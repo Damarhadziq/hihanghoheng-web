@@ -142,7 +142,7 @@ export default function LoadingScreen({ onComplete }) {
   );
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-[300] flex items-center justify-center bg-[#070A08] text-ink">
+    <div ref={rootRef} className="fixed-edge fixed inset-0 z-[300] flex items-center justify-center bg-[#070A08] text-ink">
       <div className="section-wrapper w-full">
         <div ref={contentRef} className="mx-auto flex max-w-xl flex-col items-center gap-8 text-center">
           <img ref={logoRef} src="/hihang-hoeng-logo.svg" alt="Hihang Hoeng" className="h-auto w-[178px] object-contain md:w-[220px]" />

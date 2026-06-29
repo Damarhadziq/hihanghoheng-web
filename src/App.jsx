@@ -29,6 +29,8 @@ export default function App() {
   const pendingViewRef = useRef(null);
   const pendingRouteViewRef = useRef(null);
   const [routeTransition, setRouteTransition] = useState(null);
+  const viewShellRef = useRef(null);
+  const skipNextShellAnimationRef = useRef(false);
 
   const handleViewChange = (nextView) => {
     if (nextView === "all-projects") {
@@ -43,8 +45,9 @@ export default function App() {
 
   const handleProjectTransitionCovered = () => {
     if (!pendingViewRef.current) return;
+    skipNextShellAnimationRef.current = true;
     setCurrentView(pendingViewRef.current);
-    window.scrollTo(0, 0);
+    scrollToTopInstant();
   };
 
   const handleProjectTransitionComplete = () => {
@@ -58,10 +61,19 @@ export default function App() {
     setRouteTransition(options);
   };
 
+  const scrollToTopInstant = () => {
+    const root = document.documentElement;
+    const previousBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    root.style.scrollBehavior = previousBehavior;
+  };
+
   const handleRouteTransitionCovered = () => {
     if (!pendingRouteViewRef.current) return;
+    skipNextShellAnimationRef.current = true;
     setCurrentView(pendingRouteViewRef.current);
-    window.scrollTo(0, 0);
+    scrollToTopInstant();
   };
 
   const handleRouteTransitionComplete = () => {
@@ -95,9 +107,43 @@ export default function App() {
   }, []);
 
   useLayoutEffect(() => {
-    document.documentElement.classList.toggle("is-transitioning", isProjectLoading || isBootLoading || Boolean(routeTransition));
-    return () => document.documentElement.classList.remove("is-transitioning");
-  }, [isProjectLoading, isBootLoading, routeTransition]);
+    const root = document.documentElement;
+    const isTransitioning = isProjectLoading || isBootLoading || Boolean(routeTransition);
+    const isProjectGallery = currentView === "all-projects";
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+
+    root.classList.toggle("is-transitioning", isTransitioning);
+    root.classList.toggle("is-project-gallery", isProjectGallery);
+    root.style.setProperty("--scrollbar-compensation", isTransitioning && scrollbarWidth > 0 ? `${scrollbarWidth}px` : "0px");
+
+    return () => {
+      root.classList.remove("is-transitioning");
+      root.classList.remove("is-project-gallery");
+      root.style.removeProperty("--scrollbar-compensation");
+    };
+  }, [currentView, isProjectLoading, isBootLoading, routeTransition]);
+
+  useLayoutEffect(() => {
+    const shell = viewShellRef.current;
+    if (!shell) return undefined;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return undefined;
+    if (routeTransition || skipNextShellAnimationRef.current) {
+      skipNextShellAnimationRef.current = false;
+      gsap.set(shell, { clearProps: "filter,transform,opacity,visibility" });
+      return undefined;
+    }
+
+    gsap.killTweensOf(shell);
+    gsap.fromTo(
+      shell,
+      { autoAlpha: 0.98, y: 8 },
+      { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out", clearProps: "transform,opacity,visibility" },
+    );
+
+    return () => gsap.killTweensOf(shell);
+  }, [currentView, routeTransition]);
 
   useEffect(() => {
     if (currentView !== "home") return;
@@ -116,21 +162,23 @@ export default function App() {
       lenis.destroy();
       gsap.ticker.remove(raf);
     };
-  }, [currentView]);
+  }, [currentView, routeTransition]);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return undefined;
+    if (prefersReduced || routeTransition) return undefined;
 
     const elements = gsap.utils.toArray(
       ".gsap-pill, .contact-nav-link, .gsap-icon-button, .gsap-clickable-card, button[aria-label^='Go to project'], .gallery-item, .gsap-reveal a",
     );
 
-    const cleanups = elements.map((element) => {
+    const cleanups = elements
+      .filter((element) => !element.classList.contains("project-title-link"))
+      .map((element) => {
       const hoverScale = element.classList.contains("project-card") ? 1.006 : 1.025;
       const enter = () => gsap.to(element, { y: -2, scale: hoverScale, duration: 0.22, ease: "power2.out", overwrite: "auto" });
       const leave = () => gsap.to(element, { y: 0, scale: 1, duration: 0.28, ease: "power2.out", overwrite: "auto" });
-      const down = () => gsap.to(element, { scale: 0.965, duration: 0.12, ease: "power2.out", overwrite: "auto" });
+      const down = () => gsap.to(element, { scale: 0.985, duration: 0.1, ease: "power2.out", overwrite: "auto" });
       const up = () => gsap.to(element, { scale: hoverScale, duration: 0.18, ease: "back.out(2)", overwrite: "auto" });
 
       element.addEventListener("pointerenter", enter);
@@ -151,7 +199,7 @@ export default function App() {
     });
 
     return () => cleanups.forEach((cleanup) => cleanup());
-  }, [currentView]);
+  }, [currentView, routeTransition]);
 
   let pageContent;
 
@@ -182,13 +230,18 @@ export default function App() {
   return (
     <>
       <Nav onViewChange={setCurrentView} activeView={currentView} />
-      {pageContent}
+      <div ref={viewShellRef} className="route-view-shell">
+        {pageContent}
+      </div>
       <ProjectTransition active={isProjectLoading} onCovered={handleProjectTransitionCovered} onComplete={handleProjectTransitionComplete} />
       <RouteSlideTransition active={Boolean(routeTransition)} direction={routeTransition?.direction} label={routeTransition?.label} title={routeTransition?.title} onCovered={handleRouteTransitionCovered} onComplete={handleRouteTransitionComplete} />
       {isBootLoading && <LoadingScreen onComplete={() => setIsBootLoading(false)} />}
     </>
   );
 }
+
+
+
 
 
 

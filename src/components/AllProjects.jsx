@@ -185,20 +185,20 @@ export default function AllProjects({ onSelectProject }) {
   return (
     <main
       ref={stageRef}
-      className="project-carousel-stage min-h-screen overflow-hidden bg-[#050605] pt-20 text-[#F8F5EC] select-none"
+      className="project-carousel-stage h-screen overflow-hidden bg-[#050605] pt-20 text-[#F8F5EC] select-none"
       aria-label="All projects showcase carousel"
     >
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.96),rgba(5,6,5,1))]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
-      <section className="relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pb-10 pt-8 md:px-10 md:pt-9">
-        <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] items-center justify-end pb-4">
+      <section className="relative z-10 flex h-[calc(100vh-5rem)] min-h-0 flex-col justify-start px-5 pb-7 pt-6 md:px-10 md:pb-8 md:pt-8">
+        <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] shrink-0 items-center justify-end pb-3">
           <p className="label text-[#F8F5EC]/58" aria-live="polite">
             {activeIndex + 1} / {total}
           </p>
         </div>
 
-        <div className="project-showcase-ui project-mockup-drag-zone relative mx-auto h-[49vh] min-h-[310px] w-full max-w-[1560px] touch-none md:h-[55vh] md:min-h-[420px]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerEnd}>
+        <div className="project-showcase-ui project-mockup-drag-zone relative mx-auto h-[min(46vh,520px)] min-h-[230px] w-full max-w-[1560px] shrink-0 touch-none md:h-[min(50vh,560px)] md:min-h-[320px]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerEnd}>
           <div className="absolute left-1/2 top-1/2 h-full w-[82vw] max-w-[1094px] -translate-x-1/2 -translate-y-1/2 [transform-style:preserve-3d] md:w-[57vw]">
             {showcaseProjects.map((project, index) => (
               <article
@@ -224,23 +224,44 @@ export default function AllProjects({ onSelectProject }) {
           </div>
         </div>
 
-        <div className="project-showcase-ui mx-auto w-full max-w-[1560px] pt-7 text-center md:pt-8">
-          <p ref={eyebrowRef} className="label mb-3 text-[#F8F5EC]/58">
-            {activeProject.year} / {activeProject.tags?.join(" / ")}
-          </p>
-          <button
-            ref={titleRef}
-            type="button"
-            onClick={openActiveProject}
-            disabled={isEnteringRef.current}
-            className="project-title-link font-display text-4xl font-semibold leading-none tracking-normal text-[#F8F5EC] transition-colors duration-200 hover:text-[#F8F5EC]/72 focus-visible:text-[#F8F5EC]/72 disabled:pointer-events-none md:text-5xl"
-            aria-label={`Enter ${activeProject.name} project details`}
-          >
-            {activeProject.name}
-          </button>
+        <div className="project-showcase-ui project-caption-nav mx-auto flex w-full max-w-[980px] shrink-0 items-center justify-center pt-5 text-center md:pt-6">
+          <div className="project-caption-copy min-w-0 px-16 md:px-24">
+            <p ref={eyebrowRef} className="label mb-3 text-[#F8F5EC]/58">
+              {activeProject.year} / {activeProject.tags?.join(" / ")}
+            </p>
+            <button
+              ref={titleRef}
+              type="button"
+              onClick={openActiveProject}
+              disabled={isEnteringRef.current}
+              className="project-title-link font-display text-4xl font-semibold leading-none tracking-normal text-[#F8F5EC] disabled:pointer-events-none md:text-5xl"
+              aria-label={`Enter ${activeProject.name} project details`}
+            >
+              {activeProject.name}
+            </button>
+          </div>
+
+          <div className="project-arrow-group" aria-label="Project navigation">
+            <button
+              type="button"
+              onClick={() => goTo(-1)}
+              className="project-arrow-button"
+              aria-label="Previous project"
+            >
+              <span aria-hidden="true">&larr;</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo(1)}
+              className="project-arrow-button"
+              aria-label="Next project"
+            >
+              <span aria-hidden="true">&rarr;</span>
+            </button>
+          </div>
         </div>
 
-        <ol className="project-showcase-ui mx-auto mt-7 flex w-full max-w-[1560px] items-center justify-center gap-3" aria-label="Project progress">
+        <ol className="project-showcase-ui mx-auto mt-5 flex w-full max-w-[1560px] shrink-0 items-center justify-center gap-3" aria-label="Project progress">
           {progressItems.map((item) => (
             <li key={item}>
               <button
@@ -268,3 +289,4 @@ export default function AllProjects({ onSelectProject }) {
     </main>
   );
 }
+

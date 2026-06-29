@@ -1,4 +1,4 @@
-﻿const landingMockup = "/optimized/projects/mockup-landing-1200.webp";
+const landingMockup = "/optimized/projects/mockup-landing-1200.webp";
 const mockup16x9 = "/optimized/projects/mockup-16-9-1600.webp";
 
 const defaultTimeline = [
@@ -29,9 +29,10 @@ const defaultTimeline = [
 ];
 
 const defaultMockups = [
-  { title: "Landing experience", image: landingMockup, ratio: "portrait" },
-  { title: "Product overview", image: mockup16x9, ratio: "wide" },
-  { title: "Interaction preview", image: landingMockup, ratio: "portrait" },
+  { title: "Landing experience", image: mockup16x9 },
+  { title: "Product overview", image: mockup16x9 },
+  { title: "Interaction preview", image: mockup16x9 },
+  { title: "Final presentation", image: mockup16x9 },
 ];
 
 export const projects = [

@@ -59,7 +59,7 @@ export default function ProjectTransition({ active, onCovered, onComplete }) {
   if (!active) return null;
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-[260] flex items-center bg-[#070A08] text-ink">
+    <div ref={rootRef} className="fixed-edge fixed inset-0 z-[260] flex items-center bg-[#070A08] text-ink">
       <div className="section-wrapper w-full">
         <div className="max-w-3xl">
           <p className="label mb-6 text-ink/68">Opening project archive</p>

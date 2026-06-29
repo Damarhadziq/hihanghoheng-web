@@ -26,8 +26,8 @@ export default function ProjectDetails({ projectId, onBack }) {
   const mockups = project.mockups?.length
     ? project.mockups
     : [
-        { title: "Main mockup", image: featuredImage, ratio: "wide" },
-        { title: "Application screen", image: project.image || featuredImage, ratio: "portrait" },
+        { title: "Main mockup", image: featuredImage },
+        { title: "Application screen", image: project.mockup16x9 || featuredImage },
       ].filter((item) => item.image);
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export default function ProjectDetails({ projectId, onBack }) {
 
           <div className="case-mockup-grid mt-10">
             {mockups.map((mockup, index) => (
-              <figure key={`${mockup.title}-${index}`} className={`case-mockup-card ${mockup.ratio === "wide" ? "is-wide" : "is-portrait"}`}>
+              <figure key={`${mockup.title}-${index}`} className="case-mockup-card">
                 <img src={mockup.image} alt={`${project.name} ${mockup.title}`} loading={index === 0 ? "eager" : "lazy"} decoding="async" />
                 <figcaption>
                   <span className="label text-[#F8F5EC]/48">Mockup {index + 1}</span>

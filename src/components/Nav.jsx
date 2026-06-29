@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { label: "Home", href: "#hero", section: "hero", isHome: true },
@@ -97,7 +97,7 @@ export default function Nav({ onViewChange, activeView = "home" }) {
   };
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-[120] border-b border-[#F8F5EC]/12 bg-[#0c0f0d]/92 text-[#F8F5EC] backdrop-blur-md" role="navigation" aria-label="Main navigation">
+    <nav className="fixed-edge fixed left-0 right-0 top-0 z-[120] border-b border-[#F8F5EC]/12 bg-[#0c0f0d]/92 text-[#F8F5EC] backdrop-blur-md" role="navigation" aria-label="Main navigation">
       <div className="section-wrapper flex h-16 items-center justify-between md:h-20">
         <a href="#hero" className="interactive-nav-link inline-flex items-center" aria-label="Hihang Hoeng home" onClick={(event) => handleLinkClick(event, navLinks[0])}>
           <img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" className="brand-logo" />
