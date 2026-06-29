@@ -1,17 +1,14 @@
-﻿export const team = [
+export const team = [
   {
-    name: "Placeholder Name",
-    role: "Lead Designer",
-    programStudy: "Desain Komunikasi Visual",
+    name: "Damar Hadziq Hidayatilah",
+    role: "UI/UX Designer",
   },
   {
-    name: "Placeholder Name",
-    role: "UX Researcher",
-    programStudy: "Pendidikan Teknik Informatika",
+    name: "Muhammad Faruq Osama",
+    role: "Business Analysis",
   },
   {
-    name: "Placeholder Name",
-    role: "Front-End Developer",
-    programStudy: "Sistem Informasi",
+    name: "Febi Indra Lesmana",
+    role: "User Analysis",
   },
 ];

@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -43,7 +43,7 @@ export default function Mentor() {
         <div className="grid gap-8 md:grid-cols-[1fr_minmax(280px,380px)_1fr] md:items-end md:gap-10">
           <div className="mentor-reveal order-2 pb-10 text-center md:order-1 md:text-right">
             <span className="label mb-3 inline-flex text-gold md:justify-end">Pendamping</span>
-            <h2 className="font-display text-3xl font-semibold leading-none text-ink md:text-5xl">
+            <h2 className="font-display text-2xl font-semibold leading-tight text-ink md:text-4xl">
               A mentor who keeps our process grounded.
             </h2>
           </div>
@@ -58,7 +58,7 @@ export default function Mentor() {
           </div>
 
           <div className="mentor-reveal order-3 pb-10 text-center md:text-left">
-            <p className="font-display text-3xl font-semibold leading-tight text-ink md:text-5xl">Nama Pembimbing</p>
+            <p className="font-display text-2xl font-semibold leading-tight text-ink md:text-4xl">Ajeng Rahma Sudarni, S.Pd., M.Pd.T.</p>
             <p className="label mt-3 text-ink/56">Dosen Pembimbing</p>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-ink/66 md:text-base">
               Her guidance helps Hihang Hoeng stay honest with the problem, careful with the process, and brave enough to keep refining the work.

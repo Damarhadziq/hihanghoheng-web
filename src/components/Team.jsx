@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -59,7 +59,7 @@ export default function Team() {
       <div className="mb-12 w-full overflow-hidden md:mb-16">
         <div className="flex whitespace-nowrap pl-[8vw]">
           <p ref={textRef} className="font-display text-[18vw] font-semibold uppercase leading-none text-ink/95 md:text-[11vw]">
-            MEET THE <span className="text-signal">MAKERS</span> MEET THE <span className="text-gold">MAKERS</span> MEET THE <span className="text-sage">MAKERS</span>
+            MEET THE <span className="text-ink">MAKERS</span> MEET THE <span className="text-ink">MAKERS</span> MEET THE <span className="text-ink">MAKERS</span>
           </p>
         </div>
       </div>
@@ -77,9 +77,9 @@ export default function Team() {
                 />
               </div>
               <div className="pt-5">
-                <p className="label mb-2 text-gold">{member.role}</p>
-                <h3 className="font-display text-2xl font-semibold leading-tight text-ink md:text-3xl">{member.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.programStudy}</p>
+                <p className="label mb-2 text-gold">Member {String(index + 1).padStart(2, "0")}</p>
+                <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
               </div>
             </article>
           ))}
