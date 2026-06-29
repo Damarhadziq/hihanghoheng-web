@@ -1,0 +1,71 @@
+﻿import { useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import heroImage from "../assets/hero.png";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function Mentor() {
+  const sectionRef = useRef(null);
+
+  useGSAP(
+    () => {
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) {
+        gsap.set(".mentor-reveal", { opacity: 1, y: 0 });
+        return;
+      }
+
+      gsap.fromTo(
+        ".mentor-reveal",
+        { y: 34, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
+    },
+    { scope: sectionRef },
+  );
+
+  return (
+    <section id="mentor" ref={sectionRef} className="relative overflow-hidden border-hairline-t pt-20 md:pt-24">
+      <div className="section-wrapper relative z-20">
+        <div className="grid gap-8 md:grid-cols-[1fr_minmax(280px,380px)_1fr] md:items-end md:gap-10">
+          <div className="mentor-reveal order-2 pb-10 text-center md:order-1 md:text-right">
+            <span className="label mb-3 inline-flex text-gold md:justify-end">Pendamping</span>
+            <h2 className="font-display text-3xl font-semibold leading-none text-ink md:text-5xl">
+              A mentor who keeps our process grounded.
+            </h2>
+          </div>
+
+          <div className="mentor-reveal order-1 mx-auto flex w-full max-w-[330px] items-end justify-center md:order-2 md:max-w-[380px]">
+            <img
+              src={heroImage}
+              alt="Dosen pembimbing Hihang Hoeng"
+              className="mentor-photo h-auto w-full object-contain opacity-90 mix-blend-luminosity"
+              draggable="false"
+            />
+          </div>
+
+          <div className="mentor-reveal order-3 pb-10 text-center md:text-left">
+            <p className="font-display text-3xl font-semibold leading-tight text-ink md:text-5xl">Nama Pembimbing</p>
+            <p className="label mt-3 text-ink/56">Dosen Pembimbing</p>
+            <p className="mt-6 max-w-md text-sm leading-relaxed text-ink/66 md:text-base">
+              Her guidance helps Hihang Hoeng stay honest with the problem, careful with the process, and brave enough to keep refining the work.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
