@@ -1,15 +1,17 @@
-﻿export default function ProjectCard({ project }) {
+export default function ProjectCard({ project }) {
   const { name, year, tags, description, link, image } = project;
 
   return (
-    <article className="gsap-reveal gsap-clickable-card group flex flex-col border border-ink/12 transition-colors duration-300">
+    <article className="gsap-reveal gsap-clickable-card project-card group flex flex-col border border-ink/12 transition-colors duration-300">
       {/* Image area */}
       <div className="relative aspect-[4/3] bg-ink/5 overflow-hidden">
         {image ? (
           <img
             src={image}
             alt={`${name} project screenshot`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.018]"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

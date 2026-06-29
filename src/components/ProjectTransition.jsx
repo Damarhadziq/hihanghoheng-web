@@ -1,10 +1,10 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 const writeCount = (node, value) => {
   if (!node) return;
-  node.textContent = String(Math.round(value)).padStart(3, "0");
+  node.textContent = String(Math.round(value));
 };
 
 export default function ProjectTransition({ active, onCovered, onComplete }) {

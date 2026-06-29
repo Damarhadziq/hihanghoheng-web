@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize:images": "python scripts/optimize-images.py"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -16,6 +17,7 @@
     "lenis": "^1.3.25",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-fast-marquee": "^1.6.5",
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {

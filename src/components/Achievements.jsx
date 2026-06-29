@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { achievements } from "../data/achievements";
 
@@ -60,9 +60,10 @@ export default function Achievements() {
               </div>
 
               <div className="md:col-span-2">
-                <span className={getPlacementClass(item.placement)}>
-                  {item.placement}
-                </span>
+                <button type="button" className={getPlacementClass(item.placement)} aria-label={`See documentation for ${item.competitionName}`}>
+                  <span className="achievement-badge-label">{item.placement}</span>
+                  <span className="achievement-badge-cta">See Documentation <span aria-hidden="true">-&gt;</span></span>
+                </button>
               </div>
 
               <div className="md:col-span-2">

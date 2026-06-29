@@ -1,7 +1,6 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 
-import heroImage from "../assets/hero.png";
 import { projects } from "../data/projects";
 
 const extraProjects = [
@@ -20,7 +19,7 @@ const extraProjects = [
 const showcaseProjects = [...projects, ...extraProjects].map((project, index) => ({
   ...project,
   id: index + 1,
-  image: project.image || heroImage,
+  image: project.mockup16x9 || project.image || "/optimized/gallery/hero.webp",
 }));
 
 const wrapIndex = (index, total) => ((index % total) + total) % total;
@@ -36,6 +35,7 @@ export default function AllProjects({ onSelectProject }) {
   const dragStartXRef = useRef(0);
   const dragStartYRef = useRef(0);
   const activeRef = useRef(0);
+  const isEnteringRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const total = showcaseProjects.length;
@@ -93,6 +93,14 @@ export default function AllProjects({ onSelectProject }) {
     [animateCaption, total],
   );
 
+  const openActiveProject = useCallback(() => {
+    if (isEnteringRef.current) return;
+
+    isEnteringRef.current = true;
+    if (titleRef.current) titleRef.current.disabled = true;
+    onSelectProject?.(activeRef.current + 1);
+  }, [onSelectProject]);
+
   const goTo = useCallback(
     (direction) => {
       if (isAnimatingRef.current) return;
@@ -112,7 +120,7 @@ export default function AllProjects({ onSelectProject }) {
     draggedRef.current = false;
     dragStartXRef.current = event.clientX;
     dragStartYRef.current = event.clientY;
-    stageRef.current?.classList.add("is-dragging");
+    event.currentTarget.classList.add("is-dragging");
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
@@ -133,7 +141,7 @@ export default function AllProjects({ onSelectProject }) {
     const threshold = Math.min(160, Math.max(84, window.innerWidth * 0.13));
 
     isPointerDownRef.current = false;
-    stageRef.current?.classList.remove("is-dragging");
+    event.currentTarget.classList.remove("is-dragging");
     event.currentTarget.releasePointerCapture?.(event.pointerId);
 
     if (Math.abs(distance) >= threshold) {
@@ -177,13 +185,8 @@ export default function AllProjects({ onSelectProject }) {
   return (
     <main
       ref={stageRef}
-      className="project-carousel-stage min-h-screen overflow-hidden bg-[#050605] pt-20 text-[#F8F5EC] select-none touch-none"
+      className="project-carousel-stage min-h-screen overflow-hidden bg-[#050605] pt-20 text-[#F8F5EC] select-none"
       aria-label="All projects showcase carousel"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      onPointerCancel={handlePointerEnd}
-      onPointerLeave={handlePointerEnd}
     >
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.96),rgba(5,6,5,1))]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
@@ -191,11 +194,11 @@ export default function AllProjects({ onSelectProject }) {
       <section className="relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pb-10 pt-8 md:px-10 md:pt-9">
         <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] items-center justify-end pb-4">
           <p className="label text-[#F8F5EC]/58" aria-live="polite">
-            {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            {activeIndex + 1} / {total}
           </p>
         </div>
 
-        <div className="project-showcase-ui relative mx-auto h-[49vh] min-h-[310px] w-full max-w-[1560px] md:h-[55vh] md:min-h-[420px]">
+        <div className="project-showcase-ui project-mockup-drag-zone relative mx-auto h-[49vh] min-h-[310px] w-full max-w-[1560px] touch-none md:h-[55vh] md:min-h-[420px]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerEnd}>
           <div className="absolute left-1/2 top-1/2 h-full w-[82vw] max-w-[1094px] -translate-x-1/2 -translate-y-1/2 [transform-style:preserve-3d] md:w-[57vw]">
             {showcaseProjects.map((project, index) => (
               <article
@@ -205,14 +208,13 @@ export default function AllProjects({ onSelectProject }) {
                 }}
                 className="absolute inset-0 h-full w-full overflow-hidden rounded-[10px] border border-[#F8F5EC]/12 bg-[#0a0b0a] shadow-[0_28px_80px_rgba(0,0,0,0.42)] will-change-transform"
                 aria-hidden={activeIndex !== index}
-                onClick={() => {
-                  if (draggedRef.current) return;
-                  onSelectProject && onSelectProject(project.id);
-                }}
+
               >
                 <img
                   src={project.image}
                   alt=""
+                  loading={index === activeIndex ? "eager" : "lazy"}
+                  decoding="async"
                   className="h-full w-full object-cover opacity-62 mix-blend-luminosity"
                   draggable="false"
                 />
@@ -226,9 +228,16 @@ export default function AllProjects({ onSelectProject }) {
           <p ref={eyebrowRef} className="label mb-3 text-[#F8F5EC]/58">
             {activeProject.year} / {activeProject.tags?.join(" / ")}
           </p>
-          <h1 ref={titleRef} className="font-display text-4xl font-semibold leading-none tracking-normal text-[#F8F5EC] md:text-5xl">
+          <button
+            ref={titleRef}
+            type="button"
+            onClick={openActiveProject}
+            disabled={isEnteringRef.current}
+            className="project-title-link font-display text-4xl font-semibold leading-none tracking-normal text-[#F8F5EC] transition-colors duration-200 hover:text-[#F8F5EC]/72 focus-visible:text-[#F8F5EC]/72 disabled:pointer-events-none md:text-5xl"
+            aria-label={`Enter ${activeProject.name} project details`}
+          >
             {activeProject.name}
-          </h1>
+          </button>
         </div>
 
         <ol className="project-showcase-ui mx-auto mt-7 flex w-full max-w-[1560px] items-center justify-center gap-3" aria-label="Project progress">

@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import heroImage from "../assets/hero.png";
 import { team } from "../data/team";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -68,16 +67,21 @@ export default function Team() {
         <div className="team-grid grid gap-6 md:grid-cols-3 md:gap-8">
           {team.map((member, index) => (
             <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0">
-              <div className="aspect-[4/5] overflow-hidden bg-ink/5">
-                <img
-                  src={heroImage}
-                  alt={member.name}
-                  className="h-full w-full object-cover opacity-78 mix-blend-luminosity transition duration-500 group-hover:scale-105"
-                  draggable="false"
-                />
+              <div className="team-photo-frame aspect-[4/5] overflow-hidden bg-ink/5">
+                {member.images.map((image, imageIndex) => (
+                  <img
+                    key={`${member.name}-${image}`}
+                    src={image}
+                    alt={imageIndex === 0 ? member.name : `${member.name} alternate ${imageIndex}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover mix-blend-luminosity"
+                    draggable="false"
+                  />
+                ))}
               </div>
               <div className="pt-5">
-                <p className="label mb-2 text-gold">Member {String(index + 1).padStart(2, "0")}</p>
+                <p className="label mb-2 text-gold">Member {index + 1}</p>
                 <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
               </div>

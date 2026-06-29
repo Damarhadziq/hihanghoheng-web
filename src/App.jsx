@@ -1,5 +1,4 @@
-﻿import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Lenis from "lenis";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -15,9 +14,11 @@ import Achievements from "./components/Achievements";
 import Team from "./components/Team";
 import ClosingWords from "./components/ClosingWords";
 import Mentor from "./components/Mentor";
+import GalleryMarquee from "./components/GalleryMarquee";
 import Footer from "./components/Footer";
 import LoadingScreen from "./components/LoadingScreen";
 import ProjectTransition from "./components/ProjectTransition";
+import RouteSlideTransition from "./components/RouteSlideTransition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,6 +27,8 @@ export default function App() {
   const [isBootLoading, setIsBootLoading] = useState(true);
   const [isProjectLoading, setIsProjectLoading] = useState(false);
   const pendingViewRef = useRef(null);
+  const pendingRouteViewRef = useRef(null);
+  const [routeTransition, setRouteTransition] = useState(null);
 
   const handleViewChange = (nextView) => {
     if (nextView === "all-projects") {
@@ -49,6 +52,33 @@ export default function App() {
     setIsProjectLoading(false);
   };
 
+  const startRouteTransition = (nextView, options) => {
+    if (routeTransition) return;
+    pendingRouteViewRef.current = nextView;
+    setRouteTransition(options);
+  };
+
+  const handleRouteTransitionCovered = () => {
+    if (!pendingRouteViewRef.current) return;
+    setCurrentView(pendingRouteViewRef.current);
+    window.scrollTo(0, 0);
+  };
+
+  const handleRouteTransitionComplete = () => {
+    pendingRouteViewRef.current = null;
+    setRouteTransition(null);
+  };
+
+  useEffect(() => {
+    if (!isBootLoading) return undefined;
+
+    const bootFallbackId = window.setTimeout(() => {
+      setIsBootLoading(false);
+    }, 8200);
+
+    return () => window.clearTimeout(bootFallbackId);
+  }, [isBootLoading]);
+
   useEffect(() => {
     const cleanHash = () => {
       window.setTimeout(() => {
@@ -65,9 +95,9 @@ export default function App() {
   }, []);
 
   useLayoutEffect(() => {
-    document.documentElement.classList.toggle("is-transitioning", isProjectLoading || isBootLoading);
+    document.documentElement.classList.toggle("is-transitioning", isProjectLoading || isBootLoading || Boolean(routeTransition));
     return () => document.documentElement.classList.remove("is-transitioning");
-  }, [isProjectLoading, isBootLoading]);
+  }, [isProjectLoading, isBootLoading, routeTransition]);
 
   useEffect(() => {
     if (currentView !== "home") return;
@@ -97,10 +127,11 @@ export default function App() {
     );
 
     const cleanups = elements.map((element) => {
-      const enter = () => gsap.to(element, { y: -2, scale: 1.025, duration: 0.22, ease: "power2.out", overwrite: "auto" });
+      const hoverScale = element.classList.contains("project-card") ? 1.006 : 1.025;
+      const enter = () => gsap.to(element, { y: -2, scale: hoverScale, duration: 0.22, ease: "power2.out", overwrite: "auto" });
       const leave = () => gsap.to(element, { y: 0, scale: 1, duration: 0.28, ease: "power2.out", overwrite: "auto" });
       const down = () => gsap.to(element, { scale: 0.965, duration: 0.12, ease: "power2.out", overwrite: "auto" });
-      const up = () => gsap.to(element, { scale: 1.025, duration: 0.18, ease: "back.out(2)", overwrite: "auto" });
+      const up = () => gsap.to(element, { scale: hoverScale, duration: 0.18, ease: "back.out(2)", overwrite: "auto" });
 
       element.addEventListener("pointerenter", enter);
       element.addEventListener("pointerleave", leave);
@@ -125,10 +156,10 @@ export default function App() {
   let pageContent;
 
   if (currentView === "all-projects") {
-    pageContent = <AllProjects onSelectProject={(projectId) => setCurrentView(`project-${projectId}`)} />;
+    pageContent = <AllProjects onSelectProject={(projectId) => startRouteTransition(`project-${projectId}`, { direction: "up", label: "Opening case study", title: "Project Details" })} />;
   } else if (currentView.startsWith("project-")) {
     const projectId = currentView.split("-")[1];
-    pageContent = <ProjectDetails projectId={projectId} onBack={() => setCurrentView("all-projects")} />;
+    pageContent = <ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to project archive", title: "Gallery" })} />;
   } else {
     pageContent = (
       <>
@@ -141,6 +172,7 @@ export default function App() {
           <Team />
           <ClosingWords />
           <Mentor />
+          <GalleryMarquee />
         </main>
         <Footer />
       </>
@@ -152,6 +184,7 @@ export default function App() {
       <Nav onViewChange={setCurrentView} activeView={currentView} />
       {pageContent}
       <ProjectTransition active={isProjectLoading} onCovered={handleProjectTransitionCovered} onComplete={handleProjectTransitionComplete} />
+      <RouteSlideTransition active={Boolean(routeTransition)} direction={routeTransition?.direction} label={routeTransition?.label} title={routeTransition?.title} onCovered={handleRouteTransitionCovered} onComplete={handleRouteTransitionComplete} />
       {isBootLoading && <LoadingScreen onComplete={() => setIsBootLoading(false)} />}
     </>
   );
