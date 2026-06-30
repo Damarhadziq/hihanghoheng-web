@@ -80,7 +80,6 @@ export default function AllProjects({ onSelectProject }) {
           rotateY: isActive ? 0 : distance * -7,
           scale: isActive ? 1 : isMobile ? 0.62 : 0.68,
           opacity: visibleSide ? (isActive ? 1 : 0.42) : 0,
-          filter: isActive ? "grayscale(1) brightness(0.92) blur(0px)" : "grayscale(1) brightness(0.42) blur(0.8px)",
           pointerEvents: isActive ? "auto" : "none",
           duration: 0.9,
           ease: "power3.out",
@@ -185,21 +184,21 @@ export default function AllProjects({ onSelectProject }) {
   return (
     <main
       ref={stageRef}
-      className="project-carousel-stage h-screen overflow-hidden bg-[#050605] pt-20 text-[#F8F5EC] select-none"
+      className="project-carousel-stage h-screen overflow-hidden bg-[#050605] pt-16 text-[#F8F5EC] select-none md:pt-20"
       aria-label="All projects showcase carousel"
     >
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.96),rgba(5,6,5,1))]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
-      <section className="relative z-10 flex h-[calc(100vh-5rem)] min-h-0 flex-col justify-start px-5 pb-7 pt-6 md:px-10 md:pb-8 md:pt-8">
+      <section className="relative z-10 flex h-[calc(100vh-4rem)] min-h-0 flex-col justify-start px-4 pb-5 pt-4 md:h-[calc(100vh-5rem)] md:px-10 md:pb-8 md:pt-8">
         <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] shrink-0 items-center justify-end pb-3">
           <p className="label text-[#F8F5EC]/58" aria-live="polite">
             {activeIndex + 1} / {total}
           </p>
         </div>
 
-        <div className="project-showcase-ui project-mockup-drag-zone relative mx-auto h-[min(46vh,520px)] min-h-[230px] w-full max-w-[1560px] shrink-0 touch-none md:h-[min(50vh,560px)] md:min-h-[320px]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerEnd}>
-          <div className="absolute left-1/2 top-1/2 h-full w-[82vw] max-w-[1094px] -translate-x-1/2 -translate-y-1/2 [transform-style:preserve-3d] md:w-[57vw]">
+        <div className="project-showcase-ui project-mockup-drag-zone relative mx-auto h-[min(42vh,420px)] min-h-[190px] w-full max-w-[1560px] shrink-0 touch-none sm:min-h-[230px] md:h-[min(50vh,560px)] md:min-h-[320px]" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerEnd}>
+          <div className="project-card-stack absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [transform-style:preserve-3d]">
             {showcaseProjects.map((project, index) => (
               <article
                 key={project.id}
@@ -215,7 +214,7 @@ export default function AllProjects({ onSelectProject }) {
                   alt=""
                   loading={index === activeIndex ? "eager" : "lazy"}
                   decoding="async"
-                  className="h-full w-full object-cover opacity-62 mix-blend-luminosity"
+                  className="h-full w-full object-cover opacity-62 grayscale brightness-90"
                   draggable="false"
                 />
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.02),rgba(5,6,5,0.34))]" />
@@ -234,7 +233,7 @@ export default function AllProjects({ onSelectProject }) {
               type="button"
               onClick={openActiveProject}
               disabled={isEnteringRef.current}
-              className="project-title-link font-display text-4xl font-semibold leading-none tracking-normal text-[#F8F5EC] disabled:pointer-events-none md:text-5xl"
+              className="project-title-link font-display text-[clamp(2.1rem,10vw,3.75rem)] font-semibold leading-none tracking-normal text-[#F8F5EC] disabled:pointer-events-none md:text-5xl"
               aria-label={`Enter ${activeProject.name} project details`}
             >
               {activeProject.name}
@@ -289,4 +288,3 @@ export default function AllProjects({ onSelectProject }) {
     </main>
   );
 }
-

@@ -54,6 +54,7 @@ export default function Mentor() {
               alt="Dosen pembimbing Hihang Hoeng"
               className="mentor-photo h-auto w-full object-contain opacity-90 mix-blend-luminosity"
               draggable="false"
+              loading="lazy"
             />
           </div>
 

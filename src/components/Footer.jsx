@@ -25,6 +25,7 @@ export default function Footer() {
               src="/hihang-hoeng-logo.png"
               alt="Hihang Hoeng"
               className="footer-logo mb-5"
+              loading="lazy"
             />
             <p className="text-[#F8F5EC]/62 text-sm md:text-base leading-relaxed max-w-md mb-6">
               A UI/UX design team from Universitas Negeri Semarang. We build things, break things,

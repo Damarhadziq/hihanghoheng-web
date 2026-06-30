@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -53,6 +53,57 @@ export default function LoadingScreen({ onComplete }) {
   const progressRef = useRef(null);
   const countRef = useRef(null);
   const completedRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const previousRootOverflow = root.style.overflow;
+    const previousRootHeight = root.style.height;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyHeight = body.style.height;
+    const previousBodyPosition = body.style.position;
+    const previousBodyInset = body.style.inset;
+    const previousBodyWidth = body.style.width;
+    const previousBodyTouchAction = body.style.touchAction;
+
+    window.scrollTo(0, 0);
+    root.style.overflow = "hidden";
+    root.style.height = "100%";
+    body.style.overflow = "hidden";
+    body.style.height = "100%";
+    body.style.position = "fixed";
+    body.style.inset = "0";
+    body.style.width = "100%";
+    body.style.touchAction = "none";
+
+    const preventScroll = (event) => event.preventDefault();
+    const preventScrollKeys = (event) => {
+      const lockedKeys = ["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "];
+      if (lockedKeys.includes(event.key)) event.preventDefault();
+    };
+    const restoreTop = () => window.scrollTo(0, 0);
+
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    window.addEventListener("keydown", preventScrollKeys);
+    window.addEventListener("scroll", restoreTop, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
+      window.removeEventListener("keydown", preventScrollKeys);
+      window.removeEventListener("scroll", restoreTop);
+      root.style.overflow = previousRootOverflow;
+      root.style.height = previousRootHeight;
+      body.style.overflow = previousBodyOverflow;
+      body.style.height = previousBodyHeight;
+      body.style.position = previousBodyPosition;
+      body.style.inset = previousBodyInset;
+      body.style.width = previousBodyWidth;
+      body.style.touchAction = previousBodyTouchAction;
+      window.scrollTo(0, 0);
+    };
+  }, []);
 
   useGSAP(
     () => {
@@ -142,10 +193,10 @@ export default function LoadingScreen({ onComplete }) {
   );
 
   return (
-    <div ref={rootRef} className="fixed-edge fixed inset-0 z-[300] flex items-center justify-center bg-[#070A08] text-ink">
+    <div ref={rootRef} className="boot-loading-screen fixed-edge fixed inset-0 z-[300] flex items-center justify-center overflow-hidden bg-[#070A08] text-ink">
       <div className="section-wrapper w-full">
         <div ref={contentRef} className="mx-auto flex max-w-xl flex-col items-center gap-8 text-center">
-          <img ref={logoRef} src="/hihang-hoeng-logo.svg" alt="Hihang Hoeng" className="h-auto w-[178px] object-contain md:w-[220px]" />
+          <img ref={logoRef} src="/hihang-hoeng-logo.svg" alt="Hihang Hoeng" className="h-auto w-[178px] object-contain md:w-[220px]" loading="lazy" />
           <div className="w-full max-w-sm">
             <div className="mb-3 flex items-center justify-between label text-ink/68">
               <span>Preparing craft</span>

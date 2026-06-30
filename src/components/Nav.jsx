@@ -1,115 +1,41 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const navLinks = [
-  { label: "Home", href: "#hero", section: "hero", isHome: true },
-  { label: "About", href: "#about", section: "about" },
-  { label: "Projects", href: "#projects", section: "projects" },
-  { label: "Process", href: "#process", section: "process" },
-  { label: "Achievements", href: "#achievements", section: "achievements" },
-  { label: "Team", href: "#team", section: "team" },
+  { label: "Home", view: "home" },
+  { label: "About", view: "about" },
+  { label: "Projects", view: "all-projects" },
+  { label: "Achievement", view: "achievements" },
+  { label: "Team", view: "team" },
 ];
-
-const trackedIds = new Set([...navLinks.map((link) => link.section), "contact"]);
-
-const cleanHash = () => {
-  if (window.location.hash) {
-    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-  }
-};
 
 export default function Nav({ onViewChange, activeView = "home" }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("hero");
-
-  useEffect(() => {
-    cleanHash();
-  }, []);
-
-  useEffect(() => {
-    if (activeView !== "home") return undefined;
-
-    let rafId = 0;
-
-    const readActiveSection = () => {
-      rafId = 0;
-      const probeY = window.innerWidth >= 768 ? 104 : 84;
-      const isAtPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 12;
-      if (isAtPageEnd) {
-        setActiveSection("contact");
-        return;
-      }
-
-      const sections = Array.from(document.querySelectorAll("main > section, footer"));
-      const current = sections.find((section) => {
-        const rect = section.getBoundingClientRect();
-        return rect.top <= probeY && rect.bottom > probeY;
-      });
-
-      const nextId = current?.id || "";
-      setActiveSection(trackedIds.has(nextId) ? nextId : "");
-    };
-
-    const scheduleRead = () => {
-      if (rafId) return;
-      rafId = window.requestAnimationFrame(readActiveSection);
-    };
-
-    scheduleRead();
-    window.addEventListener("scroll", scheduleRead, { passive: true });
-    window.addEventListener("resize", scheduleRead);
-
-    return () => {
-      if (rafId) window.cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", scheduleRead);
-      window.removeEventListener("resize", scheduleRead);
-    };
-  }, [activeView]);
-
-  const scrollToSection = (section) => {
-    window.setTimeout(() => {
-      document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      cleanHash();
-    }, 0);
-  };
 
   const handleLinkClick = (event, link) => {
     event.preventDefault();
     setMobileOpen(false);
-    setActiveSection(link.section);
-
-    if (activeView !== "home" && onViewChange) {
-      onViewChange("home");
-    }
-
-    scrollToSection(link.section);
-  };
-
-  const handleContactClick = (event) => {
-    event.preventDefault();
-    setActiveSection("contact");
-    setMobileOpen(false);
-    scrollToSection("contact");
+    onViewChange?.(link.view);
   };
 
   const isActiveLink = (link) => {
-    if (activeView === "all-projects" || activeView.startsWith("project-")) return link.section === "projects";
-    return activeSection === link.section;
+    if ((activeView === "all-projects" || activeView.startsWith("project-")) && link.view === "all-projects") return true;
+    return activeView === link.view;
   };
 
   return (
     <nav className="fixed-edge fixed left-0 right-0 top-0 z-[120] border-b border-[#F8F5EC]/12 bg-[#0c0f0d]/92 text-[#F8F5EC] backdrop-blur-md" role="navigation" aria-label="Main navigation">
       <div className="section-wrapper flex h-16 items-center justify-between md:h-20">
-        <a href="#hero" className="interactive-nav-link inline-flex items-center" aria-label="Hihang Hoeng home" onClick={(event) => handleLinkClick(event, navLinks[0])}>
-          <img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" className="brand-logo" />
+        <a href="#home" className="inline-flex items-center" aria-label="Hihang Hoeng home" onClick={(event) => handleLinkClick(event, navLinks[0])}>
+          <img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" className="brand-logo" loading="lazy" />
         </a>
 
         <ul className="m-0 hidden list-none items-center gap-8 p-0 md:flex">
           {navLinks.map((link) => {
             const active = isActiveLink(link);
             return (
-              <li key={link.href}>
+              <li key={link.view}>
                 <a
-                  href={link.href}
+                  href={`#${link.view}`}
                   onClick={(event) => handleLinkClick(event, link)}
                   className={`interactive-nav-link label ${active ? "is-active" : ""}`}
                   aria-current={active ? "page" : undefined}
@@ -120,10 +46,6 @@ export default function Nav({ onViewChange, activeView = "home" }) {
             );
           })}
         </ul>
-
-        <a href="#contact" className="contact-nav-link hidden items-center justify-center px-8 py-3.5 label md:inline-flex" onClick={handleContactClick}>
-          Contact
-        </a>
 
         <button
           className="flex flex-col gap-1.5 p-2 md:hidden"
@@ -143,9 +65,9 @@ export default function Nav({ onViewChange, activeView = "home" }) {
             {navLinks.map((link) => {
               const active = isActiveLink(link);
               return (
-                <li key={link.href}>
+                <li key={link.view}>
                   <a
-                    href={link.href}
+                    href={`#${link.view}`}
                     className={`interactive-nav-link label block w-fit py-1 ${active ? "is-active" : ""}`}
                     onClick={(event) => handleLinkClick(event, link)}
                     aria-current={active ? "page" : undefined}
@@ -155,11 +77,6 @@ export default function Nav({ onViewChange, activeView = "home" }) {
                 </li>
               );
             })}
-            <li>
-              <a href="#contact" className="contact-nav-link inline-flex items-center justify-center px-8 py-3.5 label" onClick={handleContactClick}>
-                Contact
-              </a>
-            </li>
           </ul>
         </div>
       )}

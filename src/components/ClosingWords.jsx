@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,7 +13,8 @@ export default function ClosingWords() {
   useGSAP(
     () => {
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const wordEls = gsap.utils.toArray(".closing-word");
+      const wordEls = sectionRef.current?.querySelectorAll(".closing-word");
+      if (!wordEls || wordEls.length === 0) return;
 
       if (prefersReduced) {
         gsap.set(wordEls, { opacity: 1, y: 0 });
