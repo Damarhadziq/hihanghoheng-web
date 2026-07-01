@@ -28,18 +28,17 @@ export function useGsapReveal(containerRef, options = {}) {
 
   useGSAP(
     () => {
-      // Respect prefers-reduced-motion
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+      const container = containerRef.current;
+      if (!container) return undefined;
 
-      const elements = containerRef.current?.querySelectorAll(target);
-      if (!elements || elements.length === 0) return;
+      const elements = container.querySelectorAll(target);
+      if (!elements || elements.length === 0) return undefined;
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       if (prefersReduced) {
-        // Just show them without animation
         gsap.set(elements, { opacity: 1, y: 0 });
-        return;
+        return undefined;
       }
 
       gsap.fromTo(
@@ -52,15 +51,20 @@ export function useGsapReveal(containerRef, options = {}) {
           stagger,
           ease: "power3.out",
           scrollTrigger: {
-            trigger: containerRef.current,
+            trigger: container,
             start,
             toggleActions: "play none none none",
+            invalidateOnRefresh: true,
           },
-        }
+        },
       );
+
+      const refreshWhenReady = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+      document.fonts?.ready?.then(refreshWhenReady);
+      window.addEventListener("load", refreshWhenReady, { once: true });
+
+      return () => window.removeEventListener("load", refreshWhenReady);
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 }
-
-

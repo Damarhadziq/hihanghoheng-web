@@ -41,10 +41,7 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 22% 0%, rgba(57, 160, 255, 0.12), transparent 30%),
-    radial-gradient(circle at 78% 8%, rgba(250, 204, 21, 0.10), transparent 26%),
-    linear-gradient(180deg, rgba(7, 10, 8, 0.96), #070A08 48%);
+  background: linear-gradient(180deg, #070A08 0%, #050705 100%);
 }
 
 ::selection {
@@ -190,7 +187,6 @@ body::before {
   position: relative;
   isolation: isolate;
 }
-
 .team-photo-frame img {
   position: absolute;
   inset: 0;
@@ -198,43 +194,13 @@ body::before {
   width: 100%;
   opacity: 0;
   transform: scale(1);
-  transition: opacity 260ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .team-photo-frame img:first-child {
   opacity: 0.78;
 }
 
-.team-card:hover .team-photo-frame img,
-.team-card:focus-within .team-photo-frame img {
-  animation: team-photo-cycle 2.1s linear infinite;
-  transform: scale(1.045);
-}
 
-.team-card:hover .team-photo-frame img:nth-child(1),
-.team-card:focus-within .team-photo-frame img:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.team-card:hover .team-photo-frame img:nth-child(2),
-.team-card:focus-within .team-photo-frame img:nth-child(2) {
-  animation-delay: 0.7s;
-}
-
-.team-card:hover .team-photo-frame img:nth-child(3),
-.team-card:focus-within .team-photo-frame img:nth-child(3) {
-  animation-delay: 1.4s;
-}
-
-@keyframes team-photo-cycle {
-  0%, 29% {
-    opacity: 0.82;
-  }
-
-  34%, 100% {
-    opacity: 0;
-  }
-}
 .muted-readable {
   color: rgba(248, 245, 236, 0.68);
 }
@@ -289,10 +255,6 @@ body::before {
   }
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 html {
   scrollbar-color: rgba(248, 245, 236, 0.32) #101410;
@@ -423,6 +385,7 @@ html.is-project-gallery body::-webkit-scrollbar {
 
 .route-view-shell {
   min-height: 100vh;
+  background: #070A08;
 }
 
 .project-carousel-stage {
@@ -1051,4 +1014,292 @@ html.is-project-gallery body::-webkit-scrollbar {
   max-height: 100dvh;
   overscroll-behavior: none;
   touch-action: none;
+}
+
+.team-social-links {
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition: opacity 260ms ease, transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card:hover .team-social-links,
+.team-card:focus-within .team-social-links,
+.team-card:focus .team-social-links {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.team-social-link,
+.case-social-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border: 1px solid rgba(248, 245, 236, 0.24);
+  background: rgba(7, 10, 8, 0.76);
+  padding: 0.45rem 0.72rem;
+  color: #F8F5EC;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  transition: border-color 220ms ease, background-color 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.team-social-link:hover,
+.team-social-link:focus-visible,
+.case-social-pill:hover,
+.case-social-pill:focus-visible {
+  border-color: transparent;
+  background: #F8F5EC;
+  color: #070A08;
+  transform: translateY(-2px);
+}
+
+.about-hero-photo {
+  aspect-ratio: 4 / 5;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.about-hero-photo img {
+  filter: grayscale(0.75) contrast(0.94) brightness(0.92);
+}
+
+.about-stat {
+  display: flex;
+  min-height: 8rem;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(248, 245, 236, 0.1);
+  background: rgba(248, 245, 236, 0.024);
+  padding: 1.2rem;
+}
+
+.about-stat strong {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.about-panel,
+.achievement-doc-body,
+.case-crew-card {
+  border: 1px solid rgba(248, 245, 236, 0.1);
+  background: rgba(248, 245, 236, 0.026);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.about-panel {
+  min-height: 16rem;
+}
+
+.achievement-docs {
+  position: relative;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.achievement-docs::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 1.15rem;
+  top: 0;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(248, 245, 236, 0.34), rgba(248, 245, 236, 0.04));
+}
+
+.achievement-doc {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.achievement-doc-marker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: 1.3rem;
+}
+
+.achievement-doc-marker span {
+  display: inline-flex;
+  height: 2.3rem;
+  width: 2.3rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(248, 245, 236, 0.32);
+  background: #070A08;
+  color: rgba(248, 245, 236, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.doc-meta {
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid rgba(248, 245, 236, 0.08);
+  background: rgba(248, 245, 236, 0.02);
+  padding: 0.95rem;
+}
+
+.doc-meta strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.doc-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding-left: 1.15rem;
+  color: rgba(248, 245, 236, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.contributor-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.contributor-pill {
+  display: grid;
+  gap: 0.15rem;
+  border: 1px solid rgba(248, 245, 236, 0.1);
+  background: rgba(248, 245, 236, 0.02);
+  padding: 0.85rem 0.95rem;
+}
+
+.contributor-pill strong {
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+.contributor-pill span {
+  color: rgba(248, 245, 236, 0.56);
+  font-size: 0.82rem;
+}
+
+.case-mockup-card figcaption {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 260ms ease, transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.case-mockup-card:hover figcaption,
+.case-mockup-card:focus-within figcaption {
+  opacity: 0;
+  transform: translateY(1rem);
+  pointer-events: none;
+}
+
+.case-crew-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.case-crew-card {
+  transition: border-color 260ms ease, background-color 260ms ease, transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.case-crew-card:hover {
+  border-color: rgba(248, 245, 236, 0.28);
+  background: rgba(248, 245, 236, 0.052);
+  transform: translateY(-4px);
+}
+
+@media (min-width: 768px) {
+  .case-crew-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .achievement-docs::before {
+    left: 0.9rem;
+  }
+
+  .achievement-doc {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .achievement-doc-marker span {
+    height: 1.8rem;
+    width: 1.8rem;
+    font-size: 0.6rem;
+  }
+
+  .about-panel,
+  .achievement-doc-body,
+  .case-crew-card {
+    padding: 1rem;
+  }
+}
+
+.achievement-badge-static {
+  cursor: default;
+  pointer-events: none;
+}
+
+.achievement-badge-static::before {
+  display: none;
+}
+
+.achievement-badge-static:hover,
+.achievement-badge-static:focus-visible {
+  box-shadow: none;
+  transform: none;
+}
+
+.achievement-badge-static:hover .achievement-badge-label,
+.achievement-badge-static:focus-visible .achievement-badge-label,
+.achievement-badge-static:hover .achievement-badge-cta,
+.achievement-badge-static:focus-visible .achievement-badge-cta {
+  opacity: 1;
+  transform: none;
+}
+
+.documentation-link,
+.doc-link-list a {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(248, 245, 236, 0.78);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  transition: color 220ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.documentation-link:hover,
+.documentation-link:focus-visible,
+.doc-link-list a:hover,
+.doc-link-list a:focus-visible {
+  color: #F8F5EC;
+  transform: translateX(3px);
+}
+
+.doc-link-list li::marker {
+  color: rgba(250, 204, 21, 0.82);
 }

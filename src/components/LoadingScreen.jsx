@@ -114,7 +114,6 @@ export default function LoadingScreen({ onComplete }) {
         completedRef.current = true;
         onComplete?.();
       };
-      const failsafeId = window.setTimeout(completeOnce, 7600);
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReduced) {
         completeOnce();
@@ -185,7 +184,6 @@ export default function LoadingScreen({ onComplete }) {
       return () => {
         cancelled = true;
         intro.kill();
-        window.clearTimeout(failsafeId);
         outro?.kill();
       };
     },

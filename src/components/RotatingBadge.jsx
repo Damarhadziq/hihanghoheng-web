@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -11,22 +11,27 @@ const scrollToProjects = (event) => {
 };
 
 export default function RotatingBadge() {
+  const wrapperRef = useRef(null);
   const badgeRef = useRef(null);
 
-  useGSAP(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
+  useGSAP(
+    () => {
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced || !badgeRef.current) return undefined;
 
-    gsap.to(badgeRef.current, {
-      rotation: 360,
-      duration: 12,
-      repeat: -1,
-      ease: "none",
-    });
-  });
+      gsap.to(badgeRef.current, {
+        rotation: 360,
+        duration: 12,
+        repeat: -1,
+        ease: "none",
+        transformOrigin: "50% 50%",
+      });
+    },
+    { scope: wrapperRef },
+  );
 
   return (
-    <div className="relative inline-flex items-center">
+    <div ref={wrapperRef} className="relative inline-flex items-center">
       <a
         href="#projects"
         className="relative flex h-24 w-24 items-center justify-center md:h-28 md:w-28"

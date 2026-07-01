@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import heroImage from "../assets/hero.png";
+import mentorImage from "../assets/mentor.svg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,14 +11,19 @@ export default function Mentor() {
 
   useGSAP(
     () => {
+      const section = sectionRef.current;
+      if (!section) return undefined;
+
+      const revealItems = gsap.utils.toArray(section.querySelectorAll(".mentor-reveal"));
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
       if (prefersReduced) {
-        gsap.set(".mentor-reveal", { opacity: 1, y: 0 });
-        return;
+        gsap.set(revealItems, { opacity: 1, y: 0 });
+        return undefined;
       }
 
       gsap.fromTo(
-        ".mentor-reveal",
+        revealItems,
         { y: 34, opacity: 0 },
         {
           y: 0,
@@ -27,9 +32,10 @@ export default function Mentor() {
           stagger: 0.1,
           ease: "power3.out",
           scrollTrigger: {
-            trigger: sectionRef.current,
+            trigger: section,
             start: "top 70%",
             toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
           },
         },
       );
@@ -50,7 +56,7 @@ export default function Mentor() {
 
           <div className="mentor-reveal order-1 mx-auto flex w-full max-w-[330px] items-end justify-center md:order-2 md:max-w-[380px]">
             <img
-              src={heroImage}
+              src={mentorImage}
               alt="Dosen pembimbing Hihang Hoeng"
               className="mentor-photo h-auto w-full object-contain opacity-90 mix-blend-luminosity"
               draggable="false"

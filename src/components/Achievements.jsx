@@ -3,16 +3,89 @@ import { useGsapReveal } from "../hooks/useGsapReveal";
 import { achievements } from "../data/achievements";
 
 const getPlacementClass = (placement) => {
-  if (placement.includes("1st")) return "achievement-badge achievement-badge-gold";
-  if (placement.includes("2nd")) return "achievement-badge achievement-badge-silver";
-  if (placement.includes("3rd")) return "achievement-badge achievement-badge-bronze";
-  if (placement.includes("Finalist")) return "achievement-badge achievement-badge-finalist";
-  return "achievement-badge achievement-badge-muted";
+  if (placement.includes("1st")) return "achievement-badge achievement-badge-gold achievement-badge-static";
+  if (placement.includes("2nd")) return "achievement-badge achievement-badge-silver achievement-badge-static";
+  if (placement.includes("3rd")) return "achievement-badge achievement-badge-bronze achievement-badge-static";
+  if (placement.includes("Finalist")) return "achievement-badge achievement-badge-finalist achievement-badge-static";
+  return "achievement-badge achievement-badge-muted achievement-badge-static";
 };
 
-export default function Achievements() {
+export default function Achievements({ variant = "home", onOpenDocumentation }) {
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef, { stagger: 0.1 });
+  const isPage = variant === "page";
+
+  const handleOpenDocumentation = (event, itemId) => {
+    event.preventDefault();
+    onOpenDocumentation?.(itemId);
+  };
+
+  if (isPage) {
+    return (
+      <section id="achievements" ref={sectionRef} className="achievement-page py-20 md:py-32 border-hairline-t">
+        <div className="section-wrapper">
+          <div className="mb-14 grid gap-5 md:mb-20 md:grid-cols-12 md:items-end">
+            <div className="md:col-span-7">
+              <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">Competition Docs</span>
+              <h1 className="headline-lg gsap-reveal">A timeline of HIHANG HOENG competition journeys.</h1>
+            </div>
+            <p className="gsap-reveal text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
+              Every achievement is documented as a competition record: organizer, scale, project, journey notes, and the members who contributed.
+            </p>
+          </div>
+
+          <div className="achievement-docs">
+            {achievements.map((item, index) => (
+              <article id={item.id} key={`${item.competitionName}-${item.date}`} className="achievement-doc gsap-reveal">
+                <div className="achievement-doc-marker">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                </div>
+                <div className="achievement-doc-body">
+                  <div className="mb-5 flex flex-wrap items-center gap-3">
+                    <span className={getPlacementClass(item.placement)}>{item.placement}</span>
+                    <span className="label text-ink/48">{item.date}</span>
+                    <span className="label text-ink/48">{item.scale}</span>
+                  </div>
+                  <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-5xl">{item.competitionName}</h2>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="doc-meta"><span className="label text-ink/42">Organizer</span><strong>{item.organizer}</strong></div>
+                    <div className="doc-meta"><span className="label text-ink/42">Project</span><strong>{item.projectName}</strong></div>
+                    <div className="doc-meta"><span className="label text-ink/42">Result</span><strong>{item.placement}</strong></div>
+                  </div>
+                  <p className="mt-6 max-w-3xl text-sm leading-8 text-ink/68 md:text-base">{item.story}</p>
+                  <div className="mt-7 grid gap-5 md:grid-cols-2">
+                    <div>
+                      <p className="label mb-3 text-gold">Documentation</p>
+                      <ol className="doc-list doc-link-list">
+                        {item.documentation.map((doc) => (
+                          <li key={doc}>
+                            <a href={`#${item.id}`} aria-label={`Open ${doc} documentation for ${item.competitionName}`}>
+                              {doc}
+                            </a>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                    <div>
+                      <p className="label mb-3 text-gold">Contributors</p>
+                      <div className="contributor-list">
+                        {item.contributors.map((person) => (
+                          <div key={`${item.competitionName}-${person.name}`} className="contributor-pill">
+                            <strong>{person.name}</strong>
+                            <span>{person.role}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -39,7 +112,7 @@ export default function Achievements() {
             <span className="label text-ink/52 md:col-span-3">Competition</span>
             <span className="label text-ink/52 md:col-span-2">Placement</span>
             <span className="label text-ink/52 md:col-span-2">Project</span>
-            <span className="label text-ink/52 md:col-span-3">Note</span>
+            <span className="label text-ink/52 md:col-span-3">Documentation</span>
           </div>
 
           {achievements.map((item, i) => (
@@ -60,10 +133,7 @@ export default function Achievements() {
               </div>
 
               <div className="md:col-span-2">
-                <button type="button" className={getPlacementClass(item.placement)} aria-label={`See documentation for ${item.competitionName}`}>
-                  <span className="achievement-badge-label">{item.placement}</span>
-                  <span className="achievement-badge-cta">See Documentation <span aria-hidden="true">-&gt;</span></span>
-                </button>
+                <span className={getPlacementClass(item.placement)}>{item.placement}</span>
               </div>
 
               <div className="md:col-span-2">
@@ -71,7 +141,10 @@ export default function Achievements() {
               </div>
 
               <div className="md:col-span-3">
-                <p className="text-ink/68 text-sm leading-relaxed">
+                <a href={`#${item.id}`} onClick={(event) => handleOpenDocumentation(event, item.id)} className="documentation-link">
+                  Open Documentation <span aria-hidden="true">-&gt;</span>
+                </a>
+                <p className="mt-2 text-ink/52 text-sm leading-relaxed">
                   {item.note}
                 </p>
               </div>

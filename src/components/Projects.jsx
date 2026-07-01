@@ -22,8 +22,7 @@ export default function Projects({ onSelectProject, onViewAllProjects }) {
             <h2 className="headline-lg gsap-reveal">Projects</h2>
           </div>
           <p className="max-w-md text-sm text-ink/50 gsap-reveal md:text-base">
-            Competition entries, class projects, and self-initiated work -
-            each one a step forward in our craft.
+            Competition entries from real judging stages - each one a documented step forward in our craft.
           </p>
         </div>
 
@@ -47,3 +46,5 @@ export default function Projects({ onSelectProject, onViewAllProjects }) {
     </section>
   );
 }
+
+

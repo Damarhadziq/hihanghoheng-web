@@ -1,22 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useMemo, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 import { projects } from "../data/projects";
 
-const extraProjects = [
-  {
-    name: "Ruang Rasa",
-    year: "2025",
-    tags: ["Brand System", "Editorial", "Motion"],
-  },
-  {
-    name: "Arsip Kota",
-    year: "2024",
-    tags: ["Web Archive", "Research", "Mapping"],
-  },
-];
-
-const showcaseProjects = [...projects, ...extraProjects].map((project, index) => ({
+const showcaseProjects = projects.map((project, index) => ({
   ...project,
   id: index + 1,
   image: project.mockup16x9 || project.image || "/optimized/gallery/hero.webp",
@@ -49,8 +37,8 @@ export default function AllProjects({ onSelectProject }) {
   const animateCaption = useCallback(() => {
     gsap.fromTo(
       [eyebrowRef.current, titleRef.current].filter(Boolean),
-      { y: 16, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.5, stagger: 0.055, ease: "power3.out" },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.5, stagger: 0.055, ease: "power3.out" },
     );
   }, []);
 
@@ -154,10 +142,9 @@ export default function AllProjects({ onSelectProject }) {
     }, Math.abs(distance) > 8 ? 150 : 0);
   };
 
-  useEffect(() => {
-    if (!stageRef.current) return undefined;
-
-    const context = gsap.context(() => {
+  useGSAP(
+    () => {
+      if (!stageRef.current) return undefined;
       gsap.set(stageRef.current, { perspective: 1200 });
       gsap.set(cardsRef.current.filter(Boolean), {
         transformStyle: "preserve-3d",
@@ -165,8 +152,8 @@ export default function AllProjects({ onSelectProject }) {
       });
       gsap.fromTo(
         ".project-showcase-ui",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.75, stagger: 0.08, ease: "power3.out" },
+        { opacity: 0 },
+        { opacity: 1, duration: 0.75, stagger: 0.08, ease: "power3.out" },
       );
       animateToIndex(0);
 
@@ -176,16 +163,15 @@ export default function AllProjects({ onSelectProject }) {
       return () => {
         window.removeEventListener("resize", handleResize);
       };
-    }, stageRef);
-
-    return () => context.revert();
-  }, [animateToIndex]);
+    },
+    { scope: stageRef, dependencies: [animateToIndex] },
+  );
 
   return (
     <main
       ref={stageRef}
       className="project-carousel-stage h-screen overflow-hidden bg-[#050605] pt-16 text-[#F8F5EC] select-none md:pt-20"
-      aria-label="All projects showcase carousel"
+      aria-label="Competition projects showcase carousel"
     >
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.96),rgba(5,6,5,1))]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
@@ -234,7 +220,7 @@ export default function AllProjects({ onSelectProject }) {
               onClick={openActiveProject}
               disabled={isEnteringRef.current}
               className="project-title-link font-display text-[clamp(2.1rem,10vw,3.75rem)] font-semibold leading-none tracking-normal text-[#F8F5EC] disabled:pointer-events-none md:text-5xl"
-              aria-label={`Enter ${activeProject.name} project details`}
+              aria-label={`Enter ${activeProject.name} competition details`}
             >
               {activeProject.name}
             </button>
@@ -288,3 +274,4 @@ export default function AllProjects({ onSelectProject }) {
     </main>
   );
 }
+

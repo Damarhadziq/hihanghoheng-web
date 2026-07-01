@@ -10,12 +10,15 @@ gsap.registerPlugin(ScrollTrigger);
 const fallbackProject = {
   name: "Project Details",
   year: "2025",
-  tags: ["Case Study"],
-  description: "A focused project archive with process notes, design decisions, and delivery details.",
-  role: "UI/UX Design",
+  tags: ["Competition"],
+  description: "A focused competition archive with process notes, organizer context, and delivery details.",
+  type: "Competition",
+  organizer: "Competition organizer",
+  competition: "Competition archive",
+  team: [],
   timeline: [],
-  problem: "The project needs a clearer case study structure so visitors can understand the context, challenge, and design direction.",
-  solution: "The page presents a concise story with timeline, problem framing, proposed solution, and visual mockup sections.",
+  problem: "The project needs a clearer competition archive so visitors can understand the organizer, challenge, team contribution, and design direction.",
+  solution: "The page presents a concise competition story with timeline, context framing, proposed submission, team credits, and visual mockup sections.",
   mockup16x9: null,
   image: null,
   mockups: [],
@@ -56,7 +59,6 @@ export default function ProjectDetails({ projectId, onBack }) {
         return;
       }
 
-      // Hero entrance animation
       if (heroRef.current) {
         gsap.fromTo(
           heroRef.current,
@@ -65,7 +67,6 @@ export default function ProjectDetails({ projectId, onBack }) {
         );
       }
 
-      // Meta grid entrance
       if (metaRef.current) {
         gsap.fromTo(
           metaRef.current,
@@ -74,7 +75,6 @@ export default function ProjectDetails({ projectId, onBack }) {
         );
       }
 
-      // Case sections reveal on scroll
       sectionsRef.current.filter(Boolean).forEach((section) => {
         gsap.fromTo(
           section,
@@ -88,12 +88,12 @@ export default function ProjectDetails({ projectId, onBack }) {
               trigger: section,
               start: "top 85%",
               toggleActions: "play none none none",
+              invalidateOnRefresh: true,
             },
           },
         );
       });
 
-      // Refresh ScrollTrigger after images load
       const images = pageRef.current?.querySelectorAll("img");
       if (images && images.length > 0) {
         Promise.allSettled(
@@ -127,7 +127,7 @@ export default function ProjectDetails({ projectId, onBack }) {
         >
           <div>
             <p className="label mb-4 text-[#F8F5EC]/58">
-              Case Study {projectId} / {project.year}
+              Competition Archive {projectId} / {project.year}
             </p>
             <h1 className="headline-lg mb-5 text-[#F8F5EC]">{project.name}</h1>
             <p className="max-w-2xl text-sm leading-7 text-[#F8F5EC]/68 md:text-base">
@@ -154,16 +154,16 @@ export default function ProjectDetails({ projectId, onBack }) {
           style={{ opacity: 0 }}
         >
           <div className="case-meta-item">
-            <span className="label text-[#F8F5EC]/42">Role</span>
-            <strong>{project.role || "UI/UX Design"}</strong>
+            <span className="label text-[#F8F5EC]/42">Type</span>
+            <strong>{project.type || "Competition"}</strong>
           </div>
           <div className="case-meta-item">
-            <span className="label text-[#F8F5EC]/42">Timeline</span>
-            <strong>{project.timeline?.at(-1)?.duration || "8 Weeks"}</strong>
+            <span className="label text-[#F8F5EC]/42">Organizer</span>
+            <strong>{project.organizer || "Competition"}</strong>
           </div>
           <div className="case-meta-item">
-            <span className="label text-[#F8F5EC]/42">Focus</span>
-            <strong>{project.tags?.[0] || "Case Study"}</strong>
+            <span className="label text-[#F8F5EC]/42">Competition</span>
+            <strong>{project.competition || project.tags?.[0] || "Competition"}</strong>
           </div>
         </section>
 
@@ -173,14 +173,14 @@ export default function ProjectDetails({ projectId, onBack }) {
           aria-labelledby="timeline-title"
           style={{ opacity: 0 }}
         >
-          <div className="case-section-heading">
-            <p className="label text-[#F8F5EC]/48">1 / Timeline pengerjaan</p>
-            <h2 id="timeline-title" className="headline-md text-[#F8F5EC]">From research to validation</h2>
+          <div className="case-section-heading case-reveal">
+            <p className="label text-[#F8F5EC]/48">1 / Competition timeline</p>
+            <h2 id="timeline-title" className="headline-md text-[#F8F5EC]">From brief to submission</h2>
           </div>
 
           <div className="case-timeline mt-8 md:mt-10">
             {project.timeline?.map((item, index) => (
-              <article key={`${item.phase}-${index}`} className="case-timeline-item">
+              <article key={`${item.phase}-${index}`} className="case-timeline-item case-reveal">
                 <div className="case-timeline-marker" aria-hidden="true" />
                 <div className="case-timeline-content">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -201,15 +201,15 @@ export default function ProjectDetails({ projectId, onBack }) {
           aria-label="Problem and solution"
           style={{ opacity: 0 }}
         >
-          <article className="case-story-panel">
-            <p className="label mb-5 text-[#F8F5EC]/48">2 / Rumusan masalah</p>
-            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">What needed to be solved</h2>
+          <article className="case-story-panel case-reveal">
+            <p className="label mb-5 text-[#F8F5EC]/48">2 / Competition context</p>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The problem brought into competition</h2>
             <p className="mt-6 text-sm leading-8 text-[#F8F5EC]/68 md:text-base">{project.problem}</p>
           </article>
 
-          <article className="case-story-panel case-story-panel-accent">
-            <p className="label mb-5 text-[#F8F5EC]/48">3 / Solusi yang ditawarkan</p>
-            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The proposed direction</h2>
+          <article className="case-story-panel case-story-panel-accent case-reveal">
+            <p className="label mb-5 text-[#F8F5EC]/48">3 / Submission direction</p>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The direction prepared for judging</h2>
             <p className="mt-6 text-sm leading-8 text-[#F8F5EC]/68 md:text-base">{project.solution}</p>
           </article>
         </section>
@@ -220,17 +220,17 @@ export default function ProjectDetails({ projectId, onBack }) {
           aria-labelledby="mockup-title"
           style={{ opacity: 0 }}
         >
-          <div className="case-section-heading md:max-w-3xl">
-            <p className="label text-[#F8F5EC]/48">4 / Mockup aplikasi</p>
+          <div className="case-section-heading case-reveal md:max-w-3xl">
+            <p className="label text-[#F8F5EC]/48">4 / Preview interface</p>
             <h2 id="mockup-title" className="headline-md text-[#F8F5EC]">Interface preview</h2>
             <p className="mt-5 text-sm leading-7 text-[#F8F5EC]/62 md:text-base">
-              A compact visual pass showing how the product direction translates into key screens and presentation-ready mockups.
+              A visual preview of the prototype and mockups used for submission and competition presentation.
             </p>
           </div>
 
           <div className="case-mockup-grid mt-10">
             {mockups.map((mockup, index) => (
-              <figure key={`${mockup.title}-${index}`} className="case-mockup-card">
+              <figure key={`${mockup.title}-${index}`} className="case-mockup-card case-reveal">
                 <img src={mockup.image} alt={`${project.name} ${mockup.title}`} loading="lazy" decoding="async" />
                 <figcaption>
                   <span className="label text-[#F8F5EC]/48">Mockup {index + 1}</span>
@@ -239,8 +239,39 @@ export default function ProjectDetails({ projectId, onBack }) {
               </figure>
             ))}
           </div>
+                </section>
+
+        <section
+          ref={(node) => { sectionsRef.current[3] = node; }}
+          className="case-section py-10 md:py-16"
+          aria-labelledby="competition-team-title"
+          style={{ opacity: 0 }}
+        >
+          <div className="case-section-heading case-reveal md:max-w-3xl">
+            <p className="label text-[#F8F5EC]/48">5 / Competition crew</p>
+            <h2 id="competition-team-title" className="headline-md text-[#F8F5EC]">Who worked on this project</h2>
+            <p className="mt-5 text-sm leading-7 text-[#F8F5EC]/62 md:text-base">
+              Every HIHANG HOENG project comes from a competition. These are the members who worked on the submission, along with their roles and social links.
+            </p>
+          </div>
+
+          <div className="case-crew-grid mt-10">
+            {(project.team || []).map((person) => (
+              <article key={`${project.name}-${person.name}`} className="case-crew-card case-reveal">
+                <p className="label mb-3 text-gold">{person.role}</p>
+                <h3 className="font-display text-2xl font-semibold leading-tight text-[#F8F5EC]">{person.name}</h3>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <a href={person.linkedin || "#"} target="_blank" rel="noreferrer" className="case-social-pill">LinkedIn</a>
+                  <a href={person.instagram || "#"} target="_blank" rel="noreferrer" className="case-social-pill">Instagram</a>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </article>
     </div>
   );
 }
+
+
+

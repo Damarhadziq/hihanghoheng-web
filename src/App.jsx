@@ -29,13 +29,46 @@ const routeTitles = {
   "all-projects": "Projects",
 };
 
+
+const seoByRoute = {
+  home: {
+    title: "HIHANG HOENG - UI/UX Competition Team UNNES",
+    description: "HIHANG HOENG is a UI/UX competition team from Universitas Negeri Semarang documenting competition projects, achievements, prototypes, and team journeys.",
+  },
+  about: {
+    title: "About HIHANG HOENG - UI/UX Competition Team",
+    description: "The HIHANG HOENG profile, vision, mission, competition numbers, and team story from Universitas Negeri Semarang.",
+  },
+  achievements: {
+    title: "HIHANG HOENG Achievements - Competition Documentation",
+    description: "A documented timeline of HIHANG HOENG achievements, organizers, competition scale, winning projects, and contributing members.",
+  },
+  team: {
+    title: "Team HIHANG HOENG - UI/UX Competition Members",
+    description: "Profiles of HIHANG HOENG members with roles, LinkedIn, and Instagram links behind each competition project.",
+  },
+  "all-projects": {
+    title: "HIHANG HOENG Projects - Competition Project Archive",
+    description: "A collection of HIHANG HOENG competition projects, including competitions, organizers, prototypes, and UI/UX submission documentation.",
+  },
+};
+
+const getSeoMeta = (view) => {
+  if (view?.startsWith("project-")) {
+    return {
+      title: "HIHANG HOENG Competition Project - Detail",
+      description: "Detailed HIHANG HOENG competition project pages with type, organizer, timeline, interface preview, and contributing members.",
+    };
+  }
+  return seoByRoute[view] || seoByRoute.home;
+};
 const getRouteTitle = (view) => {
   if (view?.startsWith("project-")) return "Project Details";
   return routeTitles[view] || "Page";
 };
 
 const getRouteLabel = (view) => {
-  if (view?.startsWith("project-")) return "Opening case study";
+  if (view?.startsWith("project-")) return "Opening competition archive";
   if (view === "all-projects") return "Opening projects";
   return "Opening page";
 };
@@ -54,6 +87,7 @@ export default function App() {
   const viewShellRef = useRef(null);
   const skipNextShellAnimationRef = useRef(false);
   const scrollLockRef = useRef({ x: 0, y: 0 });
+  const pendingAchievementIdRef = useRef(null);
 
   const scrollToTopInstant = () => {
     const root = document.documentElement;
@@ -76,6 +110,11 @@ export default function App() {
 
   const handleViewChange = (nextView) => {
     startRouteTransition(nextView);
+  };
+
+  const handleAchievementDocumentation = (achievementId) => {
+    pendingAchievementIdRef.current = achievementId;
+    startRouteTransition("achievements", { label: "Opening documentation", title: "Achievement" });
   };
 
   const handleRouteTransitionCovered = () => {
@@ -183,8 +222,8 @@ export default function App() {
     gsap.killTweensOf(shell);
     gsap.fromTo(
       shell,
-      { autoAlpha: 0.98, y: 8 },
-      { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out", clearProps: "transform,opacity,visibility" },
+      { autoAlpha: 0.98 },
+      { autoAlpha: 1, duration: 0.3, ease: "power2.out", clearProps: "opacity,visibility" },
     );
 
     return () => gsap.killTweensOf(shell);
@@ -217,22 +256,23 @@ export default function App() {
     };
   }, [currentView, isBootLoading, routeTransition]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const root = viewShellRef.current;
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced || isBootLoading || routeTransition) return undefined;
+    if (!root || prefersReduced || isBootLoading || routeTransition) return undefined;
 
     const elements = gsap.utils.toArray(
-      ".gsap-pill, .gsap-clickable-card, button[aria-label^='Go to project'], .gallery-item, .gsap-reveal a",
+      root.querySelectorAll(".gsap-pill, .gsap-clickable-card, button[aria-label^='Go to project'], .gallery-item, .gsap-reveal a"),
     );
 
     const cleanups = elements
       .filter((element) => !element.classList.contains("project-title-link"))
       .map((element) => {
         const hoverScale = element.classList.contains("project-card") ? 1.006 : 1.025;
-        const enter = () => gsap.to(element, { y: -2, scale: hoverScale, duration: 0.22, ease: "power2.out", overwrite: "auto" });
-        const leave = () => gsap.to(element, { y: 0, scale: 1, duration: 0.28, ease: "power2.out", overwrite: "auto" });
+        const enter = () => gsap.to(element, { y: -2, scale: hoverScale, duration: 0.36, ease: "power2.out", overwrite: "auto" });
+        const leave = () => gsap.to(element, { y: 0, scale: 1, duration: 0.42, ease: "power2.out", overwrite: "auto" });
         const down = () => gsap.to(element, { scale: 0.985, duration: 0.1, ease: "power2.out", overwrite: "auto" });
-        const up = () => gsap.to(element, { scale: hoverScale, duration: 0.18, ease: "back.out(2)", overwrite: "auto" });
+        const up = () => gsap.to(element, { scale: hoverScale, duration: 0.26, ease: "power2.out", overwrite: "auto" });
 
         element.addEventListener("pointerenter", enter);
         element.addEventListener("pointerleave", leave);
@@ -255,8 +295,32 @@ export default function App() {
     return () => cleanups.forEach((cleanup) => cleanup());
   }, [currentView, isBootLoading, routeTransition]);
 
+
+  useEffect(() => {
+    if (currentView !== "achievements" || routeTransition || !pendingAchievementIdRef.current) return undefined;
+
+    const targetId = pendingAchievementIdRef.current;
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      pendingAchievementIdRef.current = null;
+    }, 120);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [currentView, routeTransition]);
+
+  useEffect(() => {
+    const seo = getSeoMeta(currentView);
+    document.title = seo.title;
+    let description = document.querySelector("meta[name='description']");
+    if (!description) {
+      description = document.createElement("meta");
+      description.setAttribute("name", "description");
+      document.head.appendChild(description);
+    }
+    description.setAttribute("content", seo.description);
+  }, [currentView]);
   const openProjectDetail = (projectId) => {
-    startRouteTransition(`project-${projectId}`, { label: "Opening case study", title: "Project Details" });
+    startRouteTransition(`project-${projectId}`, { label: "Opening competition archive", title: "Project Details" });
   };
 
   let pageContent;
@@ -269,21 +333,21 @@ export default function App() {
           <About />
           <Projects onSelectProject={openProjectDetail} onViewAllProjects={() => handleViewChange("all-projects")} />
           <Process />
-          <Achievements />
+          <Achievements onOpenDocumentation={handleAchievementDocumentation} />
           <Team />
           <ClosingWords />
           <Mentor />
           <GalleryMarquee />
         </main>
-        <Footer />
+        <Footer onViewChange={handleViewChange} />
       </>
     );
   } else if (currentView === "about") {
-    pageContent = <PageShell><About /></PageShell>;
+    pageContent = <PageShell><About variant="page" /></PageShell>;
   } else if (currentView === "achievements") {
-    pageContent = <PageShell><Achievements /></PageShell>;
+    pageContent = <PageShell><Achievements variant="page" /></PageShell>;
   } else if (currentView === "team") {
-    pageContent = <PageShell><Team /></PageShell>;
+    pageContent = <PageShell><Team variant="page" /></PageShell>;
   } else if (currentView === "all-projects") {
     pageContent = <AllProjects onSelectProject={openProjectDetail} />;
   } else if (currentView.startsWith("project-")) {
@@ -291,17 +355,17 @@ export default function App() {
     pageContent = <ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to projects", title: "Projects" })} />;
   }
 
-  if (isBootLoading) {
-    return <LoadingScreen onComplete={() => setIsBootLoading(false)} />;
-  }
-
   return (
     <>
       <Nav onViewChange={handleViewChange} activeView={currentView} />
-      <div ref={viewShellRef} className="route-view-shell">
+      <div ref={viewShellRef} className="route-view-shell" aria-hidden={isBootLoading ? "true" : undefined}>
         {pageContent}
       </div>
       <RouteSlideTransition active={Boolean(routeTransition)} direction={routeTransition?.direction} label={routeTransition?.label} title={routeTransition?.title} onCovered={handleRouteTransitionCovered} onComplete={handleRouteTransitionComplete} />
+      {isBootLoading && <LoadingScreen onComplete={() => setIsBootLoading(false)} />}
     </>
   );
 }
+
+
+

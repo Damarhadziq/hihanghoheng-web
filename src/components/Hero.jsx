@@ -65,7 +65,7 @@ export default function Hero() {
             <div className="flex items-start gap-6">
               <span className="label text-ink/58 pt-1">Est. 2023</span>
               <div className="border-hairline-l pl-6">
-                <p className="font-display font-semibold text-base md:text-lg">Hihang Hoheng</p>
+                <p className="font-display font-semibold text-base md:text-lg">Hihang Hoeng</p>
                 <p className="text-sm text-ink/64 mt-1">Universitas Negeri Semarang</p>
                 <p className="text-sm text-ink/64">UI/UX Design &amp; Development</p>
               </div>
