@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { label: "Home", view: "home" },
@@ -6,10 +6,20 @@ const navLinks = [
   { label: "Projects", view: "all-projects" },
   { label: "Achievement", view: "achievements" },
   { label: "Team", view: "team" },
+  { label: "Contact", view: "contact" },
 ];
 
 export default function Nav({ onViewChange, activeView = "home" }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
 
   const handleLinkClick = (event, link) => {
     event.preventDefault();
@@ -51,7 +61,7 @@ export default function Nav({ onViewChange, activeView = "home" }) {
           className="flex flex-col gap-1.5 p-2 md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-expanded={mobileOpen}
-          aria-label="Toggle navigation menu"
+          aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
         >
           <span className={`block h-px w-5 bg-[#F8F5EC] transition-transform duration-200 ${mobileOpen ? "translate-y-[3.5px] rotate-45" : ""}`} />
           <span className={`block h-px w-5 bg-[#F8F5EC] transition-opacity duration-200 ${mobileOpen ? "opacity-0" : ""}`} />

@@ -1,8 +1,9 @@
-﻿import { useCallback, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 import { projects } from "../data/projects";
+import Footer from "./Footer";
 
 const showcaseProjects = projects.map((project, index) => ({
   ...project,
@@ -12,8 +13,56 @@ const showcaseProjects = projects.map((project, index) => ({
 
 const wrapIndex = (index, total) => ((index % total) + total) % total;
 
-export default function AllProjects({ onSelectProject }) {
+function ProjectViewToggle({ viewMode, onChange }) {
+  const rootRef = useRef(null);
+  const indicatorRef = useRef(null);
+  const buttonsRef = useRef([]);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const indicator = indicatorRef.current;
+    const activeIndex = viewMode === "showcase" ? 0 : 1;
+    const activeButton = buttonsRef.current[activeIndex];
+    const previousButton = buttonsRef.current[activeIndex === 0 ? 1 : 0];
+    if (!root || !indicator || !activeButton) return undefined;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const target = { x: activeButton.offsetLeft, width: activeButton.offsetWidth };
+
+    if (prefersReduced) {
+      gsap.set(indicator, { ...target, opacity: 1, scale: 1 });
+      return undefined;
+    }
+
+    gsap.fromTo(
+      indicator,
+      {
+        x: previousButton?.offsetLeft ?? activeButton.offsetLeft,
+        width: previousButton?.offsetWidth ?? activeButton.offsetWidth,
+        opacity: 0.72,
+        scale: 0.92,
+      },
+      { ...target, opacity: 1, scale: 1, duration: 0.48, ease: "power3.out", overwrite: true },
+    );
+    gsap.fromTo(root, { scale: 0.985 }, { scale: 1, duration: 0.42, ease: "back.out(1.7)", overwrite: true });
+
+    return () => {
+      gsap.killTweensOf([root, indicator]);
+    };
+  }, [viewMode]);
+
+  return (
+    <div ref={rootRef} className="project-view-toggle" aria-label="Project view mode">
+      <span ref={indicatorRef} className="project-view-indicator" aria-hidden="true" />
+      <button ref={(node) => { buttonsRef.current[0] = node; }} type="button" className={viewMode === "showcase" ? "is-active" : ""} onClick={() => onChange("showcase")} aria-pressed={viewMode === "showcase"}>Showcase</button>
+      <button ref={(node) => { buttonsRef.current[1] = node; }} type="button" className={viewMode === "index" ? "is-active" : ""} onClick={() => onChange("index")} aria-pressed={viewMode === "index"}>Index</button>
+    </div>
+  );
+}
+
+export default function AllProjects({ onSelectProject, onViewChange, onViewModeChange }) {
   const stageRef = useRef(null);
+  const indexRef = useRef(null);
   const cardsRef = useRef([]);
   const eyebrowRef = useRef(null);
   const titleRef = useRef(null);
@@ -25,6 +74,12 @@ export default function AllProjects({ onSelectProject }) {
   const activeRef = useRef(0);
   const isEnteringRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [viewMode, setViewMode] = useState("showcase");
+
+  useEffect(() => {
+    onViewModeChange?.(viewMode);
+    return () => onViewModeChange?.("showcase");
+  }, [onViewModeChange, viewMode]);
 
   const total = showcaseProjects.length;
   const activeProject = showcaseProjects[activeIndex];
@@ -164,8 +219,91 @@ export default function AllProjects({ onSelectProject }) {
         window.removeEventListener("resize", handleResize);
       };
     },
-    { scope: stageRef, dependencies: [animateToIndex] },
+    { scope: stageRef, dependencies: [animateToIndex, viewMode] },
   );
+
+  useGSAP(
+    () => {
+      if (viewMode !== "index" || !indexRef.current) return undefined;
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const leadElements = gsap.utils.toArray(
+        indexRef.current.querySelectorAll(".project-index-header > *"),
+      );
+      const cards = gsap.utils.toArray(indexRef.current.querySelectorAll(".project-index-card"));
+
+      if (prefersReduced) {
+        gsap.set([...leadElements, ...cards], { opacity: 1, y: 0, scale: 1 });
+        return undefined;
+      }
+
+      const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+      timeline.fromTo(
+        leadElements,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.62, stagger: 0.075, clearProps: "transform" },
+      );
+      timeline.fromTo(
+        cards,
+        { opacity: 0, y: 38, scale: 0.985 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.72, stagger: 0.1, clearProps: "transform" },
+        "-=0.3",
+      );
+
+      return () => timeline.kill();
+    },
+    { scope: indexRef, dependencies: [viewMode] },
+  );
+
+
+  if (viewMode === "index") {
+    return (
+      <main ref={indexRef} className="project-index-page">
+        <section className="section-wrapper project-index-shell" aria-labelledby="project-index-title">
+          <div className="project-index-switch">
+            <ProjectViewToggle viewMode={viewMode} onChange={setViewMode} />
+          </div>
+
+          <header className="project-index-header">
+            <div>
+              <p className="label text-ink/48">Competition Documentation / {showcaseProjects.length} Projects</p>
+              <h1 id="project-index-title" className="headline-lg mt-4">Projects, at a glance.</h1>
+            </div>
+          </header>
+
+          <div className="project-index-grid">
+              {showcaseProjects.map((project) => (
+                <article key={project.id} className="project-index-card">
+                  <button
+                    type="button"
+                    className="project-index-media"
+                    onClick={() => onSelectProject?.(project.id)}
+                    aria-label={"Open " + project.name + " project details"}
+                  >
+                    <img src={project.image} alt="" loading="lazy" decoding="async" />
+                    <span aria-hidden="true">View case</span>
+                  </button>
+                  <div className="project-index-card-copy">
+                    <div className="project-index-meta">
+                      <span>{project.year}</span>
+                      <span>{project.organizer}</span>
+                    </div>
+                    <button type="button" className="project-index-title" onClick={() => onSelectProject?.(project.id)}>
+                      {project.name}
+                    </button>
+                    <p>{project.description}</p>
+                    <div className="project-index-tags" aria-label="Project topics">
+                      {project.tags?.map((tag) => <span key={tag}>{tag}</span>)}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+        </section>
+        <Footer onViewChange={onViewChange} />
+      </main>
+    );
+  }
 
   return (
     <main
@@ -177,7 +315,8 @@ export default function AllProjects({ onSelectProject }) {
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
       <section className="relative z-10 flex h-[calc(100vh-4rem)] min-h-0 flex-col justify-start px-4 pb-5 pt-4 md:h-[calc(100vh-5rem)] md:px-10 md:pb-8 md:pt-8">
-        <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] shrink-0 items-center justify-end pb-3">
+        <div className="project-showcase-ui mx-auto flex w-full max-w-[1560px] shrink-0 items-center justify-between gap-4 pb-3">
+          <ProjectViewToggle viewMode={viewMode} onChange={setViewMode} />
           <p className="label text-[#F8F5EC]/58" aria-live="polite">
             {activeIndex + 1} / {total}
           </p>

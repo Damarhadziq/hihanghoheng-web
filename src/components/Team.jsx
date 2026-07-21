@@ -6,6 +6,190 @@ import { team } from "../data/team";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const chatMessages = [
+  {
+    sender: "Damar",
+    role: "UI/UX Designer",
+    message: "Can we make the first screen answer the brief in under five seconds?",
+    tone: "gold",
+  },
+  {
+    sender: "Faruq",
+    role: "Business Analysis",
+    message: "The judge will ask about impact. Put the value proposition before the feature list.",
+    tone: "blue",
+  },
+  {
+    sender: "Febi",
+    role: "User Analysis",
+    message: "I found three repeated user pains. The queue issue is still the strongest angle.",
+    tone: "cream",
+  },
+  {
+    sender: "Damar",
+    role: "UI/UX Designer",
+    message: "Prototype flow is ready. Need one more pass on empty states and microcopy.",
+    tone: "cream",
+  },
+  {
+    sender: "Faruq",
+    role: "Business Analysis",
+    message: "Pitch order: problem, evidence, solution, business fit, then demo. Keep it tight.",
+    tone: "gold",
+  },
+  {
+    sender: "Febi",
+    role: "User Analysis",
+    message: "User quotes are stronger than generic claims. I'll trim the findings into three cards.",
+    tone: "blue",
+  },
+  {
+    sender: "Damar",
+    role: "UI/UX Designer",
+    message: "The visual system should feel confident, not crowded. Fewer colors, clearer hierarchy.",
+    tone: "blue",
+  },
+  {
+    sender: "Faruq",
+    role: "Business Analysis",
+    message: "Let's connect every feature to scoring criteria so the deck feels intentional.",
+    tone: "cream",
+  },
+  {
+    sender: "Febi",
+    role: "User Analysis",
+    message: "Testing note: users understood pickup status faster when we used timeline labels.",
+    tone: "gold",
+  },
+  {
+    sender: "Damar",
+    role: "UI/UX Designer",
+    message: "Final slide needs breathing room. One key sentence, one strong mockup.",
+    tone: "cream",
+  },
+];
+const getChatMember = (sender) => team.find((member) => member.shortName === sender);
+
+const TeamMessageWall = () => {
+  const sectionRef = useRef(null);
+  const viewportRef = useRef(null);
+  const trackRef = useRef(null);
+
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      const viewport = viewportRef.current;
+      const track = trackRef.current;
+      if (!section || !viewport || !track) return undefined;
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const bubbles = gsap.utils.toArray(track.querySelectorAll(".team-message-bubble"));
+
+      if (prefersReduced) {
+        gsap.set(track, { x: 0 });
+        gsap.set(bubbles, { opacity: 1, y: 0, scale: 1 });
+        return undefined;
+      }
+
+      const getTravelDistance = () => {
+        const lastBubble = bubbles[bubbles.length - 1];
+        if (!lastBubble) return Math.min(0, viewport.clientWidth - track.scrollWidth);
+
+        const endInset = Math.max(24, Math.min(viewport.clientWidth * 0.08, 96));
+        return Math.min(0, viewport.clientWidth - lastBubble.offsetLeft - lastBubble.offsetWidth - endInset);
+      };
+      const getScrollDistance = () => Math.max(Math.abs(getTravelDistance()) * 0.82, window.innerHeight * 0.55);
+
+      gsap.set(bubbles, {
+        autoAlpha: 0,
+        y: 46,
+        scale: 1,
+        rotate: (index) => (index % 2 === 0 ? -3.5 : 3.5),
+        transformOrigin: "50% 85%",
+      });
+
+      const tween = gsap.to(track, {
+        x: getTravelDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => `+=${getScrollDistance()}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      const revealTriggers = bubbles.map((bubble, index) => {
+        const bubbleTween = gsap.to(bubble, {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          rotate: index % 2 === 0 ? -0.9 : 0.9,
+          duration: 0.72,
+          ease: "back.out(1.55)",
+          scrollTrigger: {
+            trigger: bubble,
+            containerAnimation: tween,
+            start: "left 84%",
+            end: "left 54%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        });
+
+        return bubbleTween.scrollTrigger;
+      });
+
+      return () => {
+        revealTriggers.forEach((trigger) => trigger?.kill());
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
+    },
+    { scope: sectionRef },
+  );
+
+  return (
+    <section ref={sectionRef} className="team-message-section border-hairline-t" aria-labelledby="team-message-title">
+      <div className="section-wrapper">
+        <div className="team-message-heading">
+          <span className="label text-ink/48">Team Notes</span>
+          <h2 id="team-message-title" className="headline-md">The group chat before submission.</h2>
+          <p className="text-sm leading-7 text-ink/64 md:text-base">
+            Scroll through a horizontal stack of short pre-submission messages from the team.
+          </p>
+        </div>
+      </div>
+
+      <div ref={viewportRef} className="team-message-viewport" aria-label="Team message stack">
+        <div ref={trackRef} className="team-message-track">
+          {chatMessages.map((item, index) => {
+            const member = getChatMember(item.sender);
+
+            return (
+              <article key={`${item.sender}-${index}`} className={`team-message-bubble team-message-bubble-${item.tone || "cream"}`}>
+                <p className="team-message-text">&ldquo;{item.message}&rdquo;</p>
+                <div className="team-message-author">
+                  {member?.images?.[0] && (
+                    <img src={member.images[0]} alt={item.sender} loading="lazy" decoding="async" />
+                  )}
+                  <div>
+                    <strong>{item.sender}</strong>
+                    <span>{item.role}</span>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const SocialLinks = ({ member }) => (
   <div className="team-social-links" aria-label={`${member.name} social links`}>
     <a href={member.social?.linkedin || "#"} target="_blank" rel="noreferrer" className="team-social-link">LinkedIn</a>
@@ -117,12 +301,13 @@ export default function Team({ variant = "home" }) {
   );
 
   return (
-    <section id="team" ref={sectionRef} className={`overflow-hidden border-hairline-t py-20 md:py-32 ${isPage ? "team-page" : ""}`}>
+    <>
+      <section id="team" ref={sectionRef} className={`overflow-hidden border-hairline-t py-20 md:py-32 ${isPage ? "team-page" : ""}`}>
       {isPage ? (
         <div className="section-wrapper mb-12 md:mb-16">
           <span className="label mb-5 inline-flex text-ink/48">Team</span>
           <div className="grid gap-5 md:grid-cols-12 md:items-end">
-            <h1 className="headline-lg md:col-span-7">The people behind HIHANG HOENG.</h1>
+            <h1 className="headline-lg md:col-span-7">Meet the makers.</h1>
             <p className="text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
               Three core roles moving from research and strategy to design and competition presentation.
             </p>
@@ -171,7 +356,9 @@ export default function Team({ variant = "home" }) {
           ))}
         </div>
       </div>
-    </section>
+
+      </section>
+      {isPage && <TeamMessageWall />}
+    </>
   );
 }
-

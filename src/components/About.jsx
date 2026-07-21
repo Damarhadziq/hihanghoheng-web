@@ -17,9 +17,9 @@ export default function About({ variant = "home" }) {
         <div className="section-wrapper">
           <div className="grid gap-10 md:grid-cols-12 md:items-end md:gap-12">
             <div className="md:col-span-7">
-              <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">About HIHANG HOENG</span>
+              <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">About</span>
               <h1 className="headline-lg gsap-reveal mb-6">
-                A small team shaped by competition stages, research, and presentations that keep getting sharper.
+                Built through briefs, research, and pitch decks.
               </h1>
               <p className="gsap-reveal max-w-2xl text-base leading-8 text-ink/68 md:text-lg">
                 HIHANG HOENG is a UI/UX team from Universitas Negeri Semarang focused on competitions. Every work starts from a competition brief, grows through research, and turns into a prototype, deck, and documentation ready for judging.
@@ -113,3 +113,4 @@ export default function About({ variant = "home" }) {
     </section>
   );
 }
+

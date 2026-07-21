@@ -24,11 +24,17 @@ const fallbackProject = {
   mockups: [],
 };
 
-export default function ProjectDetails({ projectId, onBack }) {
+export default function ProjectDetails({ projectId, onBack, onSelectProject }) {
   const project = useMemo(() => {
     const index = Number(projectId) - 1;
     return projects[index] || fallbackProject;
   }, [projectId]);
+
+  const currentIndex = Math.max(0, Number(projectId) - 1);
+  const previousIndex = (currentIndex - 1 + projects.length) % projects.length;
+  const nextIndex = (currentIndex + 1) % projects.length;
+  const previousProject = projects[previousIndex];
+  const nextProject = projects[nextIndex];
 
   const featuredImage = project.mockup16x9 || project.image;
   const mockups = project.mockups?.length
@@ -268,6 +274,16 @@ export default function ProjectDetails({ projectId, onBack }) {
             ))}
           </div>
         </section>
+        <nav className="case-project-nav" aria-label="Browse competition projects">
+          <button type="button" onClick={() => onSelectProject?.(previousIndex + 1)}>
+            <span className="label text-[#F8F5EC]/42">Previous project</span>
+            <strong><span aria-hidden="true">&larr;</span> {previousProject.name}</strong>
+          </button>
+          <button type="button" onClick={() => onSelectProject?.(nextIndex + 1)}>
+            <span className="label text-[#F8F5EC]/42">Next project</span>
+            <strong>{nextProject.name} <span aria-hidden="true">&rarr;</span></strong>
+          </button>
+        </nav>
       </article>
     </div>
   );

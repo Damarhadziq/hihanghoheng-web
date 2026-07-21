@@ -27,7 +27,7 @@ export default function Achievements({ variant = "home", onOpenDocumentation }) 
           <div className="mb-14 grid gap-5 md:mb-20 md:grid-cols-12 md:items-end">
             <div className="md:col-span-7">
               <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">Competition Docs</span>
-              <h1 className="headline-lg gsap-reveal">A timeline of HIHANG HOENG competition journeys.</h1>
+              <h1 className="headline-lg gsap-reveal">Competition journeys, documented.</h1>
             </div>
             <p className="gsap-reveal text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
               Every achievement is documented as a competition record: organizer, scale, project, journey notes, and the members who contributed.
@@ -155,3 +155,4 @@ export default function Achievements({ variant = "home", onOpenDocumentation }) 
     </section>
   );
 }
+

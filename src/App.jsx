@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Lenis from "lenis";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -16,6 +16,7 @@ import ClosingWords from "./components/ClosingWords";
 import Mentor from "./components/Mentor";
 import GalleryMarquee from "./components/GalleryMarquee";
 import Footer from "./components/Footer";
+import Contact from "./components/Contact";
 import LoadingScreen from "./components/LoadingScreen";
 import RouteSlideTransition from "./components/RouteSlideTransition";
 
@@ -27,6 +28,7 @@ const routeTitles = {
   achievements: "Achievement",
   team: "Team",
   "all-projects": "Projects",
+  contact: "Contact",
 };
 
 
@@ -51,7 +53,23 @@ const seoByRoute = {
     title: "HIHANG HOENG Projects - Competition Project Archive",
     description: "A collection of HIHANG HOENG competition projects, including competitions, organizers, prototypes, and UI/UX submission documentation.",
   },
+  contact: {
+    title: "Contact HIHANG HOENG - Competition Collaboration",
+    description: "Contact HIHANG HOENG for UI/UX competition collaboration, speaking opportunities, and project conversations.",
+  },
 };
+
+const staticRoutes = new Set(["home", "about", "achievements", "team", "all-projects", "contact"]);
+
+const getViewFromHash = () => {
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  if (!hash) return "home";
+  if (staticRoutes.has(hash)) return hash;
+  if (/^project-\d+$/.test(hash)) return hash;
+  return "home";
+};
+
+const getRouteHash = (view) => (view === "home" ? "#home" : "#" + view);
 
 const getSeoMeta = (view) => {
   if (view?.startsWith("project-")) {
@@ -80,8 +98,9 @@ const PageShell = ({ children }) => (
 );
 
 export default function App() {
-  const [currentView, setCurrentView] = useState("home");
-  const [isBootLoading, setIsBootLoading] = useState(true);
+  const [currentView, setCurrentView] = useState(getViewFromHash);
+  const [isBootLoading, setIsBootLoading] = useState(currentView === "home");
+  const [projectViewMode, setProjectViewMode] = useState("showcase");
   const pendingRouteViewRef = useRef(null);
   const [routeTransition, setRouteTransition] = useState(null);
   const viewShellRef = useRef(null);
@@ -98,15 +117,31 @@ export default function App() {
     root.style.scrollBehavior = previousBehavior;
   };
 
-  const startRouteTransition = (nextView, options = {}) => {
+  const startRouteTransition = useCallback((nextView, options = {}) => {
     if (!nextView || nextView === currentView || routeTransition) return;
+    if (options.history !== "none") {
+      const nextHash = getRouteHash(nextView);
+      if (window.location.hash !== nextHash) window.history.pushState({ view: nextView }, "", nextHash);
+    }
     pendingRouteViewRef.current = nextView;
     setRouteTransition({
       direction: options.direction || "up",
       label: options.label || getRouteLabel(nextView),
       title: options.title || getRouteTitle(nextView),
     });
-  };
+  }, [currentView, routeTransition]);
+
+  useEffect(() => {
+    const handleHistoryChange = () => {
+      const nextView = getViewFromHash();
+      if (nextView !== currentView && !routeTransition) {
+        startRouteTransition(nextView, { history: "none", direction: "down", label: "Returning to page" });
+      }
+    };
+    handleHistoryChange();
+    window.addEventListener("popstate", handleHistoryChange);
+    return () => window.removeEventListener("popstate", handleHistoryChange);
+  }, [currentView, routeTransition, startRouteTransition]);
 
   const handleViewChange = (nextView) => {
     startRouteTransition(nextView);
@@ -142,7 +177,7 @@ export default function App() {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const isTransitioning = isBootLoading || Boolean(routeTransition);
-    const isProjectGallery = currentView === "all-projects";
+    const isProjectGallery = currentView === "all-projects" && projectViewMode === "showcase";
 
     root.classList.toggle("is-transitioning", isTransitioning);
     root.classList.toggle("is-boot-loading", isBootLoading);
@@ -153,7 +188,7 @@ export default function App() {
       root.classList.remove("is-boot-loading");
       root.classList.remove("is-project-gallery");
     };
-  }, [currentView, isBootLoading, routeTransition]);
+  }, [currentView, isBootLoading, projectViewMode, routeTransition]);
   useEffect(() => {
     const shouldLockScroll = isBootLoading || Boolean(routeTransition);
     if (!shouldLockScroll) return undefined;
@@ -343,16 +378,18 @@ export default function App() {
       </>
     );
   } else if (currentView === "about") {
-    pageContent = <PageShell><About variant="page" /></PageShell>;
+    pageContent = <><PageShell><About variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "achievements") {
-    pageContent = <PageShell><Achievements variant="page" /></PageShell>;
+    pageContent = <><PageShell><Achievements variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "team") {
-    pageContent = <PageShell><Team variant="page" /></PageShell>;
+    pageContent = <><PageShell><Team variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "all-projects") {
-    pageContent = <AllProjects onSelectProject={openProjectDetail} />;
+    pageContent = <AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} onViewModeChange={setProjectViewMode} />;
   } else if (currentView.startsWith("project-")) {
     const projectId = currentView.split("-")[1];
-    pageContent = <ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to projects", title: "Projects" })} />;
+    pageContent = <><ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to projects", title: "Projects" })} onSelectProject={openProjectDetail} /><Footer onViewChange={handleViewChange} /></>;
+  } else if (currentView === "contact") {
+    pageContent = <><PageShell><Contact onViewChange={handleViewChange} /></PageShell><Footer onViewChange={handleViewChange} /></>;
   }
 
   return (
