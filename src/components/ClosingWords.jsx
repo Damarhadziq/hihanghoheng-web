@@ -42,7 +42,7 @@ export default function ClosingWords() {
   );
 
   return (
-    <section id="mentor-note" ref={sectionRef} className="border-hairline-t py-24 md:py-36" aria-label="A quiet note before mentor section">
+    <section id="mentor-note" ref={sectionRef} className="border-hairline-t pt-24 pb-14 md:pt-36 md:pb-16" aria-label="A quiet note before mentor section">
       <div className="section-wrapper">
         <span className="label mb-8 inline-flex text-ink/48">A Quiet Note</span>
         <p className="max-w-6xl font-display text-3xl font-semibold leading-tight text-ink md:text-6xl">

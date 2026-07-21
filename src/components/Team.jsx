@@ -153,7 +153,7 @@ const TeamMessageWall = () => {
   );
 
   return (
-    <section ref={sectionRef} className="team-message-section border-hairline-t" aria-labelledby="team-message-title">
+    <section ref={sectionRef} className="team-message-section team-message-page border-hairline-t" aria-labelledby="team-message-title">
       <div className="section-wrapper">
         <div className="team-message-heading">
           <span className="label text-ink/48">Team Notes</span>
@@ -262,17 +262,17 @@ export default function Team({ variant = "home" }) {
         gsap.set(images, { opacity: 0, scale: 1 });
         gsap.set(images[0], { opacity: 0.78 });
 
-        const cycle = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.35 });
+        const cycle = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.12 });
         images.forEach((image, index) => {
-          cycle.to(images, { opacity: 0, duration: 0.62, ease: "power2.inOut" }, index * 1.85);
-          cycle.to(image, { opacity: 0.82, duration: 0.62, ease: "power2.inOut" }, index * 1.85);
+          cycle.to(images, { opacity: 0, duration: 0.3, ease: "power2.inOut" }, index * 0.82);
+          cycle.to(image, { opacity: 0.82, duration: 0.3, ease: "power2.inOut" }, index * 0.82);
         });
-        cycle.to(images, { opacity: 0, duration: 0.72, ease: "power2.inOut" }, images.length * 1.85);
-        cycle.to(images[0], { opacity: 0.78, duration: 0.72, ease: "power2.inOut" }, images.length * 1.85);
+        cycle.to(images, { opacity: 0, duration: 0.34, ease: "power2.inOut" }, images.length * 0.82);
+        cycle.to(images[0], { opacity: 0.78, duration: 0.34, ease: "power2.inOut" }, images.length * 0.82);
 
         const enter = () => {
           gsap.to(images, { scale: 1.025, duration: 1.05, ease: "power3.out", overwrite: "auto" });
-          cycle.restart(true).timeScale(0.58);
+          cycle.restart(true);
         };
         const leave = () => {
           cycle.pause(0);

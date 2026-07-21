@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hihanghoeng.com/sitemap.xml

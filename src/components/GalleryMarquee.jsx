@@ -46,9 +46,16 @@ const getVariantClass = (rowIndex, imageIndex) => {
   return `${ratio} ${height}`;
 };
 
-export default function GalleryMarquee() {
+export default function GalleryMarquee({ variant = "section" }) {
+  const isBackground = variant === "background";
+
   return (
-    <section id="gallery" className="gallery-marquee-section relative overflow-hidden border-hairline-t bg-[#070A08]" aria-label="Hihang Hoeng visual gallery">
+    <section
+      id={isBackground ? undefined : "gallery"}
+      className={`gallery-marquee-section relative overflow-hidden bg-[#070A08] ${isBackground ? "gallery-marquee-background" : "border-hairline-t"}`}
+      aria-label={isBackground ? undefined : "Hihang Hoeng visual gallery"}
+      aria-hidden={isBackground ? "true" : undefined}
+    >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,8,0.96),rgba(7,10,8,0.88)_45%,rgba(7,10,8,0.98))]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
 

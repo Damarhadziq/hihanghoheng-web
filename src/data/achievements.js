@@ -1,3 +1,5 @@
+const standardDocumentation = ["Project brief", "Proposal", "Prototype"];
+
 export const achievements = [
   {
     id: "gemastik-pasar-nusantara",
@@ -9,7 +11,7 @@ export const achievements = [
     projectName: "Pasar Nusantara",
     note: "Top 10 out of 800+ teams nationally. Our first major podium finish.",
     story: "GEMASTIK became the team's first major validation at a national level. We started by researching the craft market, shaping the product narrative, then preparing the prototype and presentation deck for national judging.",
-    documentation: ["Brief analysis", "Prototype submission", "National finalist pitching"],
+    documentation: standardDocumentation,
     contributors: [
       { name: "Damar Hadziq Hidayatilah", role: "UI/UX Designer" },
       { name: "Muhammad Faruq Osama", role: "Business Analyst" },
@@ -26,7 +28,7 @@ export const achievements = [
     projectName: "WarungCepat",
     note: "Recognized for innovative queue management UX and comprehensive user research methodology.",
     story: "This challenge tested how clearly we could translate a campus canteen queue problem into a realistic product flow. Research documentation and impact reasoning became the strongest parts of the submission.",
-    documentation: ["Field problem mapping", "Queue flow prototype", "Final judging presentation"],
+    documentation: standardDocumentation,
     contributors: [
       { name: "Damar Hadziq Hidayatilah", role: "Interaction Designer" },
       { name: "Muhammad Faruq Osama", role: "Business Analyst" },
@@ -43,7 +45,7 @@ export const achievements = [
     projectName: "KampusKu",
     note: "Judges praised the accessibility-first approach and the depth of our design system documentation.",
     story: "KampusKu marked the point where the team found a stronger competition rhythm: clearer role ownership, cleaner design system documentation, and a more confident presentation structure.",
-    documentation: ["Academic journey mapping", "Accessibility review", "Winner announcement"],
+    documentation: standardDocumentation,
     contributors: [
       { name: "Damar Hadziq Hidayatilah", role: "UI/UX Designer" },
       { name: "Muhammad Faruq Osama", role: "Pitch Strategist" },
@@ -60,7 +62,7 @@ export const achievements = [
     projectName: "Jejak Karbon",
     note: "Awarded for blending gamification with sustainability awareness in a compelling, usable way.",
     story: "At DINACOM, we learned how to make a large environmental issue feel close to everyday users. The documentation focused on turning carbon data into small, understandable daily actions.",
-    documentation: ["Issue framing", "Gamification concept", "Prototype demo"],
+    documentation: standardDocumentation,
     contributors: [
       { name: "Damar Hadziq Hidayatilah", role: "Product Designer" },
       { name: "Muhammad Faruq Osama", role: "Business Analyst" },
@@ -77,7 +79,7 @@ export const achievements = [
     projectName: "EduBridge",
     note: "Our first competition entry as a newly formed team - the start of everything.",
     story: "EduBridge is the first record of how this team came together. Even though the work was still raw, this first competition shaped our workflow, role split, and confidence to enter the next competitions.",
-    documentation: ["Team formation", "Business model draft", "First competition submission"],
+    documentation: standardDocumentation,
     contributors: [
       { name: "Damar Hadziq Hidayatilah", role: "Designer" },
       { name: "Muhammad Faruq Osama", role: "Business Planner" },

@@ -16,7 +16,9 @@ import ClosingWords from "./components/ClosingWords";
 import Mentor from "./components/Mentor";
 import GalleryMarquee from "./components/GalleryMarquee";
 import Footer from "./components/Footer";
-import Contact from "./components/Contact";
+import DocumentationBrief from "./components/DocumentationBrief";
+import ProposalPreview from "./components/ProposalPreview";
+import { getCompetitionDocumentation } from "./data/documentation";
 import LoadingScreen from "./components/LoadingScreen";
 import RouteSlideTransition from "./components/RouteSlideTransition";
 
@@ -28,7 +30,6 @@ const routeTitles = {
   achievements: "Achievement",
   team: "Team",
   "all-projects": "Projects",
-  contact: "Contact",
 };
 
 
@@ -53,33 +54,47 @@ const seoByRoute = {
     title: "HIHANG HOENG Projects - Competition Project Archive",
     description: "A collection of HIHANG HOENG competition projects, including competitions, organizers, prototypes, and UI/UX submission documentation.",
   },
-  contact: {
-    title: "Contact HIHANG HOENG - Competition Collaboration",
-    description: "Contact HIHANG HOENG for UI/UX competition collaboration, speaking opportunities, and project conversations.",
-  },
 };
 
-const staticRoutes = new Set(["home", "about", "achievements", "team", "all-projects", "contact"]);
+const staticRoutes = new Set(["home", "about", "achievements", "team", "all-projects"]);
 
 const getViewFromHash = () => {
   const hash = window.location.hash.replace(/^#\/?/, "");
   if (!hash) return "home";
   if (staticRoutes.has(hash)) return hash;
   if (/^project-\d+$/.test(hash)) return hash;
+  if (/^(brief|proposal)-[a-z0-9-]+$/.test(hash)) return hash;
   return "home";
 };
 
 const getRouteHash = (view) => (view === "home" ? "#home" : "#" + view);
 
 const getSeoMeta = (view) => {
+  const documentationMatch = view?.match(/^(brief|proposal)-(.+)$/);
+  if (documentationMatch) {
+    const [, type, achievementId] = documentationMatch;
+    const documentation = getCompetitionDocumentation(achievementId);
+    if (documentation) {
+      const isBrief = type === "brief";
+      return {
+        title: documentation.projectName + " " + (isBrief ? "Project Brief" : "Proposal Reference") + " - HIHANG HOENG",
+        description: isBrief
+          ? "Read the " + documentation.projectName + " UI/UX competition project brief, including objectives, target users, solution, features, scope, and user flow."
+          : "Preview and download a UI/UX competition proposal reference for " + documentation.projectName + ".",
+        schemaType: isBrief ? "TechArticle" : "DigitalDocument",
+        name: documentation.projectName + " " + (isBrief ? "Project Brief" : "Proposal Reference"),
+      };
+    }
+  }
   if (view?.startsWith("project-")) {
     return {
       title: "HIHANG HOENG Competition Project - Detail",
       description: "Detailed HIHANG HOENG competition project pages with type, organizer, timeline, interface preview, and contributing members.",
+      schemaType: "CreativeWork",
     };
   }
-  return seoByRoute[view] || seoByRoute.home;
-};
+  return { ...(seoByRoute[view] || seoByRoute.home), schemaType: "WebPage" };
+}
 const getRouteTitle = (view) => {
   if (view?.startsWith("project-")) return "Project Details";
   return routeTitles[view] || "Page";
@@ -145,6 +160,10 @@ export default function App() {
 
   const handleViewChange = (nextView) => {
     startRouteTransition(nextView);
+  };
+
+  const handleAchievementDocument = (type, achievementId) => {
+    startRouteTransition(type + "-" + achievementId, { label: "Opening documentation", title: type === "brief" ? "Project Brief" : "Proposal" });
   };
 
   const handleAchievementDocumentation = (achievementId) => {
@@ -345,14 +364,50 @@ export default function App() {
 
   useEffect(() => {
     const seo = getSeoMeta(currentView);
+    const canonicalUrl = "https://hihanghoeng.com/" + (currentView === "home" ? "" : "#" + currentView);
+    const setMeta = (selector, attribute, key, content) => {
+      let element = document.head.querySelector(selector);
+      if (!element) {
+        element = document.createElement("meta");
+        element.setAttribute(attribute, key);
+        document.head.appendChild(element);
+      }
+      element.setAttribute("content", content);
+    };
+
     document.title = seo.title;
-    let description = document.querySelector("meta[name='description']");
-    if (!description) {
-      description = document.createElement("meta");
-      description.setAttribute("name", "description");
-      document.head.appendChild(description);
+    setMeta("meta[name='description']", "name", "description", seo.description);
+    setMeta("meta[property='og:title']", "property", "og:title", seo.title);
+    setMeta("meta[property='og:description']", "property", "og:description", seo.description);
+    setMeta("meta[property='og:url']", "property", "og:url", canonicalUrl);
+    setMeta("meta[name='twitter:title']", "name", "twitter:title", seo.title);
+    setMeta("meta[name='twitter:description']", "name", "twitter:description", seo.description);
+
+    let canonical = document.head.querySelector("link[rel='canonical']");
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
     }
-    description.setAttribute("content", seo.description);
+    canonical.setAttribute("href", canonicalUrl);
+
+    let routeSchema = document.getElementById("route-structured-data");
+    if (!routeSchema) {
+      routeSchema = document.createElement("script");
+      routeSchema.id = "route-structured-data";
+      routeSchema.type = "application/ld+json";
+      document.head.appendChild(routeSchema);
+    }
+    routeSchema.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": seo.schemaType || "WebPage",
+      name: seo.name || seo.title,
+      headline: seo.title,
+      description: seo.description,
+      url: canonicalUrl,
+      author: { "@type": "Organization", name: "HIHANG HOENG" },
+      publisher: { "@type": "Organization", name: "HIHANG HOENG", logo: { "@type": "ImageObject", url: "https://hihanghoeng.com/hihang-hoeng-logo.png" } },
+    });
   }, [currentView]);
   const openProjectDetail = (projectId) => {
     startRouteTransition(`project-${projectId}`, { label: "Opening competition archive", title: "Project Details" });
@@ -380,16 +435,20 @@ export default function App() {
   } else if (currentView === "about") {
     pageContent = <><PageShell><About variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "achievements") {
-    pageContent = <><PageShell><Achievements variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
+    pageContent = <><PageShell><Achievements variant="page" onOpenDocument={handleAchievementDocument} /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "team") {
     pageContent = <><PageShell><Team variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "all-projects") {
     pageContent = <AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} onViewModeChange={setProjectViewMode} />;
+  } else if (currentView.startsWith("brief-")) {
+    const achievementId = currentView.replace(/^brief-/, "");
+    pageContent = <><DocumentationBrief achievementId={achievementId} onBack={() => startRouteTransition("achievements", { direction: "down", label: "Back to achievements", title: "Achievement" })} onOpenProposal={() => handleAchievementDocument("proposal", achievementId)} /><Footer onViewChange={handleViewChange} /></>;
+  } else if (currentView.startsWith("proposal-")) {
+    const achievementId = currentView.replace(/^proposal-/, "");
+    pageContent = <><ProposalPreview achievementId={achievementId} onBack={() => startRouteTransition("achievements", { direction: "down", label: "Back to achievements", title: "Achievement" })} onOpenBrief={() => handleAchievementDocument("brief", achievementId)} /><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView.startsWith("project-")) {
     const projectId = currentView.split("-")[1];
     pageContent = <><ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to projects", title: "Projects" })} onSelectProject={openProjectDetail} /><Footer onViewChange={handleViewChange} /></>;
-  } else if (currentView === "contact") {
-    pageContent = <><PageShell><Contact onViewChange={handleViewChange} /></PageShell><Footer onViewChange={handleViewChange} /></>;
   }
 
   return (

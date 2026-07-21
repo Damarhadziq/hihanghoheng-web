@@ -6,7 +6,6 @@ const navLinks = [
   { label: "Projects", view: "all-projects" },
   { label: "Achievement", view: "achievements" },
   { label: "Team", view: "team" },
-  { label: "Contact", view: "contact" },
 ];
 
 export default function Nav({ onViewChange, activeView = "home" }) {

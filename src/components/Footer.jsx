@@ -4,7 +4,6 @@
   { label: "Projects", view: "all-projects" },
   { label: "Achievements", view: "achievements" },
   { label: "Team", view: "team" },
-  { label: "Contact", view: "contact" },
 ];
 
 export default function Footer({ onViewChange }) {

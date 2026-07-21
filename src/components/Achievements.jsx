@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { achievements } from "../data/achievements";
+import { getCompetitionDocumentation } from "../data/documentation";
 
 const getPlacementClass = (placement) => {
   if (placement.includes("1st")) return "achievement-badge achievement-badge-gold achievement-badge-static";
@@ -10,7 +11,7 @@ const getPlacementClass = (placement) => {
   return "achievement-badge achievement-badge-muted achievement-badge-static";
 };
 
-export default function Achievements({ variant = "home", onOpenDocumentation }) {
+export default function Achievements({ variant = "home", onOpenDocumentation, onOpenDocument }) {
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef, { stagger: 0.1 });
   const isPage = variant === "page";
@@ -24,15 +25,10 @@ export default function Achievements({ variant = "home", onOpenDocumentation }) 
     return (
       <section id="achievements" ref={sectionRef} className="achievement-page py-20 md:py-32 border-hairline-t">
         <div className="section-wrapper">
-          <div className="mb-14 grid gap-5 md:mb-20 md:grid-cols-12 md:items-end">
-            <div className="md:col-span-7">
-              <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">Competition Docs</span>
-              <h1 className="headline-lg gsap-reveal">Competition journeys, documented.</h1>
-            </div>
-            <p className="gsap-reveal text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
-              Every achievement is documented as a competition record: organizer, scale, project, journey notes, and the members who contributed.
-            </p>
-          </div>
+          <header className="mb-14 md:mb-20">
+            <span className="label mb-5 inline-flex text-ink/48 gsap-reveal">Competition Docs</span>
+            <h1 className="achievement-page-title gsap-reveal">Competition journeys, documented.</h1>
+          </header>
 
           <div className="achievement-docs">
             {achievements.map((item, index) => (
@@ -46,7 +42,7 @@ export default function Achievements({ variant = "home", onOpenDocumentation }) 
                     <span className="label text-ink/48">{item.date}</span>
                     <span className="label text-ink/48">{item.scale}</span>
                   </div>
-                  <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-5xl">{item.competitionName}</h2>
+                  <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">{item.competitionName}</h2>
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="doc-meta"><span className="label text-ink/42">Organizer</span><strong>{item.organizer}</strong></div>
                     <div className="doc-meta"><span className="label text-ink/42">Project</span><strong>{item.projectName}</strong></div>
@@ -59,9 +55,20 @@ export default function Achievements({ variant = "home", onOpenDocumentation }) 
                       <ol className="doc-list doc-link-list">
                         {item.documentation.map((doc) => (
                           <li key={doc}>
-                            <a href={`#${item.id}`} aria-label={`Open ${doc} documentation for ${item.competitionName}`}>
-                              {doc}
-                            </a>
+                            {doc === "Project brief" && (
+                              <button type="button" onClick={() => onOpenDocument?.("brief", item.id)}>Project brief</button>
+                            )}
+                            {doc === "Proposal" && (
+                              <button type="button" onClick={() => onOpenDocument?.("proposal", item.id)}>Proposal</button>
+                            )}
+                            {doc === "Prototype" && (() => {
+                              const documentation = getCompetitionDocumentation(item.id);
+                              return documentation?.prototypeUrl ? (
+                                <a href={documentation.prototypeUrl} target="_blank" rel="noreferrer">Prototype <span aria-hidden="true">&nearr;</span></a>
+                              ) : (
+                                <span className="documentation-link-pending" aria-disabled="true">Prototype link pending</span>
+                              );
+                            })()}
                           </li>
                         ))}
                       </ol>

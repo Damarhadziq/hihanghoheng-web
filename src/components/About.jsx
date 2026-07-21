@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
+import GalleryMarquee from "./GalleryMarquee";
 
 const stats = [
   ["12+", "Competitions joined"],
@@ -13,26 +14,24 @@ export default function About({ variant = "home" }) {
 
   if (variant === "page") {
     return (
-      <section id="about" ref={sectionRef} className="about-page py-20 md:py-32 border-hairline-t">
-        <div className="section-wrapper">
-          <div className="grid gap-10 md:grid-cols-12 md:items-end md:gap-12">
-            <div className="md:col-span-7">
-              <span className="label text-ink/48 gsap-reveal mb-5 inline-flex">About</span>
-              <h1 className="headline-lg gsap-reveal mb-6">
-                Built through briefs, research, and pitch decks.
-              </h1>
-              <p className="gsap-reveal max-w-2xl text-base leading-8 text-ink/68 md:text-lg">
-                HIHANG HOENG is a UI/UX team from Universitas Negeri Semarang focused on competitions. Every work starts from a competition brief, grows through research, and turns into a prototype, deck, and documentation ready for judging.
-              </p>
-            </div>
-            <div className="gsap-reveal md:col-span-5">
-              <figure className="about-hero-photo overflow-hidden border border-hairline bg-ink/[0.03]">
-                <img src="/optimized/gallery/hero.webp" alt="HIHANG HOENG team documentation" loading="eager" decoding="async" className="h-full w-full object-cover" />
-              </figure>
-            </div>
-          </div>
+      <section id="about" ref={sectionRef} className="about-page border-hairline-t">
+        <div className="about-marquee-hero gsap-reveal">
+          <GalleryMarquee variant="background" />
+          <div className="about-marquee-overlay" />
+          <header className="about-marquee-copy">
+            <span className="label mb-5 inline-flex text-[#F8F5EC]/68">About</span>
+            <h1 className="about-page-headline mb-6">
+              <span>Built from briefs and research.</span>
+              <span>Ready for the final pitch.</span>
+            </h1>
+            <p className="mx-auto max-w-4xl text-sm leading-7 text-[#F8F5EC]/72 md:text-base">
+              HIHANG HOENG is a UI/UX competition team from Universitas Negeri Semarang. We turn briefs and research into prototypes, pitch decks, and clear documentation.
+            </p>
+          </header>
+        </div>
 
-          <div className="my-12 grid gap-3 border-y border-hairline py-5 sm:grid-cols-3 md:my-16">
+        <div className="about-page-content section-wrapper">
+          <div className="grid gap-3 border-y border-hairline py-5 sm:grid-cols-3">
             {stats.map(([value, label]) => (
               <div key={label} className="about-stat gsap-reveal">
                 <strong>{value}</strong>
@@ -41,7 +40,7 @@ export default function About({ variant = "home" }) {
             ))}
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 md:mt-16 md:grid-cols-2">
             <article className="about-panel gsap-reveal">
               <p className="label mb-4 text-gold">Vision</p>
               <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">To become a consistent design competition team that carries campus-born work to broader stages.</h2>
@@ -55,17 +54,11 @@ export default function About({ variant = "home" }) {
           </div>
 
           <div className="mt-10 grid gap-8 md:mt-16 md:grid-cols-12">
-            <div className="md:col-span-3">
-              <span className="label text-ink/48 gsap-reveal">Core story</span>
-            </div>
+            <div className="md:col-span-3"><span className="label text-ink/48 gsap-reveal">Core story</span></div>
             <div className="md:col-span-9 lg:col-span-7">
               <div className="space-y-5 gsap-reveal">
-                <p className="text-base leading-8 text-ink/70 md:text-lg">
-                  We believe competitions are honest learning rooms. Ideas need reasons, prototypes need to be explained, and every detail has to connect back to a real problem.
-                </p>
-                <p className="text-base leading-8 text-ink/70 md:text-lg">
-                  This website is the archive of HIHANG HOENG's journey: projects born from competitions, documented achievements, and the people who shape each submission from brief to judging.
-                </p>
+                <p className="text-base leading-8 text-ink/70 md:text-lg">We believe competitions are honest learning rooms. Ideas need reasons, prototypes need to be explained, and every detail has to connect back to a real problem.</p>
+                <p className="text-base leading-8 text-ink/70 md:text-lg">This website is the archive of HIHANG HOENG's journey: projects born from competitions, documented achievements, and the people who shape each submission from brief to judging.</p>
               </div>
             </div>
           </div>
