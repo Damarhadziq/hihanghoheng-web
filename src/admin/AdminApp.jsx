@@ -109,12 +109,12 @@ function AdminShell({ route, onRouteChange, session }) {
           <span className="admin-nav-label">Workspace</span>
           {navOrder.filter((key) => isAdmin || key !== "settings").map((key) => {
             const item = adminPageMeta[key]; const Icon = key === "overview" ? LayoutDashboard : item.icon;
-            return <button key={key} className={route === key ? "is-active" : ""} onClick={() => navigate(key)} title={compact ? item.title : undefined}><Icon size={18} strokeWidth={1.7} /><span>{item.title}</span></button>;
+            return <button key={key} className={route === key ? "is-active" : ""} onClick={() => navigate(key)} data-tooltip={compact ? item.title : undefined} aria-label={compact ? item.title : undefined}><Icon size={16} strokeWidth={1.7} /><span>{item.title}</span></button>;
           })}
         </nav>
         <footer className="admin-sidebar-footer">
-          <a href="/#home" title={compact ? "Lihat website" : undefined}><ArrowUpRight size={17} /><span>Lihat website</span></a>
-          <button onClick={logout} title={compact ? "Keluar" : undefined}><LogOut size={17} /><span>Keluar</span></button>
+          <a href="/#home" data-tooltip={compact ? "Lihat website" : undefined} aria-label={compact ? "Lihat website" : undefined}><ArrowUpRight size={15} /><span>Lihat website</span></a>
+          <button onClick={logout} data-tooltip={compact ? "Keluar" : undefined} aria-label={compact ? "Keluar" : undefined}><LogOut size={15} /><span>Keluar</span></button>
         </footer>
       </aside>
       <div className="admin-workspace">

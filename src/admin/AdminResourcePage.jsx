@@ -6,7 +6,7 @@ import { Button, ConfirmDialog, Drawer, EmptyState, IconButton, Input, LoadingRo
 export default function AdminResourcePage({
   resource, title, description, singular, columns, emptyValue, toForm = (item) => item,
   toPayload = (form) => form, Form, canDelete = false, getSearchText = (item) => JSON.stringify(item),
-  afterSave, renderActions, drawerWidth = "default",
+  afterSave, renderActions, drawerWidth = "default", createLimit,
 }) {
   const query = useAdminList(resource);
   const mutations = useAdminResourceMutations(resource);
@@ -17,13 +17,17 @@ export default function AdminResourcePage({
   const [toast, setToast] = useState(null);
 
   const items = useMemo(() => Array.isArray(query.data) ? query.data : [], [query.data]);
+  const createLimitReached = Number.isFinite(createLimit) && items.length >= createLimit;
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return term ? items.filter((item) => getSearchText(item).toLowerCase().includes(term)) : items;
   }, [getSearchText, items, search]);
 
   const notify = (message, type = "success") => setToast({ id: Date.now(), message, type });
-  const openCreate = () => { setEditor({ mode: "create" }); setForm(emptyValue()); };
+  const openCreate = () => {
+    if (createLimitReached) return;
+    setEditor({ mode: "create" }); setForm(emptyValue());
+  };
   const openEdit = (item) => { setEditor({ mode: "edit", item }); setForm(toForm(item)); };
   const closeEditor = () => { if (!mutations.create.isPending && !mutations.update.isPending) setEditor(null); };
   const saving = mutations.create.isPending || mutations.update.isPending;
@@ -59,7 +63,7 @@ export default function AdminResourcePage({
     <div className="admin-page">
       <header className="admin-page-head">
         <div><span className="admin-eyebrow">Content management</span><h1>{title}</h1><p>{description}</p></div>
-        <Button icon={Plus} onClick={openCreate}>Tambah {singular}</Button>
+        {createLimitReached ? <span className="admin-capacity"><strong>{items.length}</strong><span>/ {createLimit} anggota inti</span></span> : <Button icon={Plus} onClick={openCreate}>{"Tambah " + singular}</Button>}
       </header>
 
       <div className="admin-toolbar">
@@ -84,7 +88,7 @@ export default function AdminResourcePage({
             ))}
           </tbody>
         </table>
-        {!query.isPending && filtered.length === 0 && <EmptyState icon={FilePlus2} title={search ? "Tidak ada hasil" : `${title} masih kosong`} description={search ? "Coba gunakan kata kunci lain." : `Tambahkan ${singular.toLowerCase()} pertama untuk mulai mengelola konten.`} action={!search && <Button icon={Plus} onClick={openCreate}>Tambah {singular}</Button>} />}
+        {!query.isPending && filtered.length === 0 && <EmptyState icon={FilePlus2} title={search ? "Tidak ada hasil" : `${title} masih kosong`} description={search ? "Coba gunakan kata kunci lain." : `Tambahkan ${singular.toLowerCase()} pertama untuk mulai mengelola konten.`} action={!search && (createLimitReached ? <span className="admin-capacity"><strong>{items.length}</strong><span>/ {createLimit} anggota inti</span></span> : <Button icon={Plus} onClick={openCreate}>{"Tambah " + singular}</Button>)} />}
       </div>
 
       <Drawer open={Boolean(editor)} eyebrow={editor?.mode === "create" ? "Konten baru" : "Edit konten"} title={editor?.mode === "create" ? `Tambah ${singular}` : `Edit ${singular}`} width={drawerWidth} onClose={closeEditor} footer={<><Button type="button" variant="secondary" onClick={closeEditor}>Batal</Button><Button type="submit" form={`${resource}-form`} disabled={saving}>{saving ? "Menyimpan..." : editor?.mode === "create" ? "Tambahkan" : "Simpan"}</Button></>}>

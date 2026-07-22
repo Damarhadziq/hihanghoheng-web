@@ -20,11 +20,16 @@ export const teamMemberInput = z.object({
   images: z.array(z.object({ url: z.string().min(1), altText: z.string().min(1) })).default([]),
 });
 
+const achievementContributorInput = z.union([
+  z.object({ type: z.literal("team").optional(), teamMemberId: z.uuid(), role: z.string().min(1) }),
+  z.object({ type: z.literal("external"), externalName: z.string().trim().min(1), role: z.string().min(1) }),
+]);
+
 export const achievementInput = z.object({
   id: z.string().min(1), occurredAt: z.coerce.date(), dateLabel: z.string().min(1), competitionName: z.string().min(1), organizer: z.string().min(1),
   scale: z.string().min(1), placement: z.string().min(1), projectName: z.string().min(1), note: z.string().min(1), story: z.string().min(1),
   status: z.enum(["draft", "published", "archived"]).default("draft"), sortOrder: z.number().int().default(0),
-  contributors: z.array(z.object({ teamMemberId: z.uuid(), role: z.string().min(1) })).default([]),
+  contributors: z.array(achievementContributorInput).default([]),
 });
 
 export const documentationInput = z.object({

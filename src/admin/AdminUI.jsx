@@ -1,5 +1,5 @@
 import { Children, useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, CircleCheck, CircleX, FileText, Plus, Trash2, UploadCloud, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleX, FileText, Plus, Trash2, UploadCloud, X } from "lucide-react";
 
 const animationMs = 180;
 
@@ -24,7 +24,7 @@ function usePresence(open) {
 export function Button({ icon: Icon, variant = "primary", children, className = "", ...props }) {
   return (
     <button className={`admin-button admin-button-${variant} ${className}`} {...props}>
-      {Icon && <Icon size={15} strokeWidth={1.8} aria-hidden="true" />}
+      {Icon && <Icon size={13} strokeWidth={1.8} aria-hidden="true" />}
       {children}
     </button>
   );
@@ -33,7 +33,7 @@ export function Button({ icon: Icon, variant = "primary", children, className = 
 export function IconButton({ icon: Icon, label, variant = "ghost", className = "", ...props }) {
   return (
     <button className={`admin-icon-button admin-icon-button-${variant} ${className}`} aria-label={label} title={label} {...props}>
-      <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
+      <Icon size={15} strokeWidth={1.8} aria-hidden="true" />
     </button>
   );
 }
@@ -57,6 +57,119 @@ export function Textarea(props) {
   return <textarea className="admin-input admin-textarea" {...props} />;
 }
 
+const dateFromValue = (value) => {
+  const date = value ? new Date(value + "T00:00:00") : new Date();
+  return Number.isNaN(date.getTime()) ? new Date() : date;
+};
+
+const dateToValue = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+};
+
+export function DatePicker({ value = "", onChange, name, disabled, required }) {
+  const id = useId();
+  const rootRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [viewDate, setViewDate] = useState(() => dateFromValue(value));
+
+  useEffect(() => {
+    if (value) setViewDate(dateFromValue(value));
+  }, [value]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event) => {
+      if (!rootRef.current?.contains(event.target)) setOpen(false);
+    };
+    const escape = (event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [open]);
+
+  const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const calendarStart = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1 - startOffset);
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const day = new Date(calendarStart);
+    day.setDate(calendarStart.getDate() + index);
+    return day;
+  });
+  const selectedValue = value || dateToValue(new Date());
+  const todayValue = dateToValue(new Date());
+  const displayValue = value
+    ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).format(dateFromValue(value))
+    : "Pilih tanggal";
+
+  const choose = (date) => {
+    const next = dateToValue(date);
+    onChange?.({ target: { value: next, name } });
+    setViewDate(date);
+    setOpen(false);
+  };
+
+  const changeMonth = (offset) => {
+    setViewDate((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+  };
+
+  return (
+    <span ref={rootRef} className={"admin-date-picker " + (open ? "is-open" : "")}>
+      <button
+        id={id}
+        type="button"
+        className="admin-input admin-date-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-required={required || undefined}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className={value ? "" : "is-placeholder"}>{displayValue}</span>
+        <CalendarDays size={15} aria-hidden="true" />
+      </button>
+      <span className="admin-calendar" role="dialog" aria-modal="false" aria-labelledby={id} aria-hidden={!open}>
+        <span className="admin-calendar-head">
+          <IconButton type="button" icon={ChevronLeft} label="Bulan sebelumnya" tabIndex={open ? 0 : -1} onClick={() => changeMonth(-1)} />
+          <strong>{new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(viewDate)}</strong>
+          <IconButton type="button" icon={ChevronRight} label="Bulan berikutnya" tabIndex={open ? 0 : -1} onClick={() => changeMonth(1)} />
+        </span>
+        <span className="admin-calendar-weekdays">
+          {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((day) => <span key={day}>{day}</span>)}
+        </span>
+        <span className="admin-calendar-grid">
+          {days.map((day) => {
+            const dayValue = dateToValue(day);
+            return (
+              <button
+                key={dayValue}
+                type="button"
+                tabIndex={open ? 0 : -1}
+                className={(day.getMonth() !== viewDate.getMonth() ? "is-outside " : "") + (dayValue === selectedValue ? "is-selected " : "") + (dayValue === todayValue ? "is-today" : "")}
+                aria-label={new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(day)}
+                aria-pressed={dayValue === selectedValue}
+                onClick={() => choose(day)}
+              >
+                {day.getDate()}
+              </button>
+            );
+          })}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 export function Select({ children, value = "", onChange, disabled, placeholder, name, required, ...props }) {
   const id = useId();
   const rootRef = useRef(null);
@@ -77,7 +190,10 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
       if (!rootRef.current?.contains(event.target)) setOpen(false);
     };
     const escape = (event) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setOpen(false);
+      }
     };
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", escape);
@@ -204,7 +320,8 @@ export function Drawer({ open, title, eyebrow, children, footer, onClose, width 
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const escape = (event) => {
-      if (event.key === "Escape") onClose();
+      const nestedPopupOpen = document.querySelector(".admin-select-wrap.is-open, .admin-date-picker.is-open");
+      if (event.key === "Escape" && !nestedPopupOpen) onClose();
     };
     window.addEventListener("keydown", escape);
     return () => {

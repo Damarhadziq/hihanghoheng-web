@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -166,11 +167,16 @@ export const achievements = pgTable("achievements", {
 }, (table) => [index("achievements_status_order_idx").on(table.status, table.sortOrder)]);
 
 export const achievementContributors = pgTable("achievement_contributors", {
+  id: uuid("id").defaultRandom().primaryKey(),
   achievementId: text("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
-  teamMemberId: uuid("team_member_id").notNull().references(() => teamMembers.id, { onDelete: "restrict" }),
+  teamMemberId: uuid("team_member_id").references(() => teamMembers.id, { onDelete: "restrict" }),
+  externalName: text("external_name"),
   role: text("role").notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
-}, (table) => [primaryKey({ columns: [table.achievementId, table.teamMemberId] })]);
+}, (table) => [
+  index("achievement_contributors_achievement_idx").on(table.achievementId),
+  check("achievement_contributors_source_check", sql`(("team_member_id" is not null)::int + ("external_name" is not null)::int) = 1`),
+]);
 
 export const competitionDocumentation = pgTable("competition_documentation", {
   id: uuid("id").defaultRandom().primaryKey(),

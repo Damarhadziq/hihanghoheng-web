@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Award, FileImage, FileText, FolderKanban, Save, Users } from "lucide-react";
 import { useAdminList, useSaveAchievementDocumentation, useUpdateSiteSetting, useUploadProposal } from "../hooks/useApiQueries";
 import AdminResourcePage from "./AdminResourcePage";
-import { Button, Drawer, Field, FileDropzone, IconButton, Input, Repeater, Section, Select, StatusBadge, Textarea, Toast, Toggle } from "./AdminUI";
+import { Button, DatePicker, Drawer, Field, FileDropzone, IconButton, Input, Repeater, Section, Select, StatusBadge, Textarea, Toast, Toggle } from "./AdminUI";
 
 const nullable = (value) => value?.trim() || null;
 const listFromText = (value) => value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
@@ -18,7 +18,7 @@ const emptyProject = () => ({
 const projectToForm = (item) => ({
   ...emptyProject(), ...item, tagsText: (item.tags || []).join(", "),
   timeline: item.timeline || [], mockups: item.mockups || [],
-  contributors: (item.contributors || []).map((person) => ({ teamMemberId: person.id, role: person.contributionRole || person.role })),
+  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", role: person.contributionRole || person.role })),
 });
 
 const projectToPayload = (form) => ({
@@ -52,7 +52,7 @@ function ProjectForm({ value, onChange }) {
       <Section title="Konteks kompetisi">
         <div className="admin-form-grid admin-form-grid-2">
           <Field label="Tipe"><Input required value={value.type} onChange={(event) => set("type", event.target.value)} /></Field>
-          <Field label="Organizer"><Input required value={value.organizer} onChange={(event) => set("organizer", event.target.value)} /></Field>
+          <Field label="Organizer"><Input required placeholder="Balai Pengembangan Talenta Indonesia" value={value.organizer} onChange={(event) => set("organizer", event.target.value)} /></Field>
         </div>
         <Field label="Nama kompetisi"><Input required value={value.competition} onChange={(event) => set("competition", event.target.value)} /></Field>
         <Field label="Problem"><Textarea required rows="5" value={value.problem} onChange={(event) => set("problem", event.target.value)} /></Field>
@@ -85,9 +85,15 @@ export function ProjectsPage({ canDelete }) {
   ]} />;
 }
 
-const emptyAchievement = () => ({
-  id: "", occurredAt: new Date().toISOString().slice(0, 10), dateLabel: "", competitionName: "", organizer: "", scale: "National", placement: "", projectName: "", note: "", story: "", status: "draft", sortOrder: 0, contributors: [],
-});
+const achievementDateLabel = (value) => new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(new Date(value + "T00:00:00"));
+
+const emptyAchievement = () => {
+  const occurredAt = new Date().toISOString().slice(0, 10);
+  return {
+    id: "", occurredAt, dateLabel: achievementDateLabel(occurredAt), competitionName: "", organizer: "", scale: "National",
+    placement: "", projectName: "", note: "", story: "", status: "draft", sortOrder: 0, contributors: [],
+  };
+};
 
 const emptyDocumentation = () => ({
   category: "", prototypeUrl: "", proposalUrl: "", summary: "", background: "", solution: "", positioning: "",
@@ -96,7 +102,7 @@ const emptyDocumentation = () => ({
 
 const achievementToForm = (item) => ({
   ...emptyAchievement(), ...item, occurredAt: new Date(item.occurredAt).toISOString().slice(0, 10),
-  contributors: (item.contributors || []).map((person) => ({ teamMemberId: person.id, role: person.contributionRole || person.role })),
+  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", role: person.contributionRole || person.role })),
 });
 
 const documentationToForm = (doc) => doc ? ({
@@ -109,7 +115,7 @@ const documentationToForm = (doc) => doc ? ({
 const achievementToPayload = (form) => ({
   id: form.id, occurredAt: new Date(form.occurredAt).toISOString(), dateLabel: form.dateLabel, competitionName: form.competitionName,
   organizer: form.organizer, scale: form.scale, placement: form.placement, projectName: form.projectName, note: form.note, story: form.story,
-  status: form.status, sortOrder: Number(form.sortOrder), contributors: form.contributors.filter((item) => item.teamMemberId).map(({ teamMemberId, role }) => ({ teamMemberId, role })),
+  status: form.status, sortOrder: Number(form.sortOrder), contributors: form.contributors.filter((item) => item.role && (item.type === "external" ? item.externalName : item.teamMemberId)).map((item) => item.type === "external" ? ({ type: "external", externalName: item.externalName, role: item.role }) : ({ type: "team", teamMemberId: item.teamMemberId, role: item.role })),
 });
 
 const documentationPayload = (doc) => ({
@@ -120,25 +126,38 @@ const documentationPayload = (doc) => ({
 
 function AchievementForm({ value, onChange, mode }) {
   const { data: members = [] } = useAdminList("teamMembers");
+  const { data: projects = [] } = useAdminList("projects");
   const set = (key, next) => onChange({ ...value, [key]: next });
+  const setCompetition = (competitionName) => onChange({ ...value, competitionName, id: value.id || slugify(competitionName) });
+  const setDate = (occurredAt) => onChange({ ...value, occurredAt, dateLabel: achievementDateLabel(occurredAt) });
   return <>
     <Section title="Hasil kompetisi" description="Data ringkas yang tampil pada daftar achievement publik.">
       <div className="admin-form-grid admin-form-grid-2">
-        <Field label="ID / slug"><Input required disabled={mode === "edit"} value={value.id} onChange={(event) => set("id", slugify(event.target.value))} /></Field>
-        <Field label="Tanggal"><Input required type="date" value={value.occurredAt} onChange={(event) => set("occurredAt", event.target.value)} /></Field>
+        <Field label="ID / slug"><Input required disabled={mode === "edit"} placeholder="gemastik-xvii-ui-ux-design" value={value.id} onChange={(event) => set("id", slugify(event.target.value))} /></Field>
+        <Field label="Tanggal"><DatePicker required value={value.occurredAt} onChange={(event) => setDate(event.target.value)} /></Field>
         <Field label="Label tanggal"><Input required placeholder="May 2025" value={value.dateLabel} onChange={(event) => set("dateLabel", event.target.value)} /></Field>
         <Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field>
         <Field label="Status"><Select value={value.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></Select></Field>
         <Field label="Skala"><Select value={value.scale} onChange={(event) => set("scale", event.target.value)}><option value="International">International</option><option value="National">National</option><option value="Regional">Regional</option><option value="University">University</option></Select></Field>
       </div>
-      <Field label="Nama kompetisi"><Input required value={value.competitionName} onChange={(event) => set("competitionName", event.target.value)} /></Field>
-      <div className="admin-form-grid admin-form-grid-2"><Field label="Organizer"><Input required value={value.organizer} onChange={(event) => set("organizer", event.target.value)} /></Field><Field label="Placement"><Input required value={value.placement} onChange={(event) => set("placement", event.target.value)} /></Field></div>
-      <Field label="Nama proyek"><Input required value={value.projectName} onChange={(event) => set("projectName", event.target.value)} /></Field>
-      <Field label="Catatan singkat"><Textarea required rows="3" value={value.note} onChange={(event) => set("note", event.target.value)} /></Field>
-      <Field label="Cerita pencapaian"><Textarea required rows="5" value={value.story} onChange={(event) => set("story", event.target.value)} /></Field>
+      <Field label="Nama kompetisi"><Input required placeholder="GEMASTIK XVII - UI/UX Design" value={value.competitionName} onChange={(event) => setCompetition(event.target.value)} /></Field>
+      <div className="admin-form-grid admin-form-grid-2"><Field label="Organizer"><Input required placeholder="Balai Pengembangan Talenta Indonesia" value={value.organizer} onChange={(event) => set("organizer", event.target.value)} /></Field><Field label="Placement"><Input required placeholder="National Finalist" value={value.placement} onChange={(event) => set("placement", event.target.value)} /></Field></div>
+      <Field label="Project"><Select required value={value.projectName} placeholder="Pilih project" onChange={(event) => set("projectName", event.target.value)}><option value="">Pilih project</option>{value.projectName && !projects.some((project) => project.name === value.projectName) && <option value={value.projectName}>{value.projectName}</option>}{projects.map((project) => <option key={project.id} value={project.name}>{project.name}</option>)}</Select></Field>
+      <Field label="Catatan singkat"><Textarea required rows="3" placeholder="Ringkasan hasil dan konteks kompetisi." value={value.note} onChange={(event) => set("note", event.target.value)} /></Field>
+      <Field label="Cerita pencapaian"><Textarea required rows="5" placeholder="Ceritakan proses, tantangan, dan hasil yang dicapai." value={value.story} onChange={(event) => set("story", event.target.value)} /></Field>
     </Section>
     <Section title="Kontributor" description="Anggota dan peran yang terlibat pada kompetisi.">
-      <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ teamMemberId: "", role: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Anggota"><Select value={item.teamMemberId} onChange={(event) => update({ ...item, teamMemberId: event.target.value })}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</Select></Field><Field label="Peran"><Input required value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field></div>} />
+      <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ type: "team", teamMemberId: "", externalName: "", role: "" })} renderItem={(item, update) => {
+        const selected = item.type === "external" ? "__external__" : item.teamMemberId;
+        const selectContributor = (next) => update(next === "__external__"
+          ? { ...item, type: "external", teamMemberId: "", externalName: "" }
+          : { ...item, type: "team", teamMemberId: next, externalName: "" });
+        return <div className="admin-form-grid admin-form-grid-2">
+          <Field label="Anggota"><Select required value={selected} onChange={(event) => selectContributor(event.target.value)}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}<option value="__external__">+ Tambah anggota eksternal</option></Select></Field>
+          {item.type === "external" && <Field label="Nama anggota eksternal"><Input required placeholder="Nama lengkap" value={item.externalName} onChange={(event) => update({ ...item, externalName: event.target.value })} /></Field>}
+          <Field label="Peran" className={item.type === "external" ? "admin-grid-full" : ""}><Input required placeholder="UI/UX Designer" value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field>
+        </div>;
+      }} />
     </Section>
   </>;
 }
@@ -246,7 +265,7 @@ function TeamForm({ value, onChange }) {
   return <><Section title="Profil anggota"><div className="admin-form-grid admin-form-grid-2"><Field label="Nama lengkap"><Input required value={value.name} onChange={(event) => setName(event.target.value)} /></Field><Field label="Nama pendek"><Input required value={value.shortName} onChange={(event) => set("shortName", event.target.value)} /></Field><Field label="Slug"><Input required value={value.slug} onChange={(event) => set("slug", slugify(event.target.value))} /></Field><Field label="Role"><Input required value={value.role} onChange={(event) => set("role", event.target.value)} /></Field><Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field><div className="admin-field admin-field-toggle"><span className="admin-field-label">Status</span><Toggle checked={value.isActive} onChange={(next) => set("isActive", next)} label="Anggota aktif" /></div></div><Field label="Bio"><Textarea rows="4" value={value.bio || ""} onChange={(event) => set("bio", event.target.value)} /></Field></Section><Section title="Social links"><Field label="LinkedIn URL"><Input value={value.linkedinUrl || ""} onChange={(event) => set("linkedinUrl", event.target.value)} /></Field><Field label="Instagram URL"><Input value={value.instagramUrl || ""} onChange={(event) => set("instagramUrl", event.target.value)} /></Field></Section><Section title="Foto anggota"><Repeater title="Foto" addLabel="Tambah foto" items={value.images} onChange={(next) => set("images", next)} createItem={() => ({ url: "", altText: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Image URL"><Input required value={item.url} onChange={(event) => update({ ...item, url: event.target.value })} /></Field><Field label="Alt text"><Input required value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field></div>} /></Section></>;
 }
 export function TeamPage({ canDelete }) {
-  return <AdminResourcePage resource="teamMembers" title="Team" singular="Anggota" description="Kelola profil, peran, foto, dan tautan sosial anggota tim." canDelete={canDelete} emptyValue={emptyMember} toForm={memberToForm} toPayload={memberToPayload} Form={TeamForm} getSearchText={(item) => `${item.name} ${item.role} ${item.slug}`} columns={[
+  return <AdminResourcePage resource="teamMembers" title="Team" singular="Anggota" description="Tiga anggota inti Hihang Hoeng. Kontributor eksternal dikelola pada tiap achievement." createLimit={3} canDelete={canDelete} emptyValue={emptyMember} toForm={memberToForm} toPayload={memberToPayload} Form={TeamForm} getSearchText={(item) => `${item.name} ${item.role} ${item.slug}`} columns={[
     { key: "member", label: "Anggota", render: (item) => <div className="admin-primary-cell">{item.images?.[0]?.url && <img src={item.images[0].url} alt="" />}<div><strong>{item.name}</strong><span>{item.shortName}</span></div></div> },
     { key: "role", label: "Role", render: (item) => item.role }, { key: "order", label: "Urutan", render: (item) => item.sortOrder },
     { key: "status", label: "Status", render: (item) => <StatusBadge value={item.isActive ? "active" : "inactive"} /> },

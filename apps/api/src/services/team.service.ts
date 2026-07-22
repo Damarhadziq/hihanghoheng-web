@@ -16,6 +16,8 @@ export const teamService = {
     });
   },
   async create(input: TeamMemberInput) {
+    const memberCount = await db.$count(teamMembers);
+    if (memberCount >= 3) throw new AppError(409, "Tim inti dibatasi maksimal 3 anggota.");
     const id = await db.transaction(async (tx) => {
       const [row] = await tx.insert(teamMembers).values(input).returning({ id: teamMembers.id });
       if (!row) throw new AppError(500, "Team member could not be created");

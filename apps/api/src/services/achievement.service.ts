@@ -13,10 +13,20 @@ const withRelations = {
   documentation: { with: { sections: { orderBy: [asc(documentationSections.sortOrder)] } } },
 };
 
-function present<T extends { contributors: Array<{ role: string; teamMember: unknown }>; documentation: null | { sections: Array<{ section: string; item: string }> } }>(row: T) {
+const contributorValues = (achievementId: string, contributors: AchievementInput["contributors"]) => contributors.map((item, sortOrder) => ({
+  achievementId,
+  teamMemberId: "teamMemberId" in item ? item.teamMemberId : null,
+  externalName: "externalName" in item ? item.externalName : null,
+  role: item.role,
+  sortOrder,
+}));
+
+function present<T extends { contributors: Array<{ id: string; role: string; externalName: string | null; teamMember: unknown | null }>; documentation: null | { sections: Array<{ section: string; item: string }> } }>(row: T) {
   return {
     ...row,
-    contributors: row.contributors.map((item) => ({ ...(item.teamMember as object), contributionRole: item.role })),
+    contributors: row.contributors.map((item) => item.teamMember
+      ? { ...(item.teamMember as object), contributionRole: item.role, contributorType: "team" }
+      : { id: item.id, name: item.externalName, shortName: item.externalName, contributionRole: item.role, role: item.role, contributorType: "external", isExternal: true }),
     documentation: row.documentation ? {
       ...row.documentation,
       sections: row.documentation.sections.reduce<Record<string, string[]>>((groups, item) => {
@@ -47,7 +57,7 @@ export const achievementService = {
   async create(input: AchievementInput) {
     await db.transaction(async (tx) => {
       await tx.insert(achievements).values(input);
-      if (input.contributors.length) await tx.insert(achievementContributors).values(input.contributors.map((item, sortOrder) => ({ achievementId: input.id, ...item, sortOrder })));
+      if (input.contributors.length) await tx.insert(achievementContributors).values(contributorValues(input.id, input.contributors));
     });
     return this.get(input.id, false);
   },
@@ -56,7 +66,7 @@ export const achievementService = {
       const [row] = await tx.update(achievements).set({ ...input, id, updatedAt: new Date() }).where(eq(achievements.id, id)).returning({ id: achievements.id });
       if (!row) throw new AppError(404, "Achievement not found");
       await tx.delete(achievementContributors).where(eq(achievementContributors.achievementId, id));
-      if (input.contributors.length) await tx.insert(achievementContributors).values(input.contributors.map((item, sortOrder) => ({ achievementId: id, ...item, sortOrder })));
+      if (input.contributors.length) await tx.insert(achievementContributors).values(contributorValues(id, input.contributors));
     });
     return this.get(id, false);
   },
