@@ -868,3 +868,111 @@
   border-color: rgba(250,204,21,.42);
   background: rgba(250,204,21,.02);
 }
+/* Reliable primary-button wipe: fill and content animate on separate layers */
+.admin-app .admin-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.admin-app .admin-button-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  color: inherit;
+  white-space: nowrap;
+}
+.admin-app .admin-button-primary {
+  background: transparent;
+  background-image: none;
+  color: var(--admin-text);
+  transition: border-color 160ms ease, color 70ms ease, transform 150ms ease, box-shadow 160ms ease;
+}
+.admin-app .admin-button-primary::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  background: var(--admin-text);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms cubic-bezier(.22,1,.36,1);
+}
+.admin-app .admin-button-primary:hover:not(:disabled) {
+  background: transparent;
+  background-image: none;
+  color: var(--admin-bg);
+  transition-delay: 0s, 100ms, 0s, 0s;
+}
+.admin-app .admin-button-primary:hover:not(:disabled)::before { transform: scaleX(1); }
+.admin-app .admin-button-primary:disabled::before { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-app .admin-button-primary::before { transition: none; }
+  .admin-app .admin-button-primary:hover:not(:disabled) { transition-delay: 0s; }
+}
+
+/* Select state, contributor layout, and contained dark tooltips */
+.admin-select-wrap {
+  width: 100%;
+  min-width: 0;
+}
+.admin-select-menu > button > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-select-menu > button > svg {
+  position: static;
+  inset: auto;
+  flex: 0 0 auto;
+  color: var(--admin-yellow);
+  transform: none;
+}
+
+.admin-contributor-grid {
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  gap: 16px;
+}
+.admin-contributor-grid > .admin-field,
+.admin-contributor-grid .admin-input,
+.admin-contributor-grid .admin-select-wrap { min-width: 0; }
+
+.admin-icon-button::after,
+.is-compact .admin-sidebar [data-tooltip]::after {
+  z-index: 250;
+  border-color: rgba(248,245,236,.16);
+  background: #101511;
+  box-shadow: 0 12px 30px rgba(0,0,0,.48);
+  color: var(--admin-text);
+}
+.is-compact .admin-sidebar [data-tooltip]::before {
+  z-index: 251;
+  border-color: transparent #101511 transparent transparent;
+}
+.admin-topbar,
+.admin-topbar-start,
+.admin-table-actions { overflow: visible; }
+.admin-topbar-start .admin-icon-button::after {
+  right: auto;
+  left: 0;
+}
+.admin-table td.admin-table-actions { overflow: visible; }
+.admin-table-actions .admin-icon-button::after {
+  top: auto;
+  right: 0;
+  bottom: calc(100% + 7px);
+  transform: translateY(4px);
+}
+.admin-table-actions .admin-icon-button:hover::after,
+.admin-table-actions .admin-icon-button:focus-visible::after { transform: translateY(0); }
+.admin-table-actions .admin-icon-button:hover,
+.admin-table-actions .admin-icon-button:focus-visible { z-index: 251; }
+
+@media (max-width: 780px) {
+  .admin-contributor-grid { grid-template-columns: minmax(0,1fr); }
+}

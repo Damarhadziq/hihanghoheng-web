@@ -24,8 +24,10 @@ function usePresence(open) {
 export function Button({ icon: Icon, variant = "primary", children, className = "", ...props }) {
   return (
     <button className={`admin-button admin-button-${variant} ${className}`} {...props}>
-      {Icon && <Icon size={13} strokeWidth={1.8} aria-hidden="true" />}
-      {children}
+      <span className="admin-button-content">
+        {Icon && <Icon size={13} strokeWidth={1.8} aria-hidden="true" />}
+        {children}
+      </span>
     </button>
   );
 }
@@ -182,6 +184,7 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
     .map((child) => ({
       value: String(child.props.value ?? ""),
       label: child.props.children,
+      selectedLabel: child.props["data-selected-label"] ?? child.props.children,
       disabled: Boolean(child.props.disabled),
     }));
   const selected = options.find((option) => option.value === displayValue);
@@ -249,7 +252,7 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
         }}
         {...props}
       >
-        <span className={selected?.value ? "" : "is-placeholder"}>{selected?.label ?? placeholder ?? "Pilih opsi"}</span>
+        <span className={selected?.value ? "" : "is-placeholder"}>{selected?.selectedLabel ?? placeholder ?? "Pilih opsi"}</span>
         <ChevronDown size={14} aria-hidden="true" />
       </button>
       <span className="admin-select-menu" role="listbox" aria-labelledby={id} aria-hidden={!open}>
@@ -259,12 +262,12 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
             type="button"
             tabIndex={open ? 0 : -1}
             role="option"
-            aria-selected={option.value === displayValue}
+            aria-selected={displayValue !== "" && option.value === displayValue}
             disabled={option.disabled}
             onClick={() => choose(option)}
           >
             <span>{option.label}</span>
-            {option.value === displayValue && <Check size={14} strokeWidth={2.2} />}
+            {displayValue !== "" && option.value === displayValue && <Check size={14} strokeWidth={2.2} />}
           </button>
         ))}
       </span>
