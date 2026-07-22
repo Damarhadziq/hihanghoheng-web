@@ -1,13 +1,22 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { requireAdmin, requireSession } from "../auth/guards.js";
 import { achievementService } from "../services/achievement.service.js";
 import { contentService } from "../services/content.service.js";
 import { projectService } from "../services/project.service.js";
 import { teamService } from "../services/team.service.js";
+import { uploadProposal } from "../services/storage.service.js";
 import { achievementInput, documentationInput, mediaInput, processStepInput, projectInput, siteSettingInput, teamMemberInput } from "../validators/content.js";
 
 export const adminRouter = Router();
 adminRouter.use(requireSession);
+
+adminRouter.post("/uploads/proposal", requireAdmin, express.raw({ type: "application/pdf", limit: "4mb" }), async (req, res) => {
+  const header = req.get("x-file-name") || "proposal.pdf";
+  let fileName = header;
+  try { fileName = decodeURIComponent(header); } catch { /* Keep the original header value. */ }
+  const uploaded = await uploadProposal(req.body as Buffer, fileName);
+  res.status(201).json({ data: uploaded });
+});
 
 const param = (value: string | string[] | undefined) => {
   if (typeof value !== "string") throw new Error("Missing route parameter");

@@ -1,4 +1,4 @@
-import { apiRequest } from "./httpClient";
+import { API_URL, apiRequest } from "./httpClient";
 
 const mapMember = (member) => ({
   ...member,
@@ -76,6 +76,15 @@ export const adminApi = {
   achievements: {
     ...createResourceClient("achievements"),
     saveDocumentation: (id, input) => apiRequest(`/api/admin/achievements/${encodeURIComponent(id)}/documentation`, { method: "PUT", body: input }),
+    uploadProposal: async (file) => {
+      const response = await fetch(`${API_URL}/api/admin/uploads/proposal`, {
+        method: "POST", credentials: "include", body: file,
+        headers: { "Content-Type": "application/pdf", "X-File-Name": encodeURIComponent(file.name) },
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error?.message || "Proposal gagal diunggah.");
+      return payload.data;
+    },
   },
   teamMembers: createResourceClient("team-members"),
   process: createResourceClient("process"),

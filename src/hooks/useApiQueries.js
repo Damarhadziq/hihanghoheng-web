@@ -63,6 +63,10 @@ export function useAdminResourceMutations(resource) {
   };
 }
 
+export function useUploadProposal() {
+  return useMutation({ mutationFn: adminApi.achievements.uploadProposal });
+}
+
 export function useSaveAchievementDocumentation() {
   const queryClient = useQueryClient();
   return useMutation({

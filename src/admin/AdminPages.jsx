@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Award, FileImage, FolderKanban, Save, Users } from "lucide-react";
-import { useAdminList, useSaveAchievementDocumentation, useUpdateSiteSetting } from "../hooks/useApiQueries";
+import { Award, FileImage, FileText, FolderKanban, Save, Users } from "lucide-react";
+import { useAdminList, useSaveAchievementDocumentation, useUpdateSiteSetting, useUploadProposal } from "../hooks/useApiQueries";
 import AdminResourcePage from "./AdminResourcePage";
-import { Button, Field, Input, Repeater, Section, Select, StatusBadge, Textarea, Toggle } from "./AdminUI";
+import { Button, Drawer, Field, FileDropzone, IconButton, Input, Repeater, Section, Select, StatusBadge, Textarea, Toast, Toggle } from "./AdminUI";
 
 const nullable = (value) => value?.trim() || null;
 const listFromText = (value) => value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
@@ -87,18 +87,24 @@ export function ProjectsPage({ canDelete }) {
 
 const emptyAchievement = () => ({
   id: "", occurredAt: new Date().toISOString().slice(0, 10), dateLabel: "", competitionName: "", organizer: "", scale: "National", placement: "", projectName: "", note: "", story: "", status: "draft", sortOrder: 0, contributors: [],
-  includeDocumentation: true, documentation: { category: "", prototypeUrl: "", proposalUrl: "", summary: "", background: "", solution: "", positioning: "", objectives: "", users: "", innovations: "", features: "", limitations: "", userFlow: "" },
 });
 
-const achievementToForm = (item) => {
-  const doc = item.documentation;
-  return {
-    ...emptyAchievement(), ...item, occurredAt: new Date(item.occurredAt).toISOString().slice(0, 10),
-    contributors: (item.contributors || []).map((person) => ({ teamMemberId: person.id, role: person.contributionRole || person.role })),
-    includeDocumentation: Boolean(doc),
-    documentation: doc ? { ...doc, objectives: textFromList(doc.sections?.objectives), users: textFromList(doc.sections?.users), innovations: textFromList(doc.sections?.innovations), features: textFromList(doc.sections?.features), limitations: textFromList(doc.sections?.limitations), userFlow: textFromList(doc.sections?.userFlow) } : emptyAchievement().documentation,
-  };
-};
+const emptyDocumentation = () => ({
+  category: "", prototypeUrl: "", proposalUrl: "", summary: "", background: "", solution: "", positioning: "",
+  objectives: "", users: "", innovations: "", features: "", limitations: "", userFlow: "",
+});
+
+const achievementToForm = (item) => ({
+  ...emptyAchievement(), ...item, occurredAt: new Date(item.occurredAt).toISOString().slice(0, 10),
+  contributors: (item.contributors || []).map((person) => ({ teamMemberId: person.id, role: person.contributionRole || person.role })),
+});
+
+const documentationToForm = (doc) => doc ? ({
+  ...emptyDocumentation(), ...doc,
+  objectives: textFromList(doc.sections?.objectives), users: textFromList(doc.sections?.users),
+  innovations: textFromList(doc.sections?.innovations), features: textFromList(doc.sections?.features),
+  limitations: textFromList(doc.sections?.limitations), userFlow: textFromList(doc.sections?.userFlow),
+}) : emptyDocumentation();
 
 const achievementToPayload = (form) => ({
   id: form.id, occurredAt: new Date(form.occurredAt).toISOString(), dateLabel: form.dateLabel, competitionName: form.competitionName,
@@ -115,16 +121,15 @@ const documentationPayload = (doc) => ({
 function AchievementForm({ value, onChange, mode }) {
   const { data: members = [] } = useAdminList("teamMembers");
   const set = (key, next) => onChange({ ...value, [key]: next });
-  const setDoc = (key, next) => set("documentation", { ...value.documentation, [key]: next });
   return <>
-    <Section title="Hasil kompetisi">
+    <Section title="Hasil kompetisi" description="Data ringkas yang tampil pada daftar achievement publik.">
       <div className="admin-form-grid admin-form-grid-2">
         <Field label="ID / slug"><Input required disabled={mode === "edit"} value={value.id} onChange={(event) => set("id", slugify(event.target.value))} /></Field>
         <Field label="Tanggal"><Input required type="date" value={value.occurredAt} onChange={(event) => set("occurredAt", event.target.value)} /></Field>
         <Field label="Label tanggal"><Input required placeholder="May 2025" value={value.dateLabel} onChange={(event) => set("dateLabel", event.target.value)} /></Field>
         <Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field>
         <Field label="Status"><Select value={value.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></Select></Field>
-        <Field label="Skala"><Input required value={value.scale} onChange={(event) => set("scale", event.target.value)} /></Field>
+        <Field label="Skala"><Select value={value.scale} onChange={(event) => set("scale", event.target.value)}><option value="International">International</option><option value="National">National</option><option value="Regional">Regional</option><option value="University">University</option></Select></Field>
       </div>
       <Field label="Nama kompetisi"><Input required value={value.competitionName} onChange={(event) => set("competitionName", event.target.value)} /></Field>
       <div className="admin-form-grid admin-form-grid-2"><Field label="Organizer"><Input required value={value.organizer} onChange={(event) => set("organizer", event.target.value)} /></Field><Field label="Placement"><Input required value={value.placement} onChange={(event) => set("placement", event.target.value)} /></Field></div>
@@ -132,30 +137,104 @@ function AchievementForm({ value, onChange, mode }) {
       <Field label="Catatan singkat"><Textarea required rows="3" value={value.note} onChange={(event) => set("note", event.target.value)} /></Field>
       <Field label="Cerita pencapaian"><Textarea required rows="5" value={value.story} onChange={(event) => set("story", event.target.value)} /></Field>
     </Section>
-    <Section title="Kontributor"><Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ teamMemberId: "", role: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Anggota"><Select required value={item.teamMemberId} onChange={(event) => update({ ...item, teamMemberId: event.target.value })}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</Select></Field><Field label="Peran"><Input required value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field></div>} /></Section>
-    <Section title="Dokumentasi" description="Brief, proposal, dan prototype yang terhubung ke achievement.">
-      <Toggle checked={value.includeDocumentation} onChange={(next) => set("includeDocumentation", next)} label="Simpan dokumentasi kompetisi" />
-      {value.includeDocumentation && <div className="admin-documentation-fields">
-        <div className="admin-form-grid admin-form-grid-2"><Field label="Kategori"><Input required value={value.documentation.category} onChange={(event) => setDoc("category", event.target.value)} /></Field><Field label="Prototype URL"><Input value={value.documentation.prototypeUrl} onChange={(event) => setDoc("prototypeUrl", event.target.value)} /></Field></div>
-        <Field label="Proposal URL"><Input value={value.documentation.proposalUrl} onChange={(event) => setDoc("proposalUrl", event.target.value)} /></Field>
-        <Field label="Summary"><Textarea required rows="3" value={value.documentation.summary} onChange={(event) => setDoc("summary", event.target.value)} /></Field>
-        <Field label="Background"><Textarea required rows="5" value={value.documentation.background} onChange={(event) => setDoc("background", event.target.value)} /></Field>
-        <Field label="Solution"><Textarea required rows="5" value={value.documentation.solution} onChange={(event) => setDoc("solution", event.target.value)} /></Field>
-        <Field label="Positioning"><Textarea required rows="3" value={value.documentation.positioning} onChange={(event) => setDoc("positioning", event.target.value)} /></Field>
-        {["objectives", "users", "innovations", "features", "limitations", "userFlow"].map((key) => <Field key={key} label={key === "userFlow" ? "User flow" : key[0].toUpperCase() + key.slice(1)} hint="Satu item per baris."><Textarea required rows="4" value={value.documentation[key]} onChange={(event) => setDoc(key, event.target.value)} /></Field>)}
-      </div>}
+    <Section title="Kontributor" description="Anggota dan peran yang terlibat pada kompetisi.">
+      <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ teamMemberId: "", role: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Anggota"><Select value={item.teamMemberId} onChange={(event) => update({ ...item, teamMemberId: event.target.value })}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</Select></Field><Field label="Peran"><Input required value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field></div>} />
     </Section>
+  </>;
+}
+
+function DocumentationForm({ value, onChange, onUpload, onUploadError, uploading, uploadError }) {
+  const [section, setSection] = useState("overview");
+  const set = (key, next) => onChange({ ...value, [key]: next });
+  const tabs = [["overview", "Umum"], ["brief", "Brief"], ["structure", "Struktur"]];
+
+  return <>
+    <div className="admin-form-tabs" role="tablist" aria-label="Bagian dokumentasi">
+      {tabs.map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={section === key} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}>{label}</button>)}
+    </div>
+    {section === "overview" && <Section title="Dokumen utama" description="Proposal PDF dan tautan prototype yang ditampilkan pada halaman dokumentasi.">
+      <div className="admin-form-grid admin-form-grid-2">
+        <Field label="Kategori"><Input required value={value.category} onChange={(event) => set("category", event.target.value)} /></Field>
+        <Field label="Prototype URL"><Input type="url" value={value.prototypeUrl} onChange={(event) => set("prototypeUrl", event.target.value)} /></Field>
+      </div>
+      <Field label="Proposal PDF" hint="File disimpan pada Supabase Storage.">
+        <FileDropzone value={value.proposalUrl} onUpload={onUpload} onError={onUploadError} uploading={uploading} error={uploadError} />
+      </Field>
+    </Section>}
+    {section === "brief" && <Section title="Competition brief" description="Narasi lengkap yang menjelaskan konteks dan arah solusi.">
+      <Field label="Summary"><Textarea required rows="3" value={value.summary} onChange={(event) => set("summary", event.target.value)} /></Field>
+      <Field label="Background"><Textarea required rows="5" value={value.background} onChange={(event) => set("background", event.target.value)} /></Field>
+      <Field label="Solution"><Textarea required rows="5" value={value.solution} onChange={(event) => set("solution", event.target.value)} /></Field>
+      <Field label="Positioning"><Textarea required rows="3" value={value.positioning} onChange={(event) => set("positioning", event.target.value)} /></Field>
+    </Section>}
+    {section === "structure" && <Section title="Struktur brief" description="Gunakan satu baris untuk setiap poin agar mudah dipindai di website.">
+      {["objectives", "users", "innovations", "features", "limitations", "userFlow"].map((key) => <Field key={key} label={key === "userFlow" ? "User flow" : key[0].toUpperCase() + key.slice(1)} hint="Satu item per baris."><Textarea required rows="4" value={value[key]} onChange={(event) => set(key, event.target.value)} /></Field>)}
+    </Section>}
   </>;
 }
 
 export function AchievementsPage({ canDelete }) {
   const saveDocumentation = useSaveAchievementDocumentation();
-  return <AdminResourcePage resource="achievements" title="Achievements" singular="Achievement" description="Kelola hasil kompetisi, kontributor, dan dokumentasi lengkap." canDelete={canDelete} emptyValue={emptyAchievement} toForm={achievementToForm} toPayload={achievementToPayload} Form={AchievementForm} afterSave={(saved, form) => form.includeDocumentation ? saveDocumentation.mutateAsync({ id: saved.id, input: documentationPayload(form.documentation) }) : undefined} getSearchText={(item) => `${item.competitionName} ${item.projectName} ${item.placement} ${item.status}`} columns={[
-    { key: "competition", label: "Competition", render: (item) => <div className="admin-stacked-cell"><strong>{item.competitionName}</strong><span>{item.organizer}</span></div> },
-    { key: "project", label: "Project", render: (item) => item.projectName },
-    { key: "placement", label: "Result", render: (item) => <div className="admin-stacked-cell"><strong>{item.placement}</strong><span>{item.dateLabel}</span></div> },
-    { key: "status", label: "Status", render: (item) => <StatusBadge value={item.status} /> },
-  ]} />;
+  const uploadProposal = useUploadProposal();
+  const [documentationItem, setDocumentationItem] = useState(null);
+  const [documentation, setDocumentation] = useState(emptyDocumentation);
+  const [uploadError, setUploadError] = useState("");
+  const [toast, setToast] = useState(null);
+
+  const openDocumentation = (item) => {
+    setDocumentationItem(item);
+    setDocumentation(documentationToForm(item.documentation));
+    setUploadError("");
+  };
+  const closeDocumentation = () => {
+    if (!saveDocumentation.isPending && !uploadProposal.isPending) setDocumentationItem(null);
+  };
+  const upload = async (file) => {
+    setUploadError("");
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError("Ukuran PDF maksimal 4 MB.");
+      return;
+    }
+    try {
+      const result = await uploadProposal.mutateAsync(file);
+      setDocumentation((current) => ({ ...current, proposalUrl: result.url }));
+    } catch (error) {
+      setUploadError(error.message || "Proposal gagal diunggah.");
+    }
+  };
+  const save = async (event) => {
+    event.preventDefault();
+    try {
+      await saveDocumentation.mutateAsync({ id: documentationItem.id, input: documentationPayload(documentation) });
+      setDocumentationItem(null);
+      setToast({ id: Date.now(), message: "Dokumentasi achievement berhasil disimpan.", type: "success" });
+    } catch (error) {
+      setToast({ id: Date.now(), message: error.message || "Dokumentasi gagal disimpan.", type: "error" });
+    }
+  };
+
+  return <>
+    <AdminResourcePage
+      resource="achievements" title="Achievements" singular="Achievement"
+      description="Kelola hasil kompetisi dan dokumentasinya secara terpisah."
+      canDelete={canDelete} emptyValue={emptyAchievement} toForm={achievementToForm}
+      toPayload={achievementToPayload} Form={AchievementForm}
+      renderActions={(item) => <IconButton icon={FileText} label="Kelola dokumentasi" onClick={() => openDocumentation(item)} />}
+      getSearchText={(item) => `${item.competitionName} ${item.projectName} ${item.placement} ${item.status}`}
+      columns={[
+        { key: "competition", label: "Competition", render: (item) => <div className="admin-stacked-cell"><strong>{item.competitionName}</strong><span>{item.organizer}</span></div> },
+        { key: "project", label: "Project", render: (item) => item.projectName },
+        { key: "placement", label: "Result", render: (item) => <div className="admin-stacked-cell"><strong>{item.placement}</strong><span>{item.dateLabel}</span></div> },
+        { key: "status", label: "Status", render: (item) => <StatusBadge value={item.status} /> },
+      ]}
+    />
+    <Drawer open={Boolean(documentationItem)} eyebrow="Competition brief" title={documentationItem ? `Dokumentasi · ${documentationItem.projectName}` : "Dokumentasi"} width="wide" onClose={closeDocumentation} footer={<><Button type="button" variant="secondary" onClick={closeDocumentation}>Batal</Button><Button type="submit" form="achievement-documentation-form" disabled={saveDocumentation.isPending || uploadProposal.isPending}>{saveDocumentation.isPending ? "Menyimpan..." : "Simpan"}</Button></>}>
+      <form id="achievement-documentation-form" className="admin-form" onSubmit={save}>
+        <DocumentationForm value={documentation} onChange={setDocumentation} onUpload={upload} onUploadError={setUploadError} uploading={uploadProposal.isPending} uploadError={uploadError} />
+      </form>
+    </Drawer>
+    {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
+  </>;
 }
 
 const emptyMember = () => ({ slug: "", name: "", shortName: "", role: "", bio: "", linkedinUrl: "", instagramUrl: "", sortOrder: 0, isActive: true, images: [] });
@@ -212,6 +291,6 @@ export function SettingsPage() {
   const definition = settingDefinitions[section]; const value = form[section] || {};
   const set = (key, next) => setForm({ ...form, [section]: { ...value, [key]: next } });
   const save = async (event) => { event.preventDefault(); setNotice(""); try { await update.mutateAsync({ key: section, value }); setNotice(`${definition.label} berhasil diperbarui.`); } catch (error) { setNotice(error.message || "Gagal menyimpan settings."); } };
-  return <div className="admin-page"><header className="admin-page-head"><div><span className="admin-eyebrow">Site configuration</span><h1>Settings</h1><p>Kelola konten global yang digunakan lintas halaman website.</p></div></header><div className="admin-settings-layout"><nav className="admin-settings-nav" aria-label="Bagian settings">{Object.entries(settingDefinitions).map(([key, item]) => <button key={key} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}>{item.label}</button>)}</nav><form className="admin-settings-form" onSubmit={save}><header><div><span className="admin-eyebrow">Website settings</span><h2>{definition.label}</h2></div><Button type="submit" icon={Save} disabled={update.isPending}>{update.isPending ? "Menyimpan..." : "Simpan"}</Button></header>{notice && <div className="admin-notice" role="status">{notice}</div>}<div className="admin-settings-fields">{definition.fields.map(([key, label, type]) => <Field key={key} label={label}>{type === "textarea" ? <Textarea rows="6" value={value[key] || ""} onChange={(event) => set(key, event.target.value)} /> : <Input value={value[key] || ""} onChange={(event) => set(key, event.target.value)} />}</Field>)}</div>{section === "about" && <div className="admin-settings-fields admin-settings-stats"><Repeater title="Statistik" addLabel="Tambah statistik" items={value.stats || []} onChange={(next) => set("stats", next)} createItem={() => ({ value: "", label: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Nilai"><Input required value={item.value} onChange={(event) => update({ ...item, value: event.target.value })} /></Field><Field label="Label"><Input required value={item.label} onChange={(event) => update({ ...item, label: event.target.value })} /></Field></div>} /></div>}</form></div></div>;
+  return <div className="admin-page"><header className="admin-page-head"><div><span className="admin-eyebrow">Site configuration</span><h1>Settings</h1><p>Kelola konten global yang digunakan lintas halaman website.</p></div></header><div className="admin-settings-layout"><nav className="admin-settings-nav" aria-label="Bagian settings">{Object.entries(settingDefinitions).map(([key, item]) => <button key={key} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}>{item.label}</button>)}</nav><form className="admin-settings-form" onSubmit={save}><header><div><span className="admin-eyebrow">Website settings</span><h2>{definition.label}</h2></div><Button type="submit" icon={Save} disabled={update.isPending}>{update.isPending ? "Menyimpan..." : "Simpan"}</Button></header>{notice && <Toast message={notice} type={notice.startsWith("Gagal") ? "error" : "success"} onDismiss={() => setNotice("")} />}<div className="admin-settings-fields">{definition.fields.map(([key, label, type]) => <Field key={key} label={label}>{type === "textarea" ? <Textarea rows="6" value={value[key] || ""} onChange={(event) => set(key, event.target.value)} /> : <Input value={value[key] || ""} onChange={(event) => set(key, event.target.value)} />}</Field>)}</div>{section === "about" && <div className="admin-settings-fields admin-settings-stats"><Repeater title="Statistik" addLabel="Tambah statistik" items={value.stats || []} onChange={(next) => set("stats", next)} createItem={() => ({ value: "", label: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Nilai"><Input required value={item.value} onChange={(event) => update({ ...item, value: event.target.value })} /></Field><Field label="Label"><Input required value={item.label} onChange={(event) => update({ ...item, label: event.target.value })} /></Field></div>} /></div>}</form></div></div>;
 }
 
