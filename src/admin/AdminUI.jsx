@@ -1,7 +1,7 @@
 import { Children, useEffect, useId, useRef, useState } from "react";
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleX, FileText, ImageIcon, Plus, Trash2, UploadCloud, X } from "lucide-react";
 
-const animationMs = 180;
+const animationMs = 260;
 
 function usePresence(open) {
   const [mounted, setMounted] = useState(open);
@@ -395,24 +395,31 @@ export function ConfirmDialog({ open, title, description, pending, onCancel, onC
 
 export function Toast({ message, type = "success", onDismiss, duration = 3200 }) {
   const [visible, setVisible] = useState(false);
+  const removeTimerRef = useRef(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setVisible(true));
     const hideTimer = window.setTimeout(() => setVisible(false), duration);
-    const removeTimer = window.setTimeout(onDismiss, duration + animationMs);
+    removeTimerRef.current = window.setTimeout(onDismiss, duration + animationMs);
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(hideTimer);
-      window.clearTimeout(removeTimer);
+      window.clearTimeout(removeTimerRef.current);
     };
   }, [duration, message, onDismiss]);
+
+  const dismiss = () => {
+    setVisible(false);
+    window.clearTimeout(removeTimerRef.current);
+    removeTimerRef.current = window.setTimeout(onDismiss, animationMs);
+  };
 
   const Icon = type === "error" ? CircleX : CircleCheck;
   return (
     <div className={`admin-toast admin-toast-${type} ${visible ? "is-visible" : ""}`} role={type === "error" ? "alert" : "status"}>
       <Icon size={17} strokeWidth={1.9} />
       <span>{message}</span>
-      <IconButton icon={X} label="Tutup notifikasi" onClick={onDismiss} />
+      <IconButton icon={X} label="Tutup notifikasi" onClick={dismiss} />
     </div>
   );
 }

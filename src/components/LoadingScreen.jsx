@@ -194,7 +194,7 @@ export default function LoadingScreen({ onComplete }) {
     <div ref={rootRef} className="boot-loading-screen fixed-edge fixed inset-0 z-[300] flex items-center justify-center overflow-hidden bg-[#070A08] text-ink">
       <div className="section-wrapper w-full">
         <div ref={contentRef} className="mx-auto flex max-w-xl flex-col items-center gap-8 text-center">
-          <img ref={logoRef} src="/hihang-hoeng-logo.svg" alt="Hihang Hoeng" className="h-auto w-[178px] object-contain md:w-[220px]" loading="lazy" />
+          <img ref={logoRef} src="/hihang-hoeng-logo.svg" alt="Hihang Hoeng" className="h-auto w-[220px] object-contain md:w-[280px]" loading="eager" />
           <div className="w-full max-w-sm">
             <div className="mb-3 flex items-center justify-between label text-ink/68">
               <span>Preparing craft</span>
