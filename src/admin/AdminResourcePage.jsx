@@ -67,7 +67,7 @@ export default function AdminResourcePage({
       </header>
 
       <div className="admin-toolbar">
-        <label className="admin-search"><Search size={16} /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Cari ${title.toLowerCase()}...`} /></label>
+        <label className="admin-search"><Search size={16} /><Input aria-label={`Cari ${title}`} autoComplete="off" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Cari ${title.toLowerCase()}...`} /></label>
         <div className="admin-toolbar-meta"><span>{filtered.length} dari {items.length}</span><IconButton icon={RefreshCw} label="Muat ulang" onClick={() => query.refetch()} /></div>
       </div>
       {query.error && <div className="admin-query-error" role="alert">{query.error.message}</div>}
@@ -94,7 +94,7 @@ export default function AdminResourcePage({
       <Drawer open={Boolean(editor)} eyebrow={editor?.mode === "create" ? "Konten baru" : "Edit konten"} title={editor?.mode === "create" ? `Tambah ${singular}` : `Edit ${singular}`} width={drawerWidth} onClose={closeEditor} footer={<><Button type="button" variant="secondary" onClick={closeEditor}>Batal</Button><Button type="submit" form={`${resource}-form`} disabled={saving}>{saving ? "Menyimpan..." : editor?.mode === "create" ? "Tambahkan" : "Simpan"}</Button></>}>
         <form id={`${resource}-form`} className="admin-form" onSubmit={save}><Form value={form} onChange={setForm} mode={editor?.mode} /></form>
       </Drawer>
-      <ConfirmDialog open={Boolean(deleteItem)} title={`Hapus ${singular}?`} description={`“${deleteItem?.name || deleteItem?.title || deleteItem?.label || deleteItem?.id}” akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`} pending={mutations.remove.isPending} onCancel={() => setDeleteItem(null)} onConfirm={remove} />
+      <ConfirmDialog open={Boolean(deleteItem)} title={`Hapus ${singular}?`} description={`"${deleteItem?.name || deleteItem?.title || deleteItem?.label || deleteItem?.id}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.`} pending={mutations.remove.isPending} onCancel={() => setDeleteItem(null)} onConfirm={remove} />
       {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
     </div>
   );

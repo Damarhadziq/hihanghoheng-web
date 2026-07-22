@@ -685,3 +685,186 @@
   height: 38px;
   flex-basis: 38px;
 }
+/* Dashboard UI audit: readable drawers and deliberate command hierarchy */
+.admin-drawer-head { min-height: 74px; padding: 13px 24px; }
+.admin-drawer-head span { font-size: 9px; }
+.admin-drawer-head h2 { margin-top: 4px; font-size: 22px; line-height: 1.15; }
+.admin-drawer-content { padding-inline: 24px; }
+.admin-form-section { grid-template-columns: 164px minmax(0, 1fr); gap: 24px; padding: 26px 0; }
+.admin-form-section-head h3 { font-size: 13px; line-height: 1.35; }
+.admin-form-section-head p { margin-top: 7px; font-size: 10.5px; line-height: 1.6; }
+.admin-form-section-body { gap: 16px; }
+.admin-field { gap: 7px; }
+.admin-field-label { font-size: 10px; font-weight: 600; line-height: 1.3; }
+.admin-field-hint { font-size: 9px; line-height: 1.55; }
+.admin-field-error { font-size: 10px; }
+.admin-app .admin-input { height: 40px; padding-inline: 11px; font-size: 11px; line-height: 1.4; }
+.admin-app .admin-input::placeholder { font-size: 10.5px; }
+.admin-app .admin-textarea { min-height: 96px; padding-block: 11px; font-size: 11px; line-height: 1.65; }
+.admin-app .admin-select-trigger,
+.admin-app .admin-select-menu > button { font-size: 11px; }
+.admin-app .admin-select-menu > button { min-height: 34px; }
+.admin-toggle-row { font-size: 10.5px; }
+.admin-repeater-head strong { font-size: 11px; }
+.admin-repeater-head span,
+.admin-repeater-empty,
+.admin-repeater-number { font-size: 9px; }
+
+.admin-app .admin-button {
+  min-height: 36px;
+  gap: 7px;
+  border-radius: 3px;
+  padding-inline: 13px;
+  font-size: 10.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.admin-app .admin-button-primary {
+  border-color: rgba(248,245,236,.52) !important;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, var(--admin-text) 0 50%, transparent 50% 100%);
+  background-position: 100% 0;
+  background-size: 205% 100%;
+  color: var(--admin-text);
+  transition: background-position 240ms cubic-bezier(.22,1,.36,1), border-color 160ms ease, color 160ms ease, transform 150ms ease, box-shadow 160ms ease;
+}
+.admin-app .admin-button-primary:hover:not(:disabled) {
+  border-color: var(--admin-text) !important;
+  background-position: 0 0;
+  color: var(--admin-bg);
+  box-shadow: 0 8px 22px rgba(0,0,0,.2);
+}
+.admin-app .admin-button-secondary {
+  border-color: rgba(248,245,236,.2) !important;
+  background: transparent;
+  color: rgba(248,245,236,.72);
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 150ms ease;
+}
+.admin-app .admin-button-secondary:hover:not(:disabled) {
+  border-color: rgba(248,245,236,.42) !important;
+  background: rgba(248,245,236,.065);
+  color: var(--admin-text);
+}
+.admin-app .admin-button-danger {
+  border-color: rgba(251,113,133,.32) !important;
+  background: transparent;
+  color: #fda4af;
+}
+.admin-app .admin-button-danger:hover:not(:disabled) {
+  border-color: #fda4af !important;
+  background: #fda4af;
+  color: #16090c;
+}
+.admin-app .admin-button:active:not(:disabled) { transform: translateY(0) scale(.98); }
+.admin-app .admin-button:disabled { box-shadow: none; transform: none; }
+.admin-app .admin-drawer-footer .admin-button { min-height: 36px; }
+.admin-app .admin-drawer-footer .admin-button-primary { min-width: 104px; }
+
+.admin-icon-button {
+  position: relative;
+  border: 1px solid transparent !important;
+  color: rgba(248,245,236,.58);
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.admin-icon-button:hover:not(:disabled) {
+  border-color: rgba(248,245,236,.16) !important;
+  background: rgba(248,245,236,.055);
+  color: var(--admin-text);
+}
+.admin-icon-button:active:not(:disabled) { transform: scale(.94); }
+.admin-icon-button::after {
+  content: attr(data-icon-tooltip);
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 190;
+  width: max-content;
+  max-width: 180px;
+  visibility: hidden;
+  border: 1px solid rgba(248,245,236,.2);
+  border-radius: 3px;
+  padding: 6px 8px;
+  background: #f8f5ec;
+  box-shadow: 0 10px 28px rgba(0,0,0,.36);
+  color: #090d0a;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 180ms cubic-bezier(.22,1,.36,1), visibility 0s linear 180ms;
+}
+.admin-icon-button:hover::after,
+.admin-icon-button:focus-visible::after {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+.admin-toast .admin-icon-button::after { display: none; }
+
+.admin-settings-nav button { transition: border-color 150ms ease, background 150ms ease, color 150ms ease; }
+.admin-settings-nav button:hover { background: rgba(248,245,236,.04); color: var(--admin-text); }
+.admin-form-tabs button { border: 1px solid transparent !important; }
+.admin-form-tabs button:hover { border-color: rgba(248,245,236,.12) !important; }
+.admin-form-tabs button.is-active { border-color: rgba(250,204,21,.2) !important; }
+
+@media (max-width: 780px) {
+  .admin-drawer-head,
+  .admin-drawer-footer,
+  .admin-drawer-content { padding-inline: 16px; }
+  .admin-form-section { grid-template-columns: minmax(0,1fr); gap: 15px; padding: 22px 0; }
+  .admin-form-section-head p { max-width: 52ch; }
+  .admin-icon-button::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-app .admin-button,
+  .admin-icon-button,
+  .admin-icon-button::after { transition: none; }
+}
+/* Final drawer readability and compact metadata grid */
+.admin-form-grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.admin-drawer-head h2 { font-size: 23px; }
+.admin-form-section-head h3 { font-size: 14px; }
+.admin-form-section-head p { font-size: 11px; }
+.admin-field-label { font-size: 10.5px; }
+.admin-field-hint { font-size: 9.5px; }
+.admin-app .admin-input,
+.admin-app .admin-select-trigger,
+.admin-app .admin-select-menu > button { font-size: 12px; }
+.admin-app .admin-input::placeholder { font-size: 11px; }
+.admin-app .admin-textarea { font-size: 12px; }
+.admin-app .admin-button { font-size: 11px; }
+
+@media (max-width: 780px) {
+  .admin-form-grid-3 { grid-template-columns: minmax(0,1fr); }
+}
+/* Search field spacing and focus affordance */
+.admin-search { min-width: 0; }
+.admin-search > svg {
+  left: 14px;
+  width: 15px;
+  height: 15px;
+  color: rgba(248,245,236,.4);
+  transition: color 150ms ease, transform 150ms ease;
+}
+.admin-app .admin-search .admin-input {
+  height: 40px;
+  padding-left: 42px;
+  padding-right: 12px;
+  border-color: rgba(248,245,236,.1);
+  background: rgba(248,245,236,.028);
+}
+.admin-search:focus-within > svg {
+  color: var(--admin-yellow);
+  transform: scale(1.04);
+}
+.admin-app .admin-search .admin-input:hover { border-color: rgba(248,245,236,.2); }
+.admin-app .admin-search .admin-input:focus,
+.admin-app .admin-search .admin-input:focus-visible {
+  border-color: rgba(250,204,21,.42);
+  background: rgba(250,204,21,.02);
+}

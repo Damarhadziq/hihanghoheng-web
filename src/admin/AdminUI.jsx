@@ -32,7 +32,7 @@ export function Button({ icon: Icon, variant = "primary", children, className = 
 
 export function IconButton({ icon: Icon, label, variant = "ghost", className = "", ...props }) {
   return (
-    <button className={`admin-icon-button admin-icon-button-${variant} ${className}`} aria-label={label} title={label} {...props}>
+    <button className={`admin-icon-button admin-icon-button-${variant} ${className}`} aria-label={label} data-icon-tooltip={label} {...props}>
       <Icon size={15} strokeWidth={1.8} aria-hidden="true" />
     </button>
   );
@@ -175,6 +175,8 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
   const rootRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [openUp, setOpenUp] = useState(false);
+  const normalizedValue = String(value ?? "");
+  const [displayValue, setDisplayValue] = useState(normalizedValue);
   const options = Children.toArray(children)
     .filter((child) => child?.type === "option")
     .map((child) => ({
@@ -182,7 +184,11 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
       label: child.props.children,
       disabled: Boolean(child.props.disabled),
     }));
-  const selected = options.find((option) => option.value === String(value));
+  const selected = options.find((option) => option.value === displayValue);
+
+  useEffect(() => {
+    setDisplayValue(normalizedValue);
+  }, [normalizedValue]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -212,13 +218,14 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
 
   const choose = (next) => {
     if (next.disabled) return;
+    setDisplayValue(next.value);
     onChange?.({ target: { value: next.value, name } });
     setOpen(false);
   };
 
   const move = (direction) => {
     const available = options.filter((option) => !option.disabled);
-    const current = available.findIndex((option) => option.value === String(value));
+    const current = available.findIndex((option) => option.value === displayValue);
     const nextIndex = current < 0 ? 0 : (current + direction + available.length) % available.length;
     choose(available[nextIndex]);
   };
@@ -252,12 +259,12 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
             type="button"
             tabIndex={open ? 0 : -1}
             role="option"
-            aria-selected={option.value === String(value)}
+            aria-selected={option.value === displayValue}
             disabled={option.disabled}
             onClick={() => choose(option)}
           >
             <span>{option.label}</span>
-            {option.value === String(value) && <Check size={14} strokeWidth={2.2} />}
+            {option.value === displayValue && <Check size={14} strokeWidth={2.2} />}
           </button>
         ))}
       </span>
