@@ -461,7 +461,6 @@ export function ImageDropzone({
   scope = "general",
   alt = "",
   label = "gambar",
-  allowClear = true,
 }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -530,7 +529,7 @@ export function ImageDropzone({
         onChange={(event) => accept(event.target.files?.[0])}
       />
       {value && <span className="admin-image-file-name"><Check size={13} /> Gambar tersimpan di media library</span>}
-      {allowClear && value && <button type="button" className="admin-image-clear" onClick={() => onChange("", null)}><X size={13} /> Hapus gambar</button>}
+
       {error && <span className="admin-field-error">{error}</span>}
     </div>
   );

@@ -86,7 +86,7 @@ function ProjectForm({ value, onChange }) {
       </Section>
       <Section title="Media dan tautan">
         <Field label="Cover project"><ImageDropzone value={value.coverImageUrl} alt={value.name} label="cover project" scope="projects" onUpload={uploadImage.mutateAsync} onChange={(url) => set("coverImageUrl", url)} /></Field>
-        <Field label="Gambar landscape"><ImageDropzone value={value.landscapeImageUrl} alt={value.name} label="gambar landscape" scope="projects" allowClear onUpload={uploadImage.mutateAsync} onChange={(url) => set("landscapeImageUrl", url)} /></Field>
+        <Field label="Gambar landscape"><ImageDropzone value={value.landscapeImageUrl} alt={value.name} label="gambar landscape" scope="projects" onUpload={uploadImage.mutateAsync} onChange={(url) => set("landscapeImageUrl", url)} /></Field>
         <Field label="External URL"><Input type="url" placeholder="https://example.com/project" value={value.externalUrl} onChange={(event) => set("externalUrl", event.target.value)} /></Field>
       </Section>
       <Section title="Timeline">

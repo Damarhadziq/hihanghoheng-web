@@ -1065,26 +1065,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.admin-image-clear {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 28px;
-  border: 1px solid rgba(251,113,133,.2) !important;
-  border-radius: 3px;
-  padding: 0 9px;
-  background: transparent;
-  color: #fda4af;
-  cursor: pointer;
-  font-size: 9px;
-  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
-}
-.admin-image-clear:hover {
-  border-color: rgba(251,113,133,.48) !important;
-  background: rgba(251,113,133,.08);
-  color: #fecdd3;
-}
 .admin-image-repeater-grid { grid-template-columns: minmax(0,1.3fr) minmax(0,.7fr); }
 
 @media (max-width: 780px) {
