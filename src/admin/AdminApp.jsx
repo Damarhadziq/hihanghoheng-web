@@ -10,8 +10,18 @@ import "./admin.css";
 const navOrder = ["overview", "projects", "achievements", "team", "process", "media", "settings"];
 
 const getRoute = () => {
-  const route = window.location.hash.replace(/^#admin\/?/, "");
+  const pathRoute = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")
+    ? window.location.pathname.replace(/^\/admin\/?/, "")
+    : null;
+  const hashRoute = window.location.hash.replace(/^#admin\/?/, "");
+  const route = window.location.hash.startsWith("#admin") ? hashRoute : pathRoute ?? hashRoute;
   return route === "login" ? "login" : adminPageMeta[route] ? route : "overview";
+};
+
+const setAdminLocation = (route, replace = false) => {
+  const path = route === "overview" ? "/admin" : `/admin/${route}`;
+  window.history[replace ? "replaceState" : "pushState"]({}, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
 };
 
 function AdminLogin() {
@@ -36,7 +46,7 @@ function AdminLogin() {
       }
       const result = await signIn.email({ email, password, rememberMe: true });
       if (result.error) throw new Error(result.error.message || "Email atau password tidak sesuai.");
-      window.location.hash = "#admin";
+      setAdminLocation("overview", true);
     } catch (signInError) {
       setError(signInError.message || "Tidak dapat masuk. Periksa koneksi API dan kredensial Anda.");
     } finally {
@@ -47,7 +57,7 @@ function AdminLogin() {
   return (
     <main className="admin-login-page">
       <div className="admin-login-brand">
-        <a href="#home" aria-label="Kembali ke website"><img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" /></a>
+        <a href="/#home" aria-label="Kembali ke website"><img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" /></a>
         <div><span className="admin-eyebrow">Content workspace</span><h1>Kelola cerita di balik setiap kompetisi.</h1><p>Satu ruang untuk memperbarui project, pencapaian, dokumentasi, dan orang-orang yang membentuk perjalanan Hihang Hoeng.</p></div>
         <span className="admin-login-mark">HH / CMS</span>
       </div>
@@ -66,7 +76,7 @@ function AdminLogin() {
           {setupStatus.isError && <div className="admin-login-error admin-login-service-error" role="alert"><span>API atau database belum dapat dihubungi. Jalankan layanan backend terlebih dahulu.</span><Button type="button" variant="secondary" onClick={() => setupStatus.refetch()}>Coba lagi</Button></div>}
           {error && <div className="admin-login-error" role="alert">{error}</div>}
           <Button type="submit" disabled={pending || setupStatus.isPending || setupStatus.isError}>{pending ? (requiresSetup ? "Membuat akun..." : "Memverifikasi...") : setupStatus.isPending ? "Memeriksa sistem..." : requiresSetup ? "Buat akun dan masuk" : "Masuk ke dashboard"}</Button>
-          <a className="admin-back-link" href="#home">Kembali ke website <ArrowUpRight size={15} /></a>
+          <a className="admin-back-link" href="/#home">Kembali ke website <ArrowUpRight size={15} /></a>
         </form>
       </div>
     </main>
@@ -78,8 +88,8 @@ function AdminShell({ route, onRouteChange, session }) {
   const user = session.user;
   const isAdmin = user.role === "admin";
 
-  const navigate = (key) => { window.location.hash = key === "overview" ? "#admin" : `#admin/${key}`; setMobileOpen(false); onRouteChange(key); };
-  const logout = async () => { await signOut(); window.location.hash = "#admin/login"; };
+  const navigate = (key) => { setAdminLocation(key); setMobileOpen(false); onRouteChange(key); };
+  const logout = async () => { await signOut(); setAdminLocation("login", true); };
 
   let page;
   if (route === "projects") page = <ProjectsPage canDelete={isAdmin} />;
@@ -94,7 +104,7 @@ function AdminShell({ route, onRouteChange, session }) {
     <div className={`admin-app ${compact ? "is-compact" : ""}`}>
       <button className={`admin-mobile-scrim ${mobileOpen ? "is-visible" : ""}`} aria-label="Tutup navigasi" onClick={() => setMobileOpen(false)} />
       <aside className={`admin-sidebar ${mobileOpen ? "is-open" : ""}`}>
-        <header className="admin-sidebar-brand"><a href="#home"><img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" /><span>Content<br />Workspace</span></a><IconButton icon={X} label="Tutup menu" className="admin-mobile-close" onClick={() => setMobileOpen(false)} /></header>
+        <header className="admin-sidebar-brand"><a href="/#home"><img src="/hihang-hoeng-logo.png" alt="Hihang Hoeng" /><span>Content<br />Workspace</span></a><IconButton icon={X} label="Tutup menu" className="admin-mobile-close" onClick={() => setMobileOpen(false)} /></header>
         <nav className="admin-nav" aria-label="Dashboard navigation">
           <span className="admin-nav-label">Workspace</span>
           {navOrder.filter((key) => isAdmin || key !== "settings").map((key) => {
@@ -103,7 +113,7 @@ function AdminShell({ route, onRouteChange, session }) {
           })}
         </nav>
         <footer className="admin-sidebar-footer">
-          <a href="#home" title={compact ? "Lihat website" : undefined}><ArrowUpRight size={17} /><span>Lihat website</span></a>
+          <a href="/#home" title={compact ? "Lihat website" : undefined}><ArrowUpRight size={17} /><span>Lihat website</span></a>
           <button onClick={logout} title={compact ? "Keluar" : undefined}><LogOut size={17} /><span>Keluar</span></button>
         </footer>
       </aside>
@@ -123,13 +133,22 @@ export default function AdminApp() {
   const session = useSession();
 
   useEffect(() => {
-    const syncRoute = () => setRoute(getRoute());
+    const syncRoute = () => {
+      const nextRoute = getRoute();
+      setRoute(nextRoute);
+      if (window.location.hash.startsWith("#admin")) setAdminLocation(nextRoute, true);
+    };
+    syncRoute();
     window.addEventListener("hashchange", syncRoute);
-    return () => window.removeEventListener("hashchange", syncRoute);
+    window.addEventListener("popstate", syncRoute);
+    return () => {
+      window.removeEventListener("hashchange", syncRoute);
+      window.removeEventListener("popstate", syncRoute);
+    };
   }, []);
 
   useEffect(() => {
-    if (session.data && route === "login") window.location.hash = "#admin";
+    if (session.data && route === "login") setAdminLocation("overview", true);
   }, [route, session.data]);
 
   if (session.isPending) return <div className="admin-session-loading"><img src="/hihang-hoeng-logo.png" alt="" /><span>Memuat workspace</span></div>;
