@@ -67,6 +67,10 @@ export function useUploadProposal() {
   return useMutation({ mutationFn: adminApi.achievements.uploadProposal });
 }
 
+export function useUploadImage() {
+  return useMutation({ mutationFn: adminApi.uploads.image });
+}
+
 export function useSaveAchievementDocumentation() {
   const queryClient = useQueryClient();
   return useMutation({

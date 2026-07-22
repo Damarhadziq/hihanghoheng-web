@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Award, FileImage, FileText, FolderKanban, Save, Users } from "lucide-react";
-import { useAdminList, useSaveAchievementDocumentation, useUpdateSiteSetting, useUploadProposal } from "../hooks/useApiQueries";
+import { useAdminList, useSaveAchievementDocumentation, useUpdateSiteSetting, useUploadImage, useUploadProposal } from "../hooks/useApiQueries";
 import AdminResourcePage from "./AdminResourcePage";
-import { Button, DatePicker, Drawer, Field, FileDropzone, IconButton, Input, Repeater, Section, Select, StatusBadge, Textarea, Toast, Toggle } from "./AdminUI";
+import { Button, DatePicker, Drawer, Field, FileDropzone, IconButton, ImageDropzone, Input, Repeater, Section, Select, StatusBadge, Textarea, Toast, Toggle } from "./AdminUI";
 
 const nullable = (value) => value?.trim() || null;
 const listFromText = (value) => value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
@@ -33,6 +33,7 @@ const projectToPayload = (form) => ({
 
 function ProjectForm({ value, onChange }) {
   const { data: members = [] } = useAdminList("teamMembers");
+  const uploadImage = useUploadImage();
   const set = (key, next) => onChange({ ...value, [key]: next });
   const setName = (name) => onChange({ ...value, name, slug: slugify(name) });
   return (
@@ -59,15 +60,15 @@ function ProjectForm({ value, onChange }) {
         <Field label="Solution"><Textarea required rows="5" placeholder="Jelaskan solusi, pendekatan desain, dan hasil yang ditawarkan." value={value.solution} onChange={(event) => set("solution", event.target.value)} /></Field>
       </Section>
       <Section title="Media dan tautan">
-        <Field label="Cover image URL"><Input required placeholder="/images/projects/project-cover.webp" value={value.coverImageUrl} onChange={(event) => set("coverImageUrl", event.target.value)} /></Field>
-        <Field label="Landscape image URL"><Input placeholder="/images/projects/project-landscape.webp" value={value.landscapeImageUrl} onChange={(event) => set("landscapeImageUrl", event.target.value)} /></Field>
+        <Field label="Cover project"><ImageDropzone value={value.coverImageUrl} alt={value.name} label="cover project" scope="projects" onUpload={uploadImage.mutateAsync} onChange={(url) => set("coverImageUrl", url)} /></Field>
+        <Field label="Gambar landscape"><ImageDropzone value={value.landscapeImageUrl} alt={value.name} label="gambar landscape" scope="projects" allowClear onUpload={uploadImage.mutateAsync} onChange={(url) => set("landscapeImageUrl", url)} /></Field>
         <Field label="External URL"><Input type="url" placeholder="https://example.com/project" value={value.externalUrl} onChange={(event) => set("externalUrl", event.target.value)} /></Field>
       </Section>
       <Section title="Timeline">
         <Repeater title="Tahap" addLabel="Tambah tahap" items={value.timeline} onChange={(next) => set("timeline", next)} createItem={() => ({ phase: "", duration: "", title: "", detail: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Phase"><Input required placeholder="Research" value={item.phase} onChange={(event) => update({ ...item, phase: event.target.value })} /></Field><Field label="Durasi"><Input required placeholder="2 minggu" value={item.duration} onChange={(event) => update({ ...item, duration: event.target.value })} /></Field><Field label="Judul" className="admin-grid-full"><Input required placeholder="User discovery" value={item.title} onChange={(event) => update({ ...item, title: event.target.value })} /></Field><Field label="Detail" className="admin-grid-full"><Textarea required rows="3" placeholder="Ringkas aktivitas dan temuan utama pada tahap ini." value={item.detail} onChange={(event) => update({ ...item, detail: event.target.value })} /></Field></div>} />
       </Section>
       <Section title="Mockups">
-        <Repeater title="Mockup" addLabel="Tambah mockup" items={value.mockups} onChange={(next) => set("mockups", next)} createItem={() => ({ title: "", imageUrl: "", altText: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Judul"><Input required placeholder="Home dashboard" value={item.title} onChange={(event) => update({ ...item, title: event.target.value })} /></Field><Field label="Alt text"><Input required placeholder="Deskripsi visual yang jelas" value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field><Field label="Image URL" className="admin-grid-full"><Input required placeholder="/images/projects/mockup-01.webp" value={item.imageUrl} onChange={(event) => update({ ...item, imageUrl: event.target.value })} /></Field></div>} />
+        <Repeater title="Mockup" addLabel="Tambah mockup" items={value.mockups} onChange={(next) => set("mockups", next)} createItem={() => ({ title: "", imageUrl: "", altText: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Judul"><Input required placeholder="Home dashboard" value={item.title} onChange={(event) => update({ ...item, title: event.target.value })} /></Field><Field label="Alt text"><Input required placeholder="Deskripsi visual yang jelas" value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field><Field label="Gambar mockup" className="admin-grid-full"><ImageDropzone value={item.imageUrl} alt={item.altText} label="gambar mockup" scope="project-mockups" onUpload={uploadImage.mutateAsync} onChange={(url) => update({ ...item, imageUrl: url })} /></Field></div>} />
       </Section>
       <Section title="Kontributor">
         <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ teamMemberId: "", role: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-contributor-grid"><Field label="Anggota"><Select required value={item.teamMemberId} onChange={(event) => update({ ...item, teamMemberId: event.target.value })}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</Select></Field><Field label="Peran proyek"><Input required placeholder="Interaction Designer" value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field></div>} />
@@ -261,10 +262,54 @@ const emptyMember = () => ({ slug: "", name: "", shortName: "", role: "", bio: "
 const memberToForm = (item) => ({ ...emptyMember(), ...item, images: item.images || [] });
 const memberToPayload = (form) => ({ slug: form.slug, name: form.name, shortName: form.shortName, role: form.role, bio: nullable(form.bio), linkedinUrl: nullable(form.linkedinUrl), instagramUrl: nullable(form.instagramUrl), sortOrder: Number(form.sortOrder), isActive: Boolean(form.isActive), images: form.images.map(({ url, altText }) => ({ url, altText })) });
 function TeamForm({ value, onChange }) {
+  const uploadImage = useUploadImage();
   const set = (key, next) => onChange({ ...value, [key]: next });
   const setName = (name) => onChange({ ...value, name, slug: slugify(name) });
-  return <><Section title="Profil anggota"><div className="admin-form-grid admin-form-grid-2"><Field label="Nama lengkap" className="admin-grid-full"><Input required placeholder="Nama lengkap anggota" value={value.name} onChange={(event) => setName(event.target.value)} /></Field><Field label="Nama pendek"><Input required placeholder="Nama panggilan" value={value.shortName} onChange={(event) => set("shortName", event.target.value)} /></Field><Field label="Role"><Input required placeholder="UI/UX Designer" value={value.role} onChange={(event) => set("role", event.target.value)} /></Field><Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field><div className="admin-field admin-field-toggle"><span className="admin-field-label">Status</span><Toggle checked={value.isActive} onChange={(next) => set("isActive", next)} label="Anggota aktif" /></div></div><Field label="Bio"><Textarea rows="4" placeholder="Perkenalkan peran, keahlian, dan fokus anggota." value={value.bio || ""} onChange={(event) => set("bio", event.target.value)} /></Field></Section><Section title="Social links"><Field label="LinkedIn URL"><Input type="url" placeholder="https://linkedin.com/in/username" value={value.linkedinUrl || ""} onChange={(event) => set("linkedinUrl", event.target.value)} /></Field><Field label="Instagram URL"><Input type="url" placeholder="https://instagram.com/username" value={value.instagramUrl || ""} onChange={(event) => set("instagramUrl", event.target.value)} /></Field></Section><Section title="Foto anggota"><Repeater title="Foto" addLabel="Tambah foto" items={value.images} onChange={(next) => set("images", next)} createItem={() => ({ url: "", altText: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Image URL"><Input required placeholder="/images/team/member.webp" value={item.url} onChange={(event) => update({ ...item, url: event.target.value })} /></Field><Field label="Alt text"><Input required placeholder="Deskripsi visual yang jelas" value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field></div>} /></Section></>;
+
+  return (
+    <>
+      <Section title="Profil anggota">
+        <div className="admin-form-grid admin-form-grid-2">
+          <Field label="Nama lengkap" className="admin-grid-full"><Input required placeholder="Nama lengkap anggota" value={value.name} onChange={(event) => setName(event.target.value)} /></Field>
+          <Field label="Nama pendek"><Input required placeholder="Nama panggilan" value={value.shortName} onChange={(event) => set("shortName", event.target.value)} /></Field>
+          <Field label="Role"><Input required placeholder="UI/UX Designer" value={value.role} onChange={(event) => set("role", event.target.value)} /></Field>
+          <Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field>
+          <div className="admin-field admin-field-toggle"><span className="admin-field-label">Status</span><Toggle checked={value.isActive} onChange={(next) => set("isActive", next)} label="Anggota aktif" /></div>
+        </div>
+        <Field label="Bio"><Textarea rows="4" placeholder="Perkenalkan peran, keahlian, dan fokus anggota." value={value.bio || ""} onChange={(event) => set("bio", event.target.value)} /></Field>
+      </Section>
+      <Section title="Social links">
+        <Field label="LinkedIn URL"><Input type="url" placeholder="https://linkedin.com/in/username" value={value.linkedinUrl || ""} onChange={(event) => set("linkedinUrl", event.target.value)} /></Field>
+        <Field label="Instagram URL"><Input type="url" placeholder="https://instagram.com/username" value={value.instagramUrl || ""} onChange={(event) => set("instagramUrl", event.target.value)} /></Field>
+      </Section>
+      <Section title="Foto anggota" description="Foto pertama digunakan sebagai foto utama. Foto berikutnya dipakai untuk variasi interaksi.">
+        <Repeater
+          title="Foto"
+          addLabel="Tambah foto"
+          items={value.images}
+          onChange={(next) => set("images", next)}
+          createItem={() => ({ url: "", altText: "" })}
+          renderItem={(item, update) => (
+            <div className="admin-form-grid admin-form-grid-2 admin-image-repeater-grid">
+              <Field label="File foto">
+                <ImageDropzone
+                  value={item.url}
+                  alt={item.altText || value.name}
+                  label="foto anggota"
+                  scope="team"
+                  onUpload={uploadImage.mutateAsync}
+                  onChange={(url) => update({ ...item, url })}
+                />
+              </Field>
+              <Field label="Alt text"><Input required placeholder="Contoh: Potret Damar Hadziq" value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field>
+            </div>
+          )}
+        />
+      </Section>
+    </>
+  );
 }
+
 export function TeamPage({ canDelete }) {
   return <AdminResourcePage resource="teamMembers" title="Team" singular="Anggota" description="Tiga anggota inti Hihang Hoeng. Kontributor eksternal dikelola pada tiap achievement." createLimit={3} canDelete={canDelete} emptyValue={emptyMember} toForm={memberToForm} toPayload={memberToPayload} Form={TeamForm} getSearchText={(item) => `${item.name} ${item.role} ${item.slug}`} columns={[
     { key: "member", label: "Anggota", render: (item) => <div className="admin-primary-cell">{item.images?.[0]?.url && <img src={item.images[0].url} alt="" />}<div><strong>{item.name}</strong><span>{item.shortName}</span></div></div> },
@@ -281,8 +326,41 @@ export function ProcessPage({ canDelete }) { return <AdminResourcePage resource=
 const emptyMedia = () => ({ kind: "image", url: "", altText: "", title: "", mimeType: "", width: "", height: "", galleryVisible: false, sortOrder: 0, metadataText: "{}" });
 const mediaToForm = (item) => ({ ...emptyMedia(), ...item, metadataText: JSON.stringify(item.metadata || {}, null, 2) });
 const mediaPayload = (form) => { let metadata; try { metadata = JSON.parse(form.metadataText || "{}"); } catch { throw new Error("Metadata harus berupa JSON yang valid."); } return { kind: form.kind, url: form.url, altText: nullable(form.altText), title: nullable(form.title), mimeType: nullable(form.mimeType), width: form.width ? Number(form.width) : null, height: form.height ? Number(form.height) : null, galleryVisible: Boolean(form.galleryVisible), sortOrder: Number(form.sortOrder), metadata }; };
-function MediaForm({ value, onChange }) { const set = (key, next) => onChange({ ...value, [key]: next }); return <><Section title="Asset"><div className="admin-form-grid admin-form-grid-2"><Field label="Jenis"><Select value={value.kind} onChange={(event) => set("kind", event.target.value)}><option value="image">Image</option><option value="document">Document</option><option value="video">Video</option></Select></Field><Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field></div><Field label="URL"><Input required placeholder="/images/gallery/asset.webp" value={value.url} onChange={(event) => set("url", event.target.value)} /></Field><div className="admin-form-grid admin-form-grid-2"><Field label="Judul"><Input placeholder="Judul asset" value={value.title || ""} onChange={(event) => set("title", event.target.value)} /></Field><Field label="MIME type"><Input placeholder="image/webp" value={value.mimeType || ""} onChange={(event) => set("mimeType", event.target.value)} /></Field></div><Field label="Alt text"><Input placeholder="Deskripsi visual untuk aksesibilitas" value={value.altText || ""} onChange={(event) => set("altText", event.target.value)} /></Field><div className="admin-form-grid admin-form-grid-2"><Field label="Width"><Input type="number" min="1" placeholder="1920" value={value.width || ""} onChange={(event) => set("width", event.target.value)} /></Field><Field label="Height"><Input type="number" min="1" placeholder="1080" value={value.height || ""} onChange={(event) => set("height", event.target.value)} /></Field></div><Toggle checked={value.galleryVisible} onChange={(next) => set("galleryVisible", next)} label="Tampilkan di gallery" /></Section><Section title="Metadata"><Field label="JSON metadata"><Textarea className="admin-code-input" rows="8" value={value.metadataText} onChange={(event) => set("metadataText", event.target.value)} spellCheck="false" /></Field></Section></>; }
-export function MediaPage({ canDelete }) { return <AdminResourcePage resource="media" title="Media" singular="Media" description="Kelola URL asset, metadata, dan visibilitas gallery." canDelete={canDelete} emptyValue={emptyMedia} toForm={mediaToForm} toPayload={mediaPayload} Form={MediaForm} getSearchText={(item) => `${item.title} ${item.url} ${item.kind}`} columns={[{ key: "asset", label: "Asset", render: (item) => <div className="admin-primary-cell">{item.kind === "image" && <img src={item.url} alt="" />}<div><strong>{item.title || item.altText || "Untitled asset"}</strong><span>{item.url}</span></div></div> }, { key: "kind", label: "Jenis", render: (item) => <StatusBadge value={item.kind} /> }, { key: "gallery", label: "Gallery", render: (item) => item.galleryVisible ? "Visible" : "Hidden" }, { key: "order", label: "Urutan", render: (item) => item.sortOrder }]} />; }
+function MediaForm({ value, onChange }) {
+  const uploadImage = useUploadImage();
+  const set = (key, next) => onChange({ ...value, [key]: next });
+  const setImage = (url, uploaded) => onChange({
+    ...value,
+    url,
+    mimeType: uploaded?.mimeType || (url ? value.mimeType : ""),
+  });
+
+  return (
+    <>
+      <Section title="Asset">
+        <div className="admin-form-grid admin-form-grid-2">
+          <Field label="Jenis"><Select value={value.kind} onChange={(event) => set("kind", event.target.value)}><option value="image">Image</option><option value="document">Document</option><option value="video">Video</option></Select></Field>
+          <Field label="Urutan"><Input required type="number" value={value.sortOrder} onChange={(event) => set("sortOrder", event.target.value)} /></Field>
+        </div>
+        {value.kind === "image"
+          ? <Field label="File gambar"><ImageDropzone value={value.url} alt={value.altText || value.title} label="gambar media" scope="media" onUpload={uploadImage.mutateAsync} onChange={setImage} /></Field>
+          : <Field label="URL asset"><Input required type="url" placeholder="https://example.com/asset" value={value.url} onChange={(event) => set("url", event.target.value)} /></Field>}
+        <div className="admin-form-grid admin-form-grid-2">
+          <Field label="Judul"><Input placeholder="Judul asset" value={value.title || ""} onChange={(event) => set("title", event.target.value)} /></Field>
+          <Field label="MIME type"><Input placeholder={value.kind === "image" ? "Terisi otomatis setelah upload" : "application/pdf"} value={value.mimeType || ""} readOnly={value.kind === "image"} onChange={(event) => set("mimeType", event.target.value)} /></Field>
+        </div>
+        <Field label="Alt text"><Input required={value.kind === "image"} placeholder="Deskripsi visual untuk aksesibilitas" value={value.altText || ""} onChange={(event) => set("altText", event.target.value)} /></Field>
+        <div className="admin-form-grid admin-form-grid-2">
+          <Field label="Width"><Input type="number" min="1" placeholder="1920" value={value.width || ""} onChange={(event) => set("width", event.target.value)} /></Field>
+          <Field label="Height"><Input type="number" min="1" placeholder="1080" value={value.height || ""} onChange={(event) => set("height", event.target.value)} /></Field>
+        </div>
+        <Toggle checked={value.galleryVisible} onChange={(next) => set("galleryVisible", next)} label="Tampilkan di gallery" />
+      </Section>
+      <Section title="Metadata"><Field label="JSON metadata"><Textarea className="admin-code-input" rows="8" value={value.metadataText} onChange={(event) => set("metadataText", event.target.value)} spellCheck="false" /></Field></Section>
+    </>
+  );
+}
+export function MediaPage({ canDelete }) { return <AdminResourcePage resource="media" title="Media" singular="Media" description="Kelola file asset, metadata, dan visibilitas gallery." canDelete={canDelete} emptyValue={emptyMedia} toForm={mediaToForm} toPayload={mediaPayload} Form={MediaForm} getSearchText={(item) => `${item.title} ${item.url} ${item.kind}`} columns={[{ key: "asset", label: "Asset", render: (item) => <div className="admin-primary-cell">{item.kind === "image" && <img src={item.url} alt="" />}<div><strong>{item.title || item.altText || "Untitled asset"}</strong><span>{item.url}</span></div></div> }, { key: "kind", label: "Jenis", render: (item) => <StatusBadge value={item.kind} /> }, { key: "gallery", label: "Gallery", render: (item) => item.galleryVisible ? "Visible" : "Hidden" }, { key: "order", label: "Urutan", render: (item) => item.sortOrder }]} />; }
 
 const overviewResources = [
   { key: "projects", label: "Projects", icon: FolderKanban, href: "#admin/projects" },
@@ -301,15 +379,15 @@ export function OverviewPage({ user }) {
 const settingDefinitions = {
   identity: { label: "Identity", fields: [["name", "Nama brand", "text", "Hihang Hoeng"], ["description", "Deskripsi", "textarea", "Deskripsi singkat identitas dan fokus tim."]] },
   about: { label: "About", fields: [["vision", "Vision", "textarea", "Tuliskan visi utama tim."], ["mission", "Mission", "textarea", "Tuliskan misi dan pendekatan tim."]] },
-  mentor: { label: "Mentor", fields: [["name", "Nama", "text", "Nama lengkap mentor"], ["role", "Role", "text", "Dosen pembimbing"], ["imageUrl", "Image URL", "text", "/images/team/mentor.webp"], ["imageAlt", "Image alt", "text", "Foto mentor Hihang Hoeng"], ["description", "Deskripsi", "textarea", "Ringkas peran dan kontribusi mentor."]] },
+  mentor: { label: "Mentor", fields: [["name", "Nama", "text", "Nama lengkap mentor"], ["role", "Role", "text", "Dosen pembimbing"], ["imageUrl", "Foto mentor", "image", ""], ["imageAlt", "Image alt", "text", "Foto mentor Hihang Hoeng"], ["description", "Deskripsi", "textarea", "Ringkas peran dan kontribusi mentor."]] },
   footer: { label: "Footer", fields: [["email", "Email", "text", "hello@hihanghoeng.com"], ["instagramUrl", "Instagram URL", "text", "https://instagram.com/username"], ["organization", "Organisasi", "text", "Universitas Negeri Semarang"]] },
 };
 
 export function SettingsPage() {
-  const query = useAdminList("settings"); const update = useUpdateSiteSetting(); const [section, setSection] = useState("identity"); const [form, setForm] = useState({}); const [notice, setNotice] = useState("");
+  const query = useAdminList("settings"); const update = useUpdateSiteSetting(); const uploadImage = useUploadImage(); const [section, setSection] = useState("identity"); const [form, setForm] = useState({}); const [notice, setNotice] = useState("");
   useEffect(() => { if (query.data) setForm(query.data); }, [query.data]);
   const definition = settingDefinitions[section]; const value = form[section] || {};
   const set = (key, next) => setForm({ ...form, [section]: { ...value, [key]: next } });
   const save = async (event) => { event.preventDefault(); setNotice(""); try { await update.mutateAsync({ key: section, value }); setNotice(`${definition.label} berhasil diperbarui.`); } catch (error) { setNotice(error.message || "Gagal menyimpan settings."); } };
-  return <div className="admin-page"><header className="admin-page-head"><div><span className="admin-eyebrow">Site configuration</span><h1>Settings</h1><p>Kelola konten global yang digunakan lintas halaman website.</p></div></header><div className="admin-settings-layout"><nav className="admin-settings-nav" aria-label="Bagian settings">{Object.entries(settingDefinitions).map(([key, item]) => <button key={key} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}>{item.label}</button>)}</nav><form className="admin-settings-form" onSubmit={save}><header><div><span className="admin-eyebrow">Website settings</span><h2>{definition.label}</h2></div><Button type="submit" icon={Save} disabled={update.isPending}>{update.isPending ? "Menyimpan..." : "Simpan"}</Button></header>{notice && <Toast message={notice} type={notice.startsWith("Gagal") ? "error" : "success"} onDismiss={() => setNotice("")} />}<div className="admin-settings-fields">{definition.fields.map(([key, label, type, placeholder]) => <Field key={key} label={label}>{type === "textarea" ? <Textarea rows="6" placeholder={placeholder} value={value[key] || ""} onChange={(event) => set(key, event.target.value)} /> : <Input placeholder={placeholder} value={value[key] || ""} onChange={(event) => set(key, event.target.value)} />}</Field>)}</div>{section === "about" && <div className="admin-settings-fields admin-settings-stats"><Repeater title="Statistik" addLabel="Tambah statistik" items={value.stats || []} onChange={(next) => set("stats", next)} createItem={() => ({ value: "", label: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Nilai"><Input required placeholder="12+" value={item.value} onChange={(event) => update({ ...item, value: event.target.value })} /></Field><Field label="Label"><Input required placeholder="Competitions" value={item.label} onChange={(event) => update({ ...item, label: event.target.value })} /></Field></div>} /></div>}</form></div></div>;
+  return <div className="admin-page"><header className="admin-page-head"><div><span className="admin-eyebrow">Site configuration</span><h1>Settings</h1><p>Kelola konten global yang digunakan lintas halaman website.</p></div></header><div className="admin-settings-layout"><nav className="admin-settings-nav" aria-label="Bagian settings">{Object.entries(settingDefinitions).map(([key, item]) => <button key={key} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}>{item.label}</button>)}</nav><form className="admin-settings-form" onSubmit={save}><header><div><span className="admin-eyebrow">Website settings</span><h2>{definition.label}</h2></div><Button type="submit" icon={Save} disabled={update.isPending}>{update.isPending ? "Menyimpan..." : "Simpan"}</Button></header>{notice && <Toast message={notice} type={notice.startsWith("Gagal") ? "error" : "success"} onDismiss={() => setNotice("")} />}<div className="admin-settings-fields">{definition.fields.map(([key, label, type, placeholder]) => <Field key={key} label={label}>{type === "textarea" ? <Textarea rows="6" placeholder={placeholder} value={value[key] || ""} onChange={(event) => set(key, event.target.value)} /> : type === "image" ? <ImageDropzone value={value[key] || ""} alt={value.imageAlt || value.name} label="foto mentor" scope="mentor" onUpload={uploadImage.mutateAsync} onChange={(url) => set(key, url)} /> : <Input placeholder={placeholder} value={value[key] || ""} onChange={(event) => set(key, event.target.value)} />}</Field>)}</div>{section === "about" && <div className="admin-settings-fields admin-settings-stats"><Repeater title="Statistik" addLabel="Tambah statistik" items={value.stats || []} onChange={(next) => set("stats", next)} createItem={() => ({ value: "", label: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Nilai"><Input required placeholder="12+" value={item.value} onChange={(event) => update({ ...item, value: event.target.value })} /></Field><Field label="Label"><Input required placeholder="Competitions" value={item.label} onChange={(event) => update({ ...item, label: event.target.value })} /></Field></div>} /></div>}</form></div></div>;
 }

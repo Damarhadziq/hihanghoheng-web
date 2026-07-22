@@ -71,7 +71,24 @@ const createResourceClient = (resource) => ({
   remove: (id) => apiRequest(`/api/admin/${resource}/${encodeURIComponent(id)}`, { method: "DELETE" }),
 });
 
+const uploadAdminFile = async (path, file) => {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    body: file,
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+      "X-File-Name": encodeURIComponent(file.name),
+    },
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.error?.message || "File gagal diunggah.");
+  return payload.data;
+};
 export const adminApi = {
+  uploads: {
+    image: ({ file, scope = "general" }) => uploadAdminFile(`/api/admin/uploads/image?scope=${encodeURIComponent(scope)}`, file),
+  },
   projects: createResourceClient("projects"),
   achievements: {
     ...createResourceClient("achievements"),

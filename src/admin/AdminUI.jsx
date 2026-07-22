@@ -1,5 +1,5 @@
 import { Children, useEffect, useId, useRef, useState } from "react";
-import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleX, FileText, Plus, Trash2, UploadCloud, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleX, FileText, ImageIcon, Plus, Trash2, UploadCloud, X } from "lucide-react";
 
 const animationMs = 180;
 
@@ -187,6 +187,7 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
       selectedLabel: child.props["data-selected-label"] ?? child.props.children,
       disabled: Boolean(child.props.disabled),
     }));
+  const menuOptions = options.filter((option) => option.value !== "");
   const selected = options.find((option) => option.value === displayValue);
 
   useEffect(() => {
@@ -227,7 +228,8 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
   };
 
   const move = (direction) => {
-    const available = options.filter((option) => !option.disabled);
+    const available = menuOptions.filter((option) => !option.disabled);
+    if (available.length === 0) return;
     const current = available.findIndex((option) => option.value === displayValue);
     const nextIndex = current < 0 ? 0 : (current + direction + available.length) % available.length;
     choose(available[nextIndex]);
@@ -256,7 +258,7 @@ export function Select({ children, value = "", onChange, disabled, placeholder, 
         <ChevronDown size={14} aria-hidden="true" />
       </button>
       <span className="admin-select-menu" role="listbox" aria-labelledby={id} aria-hidden={!open}>
-        {options.map((option) => (
+        {menuOptions.map((option) => (
           <button
             key={option.value}
             type="button"
@@ -429,6 +431,89 @@ export function FileDropzone({ value, onUpload, onError, uploading = false, erro
       </button>
       <input ref={inputRef} className="admin-visually-hidden" type="file" accept="application/pdf,.pdf" onChange={(event) => accept(event.target.files?.[0])} />
       {value && <a className="admin-uploaded-file" href={value} target="_blank" rel="noreferrer"><FileText size={16} /><span><strong>Proposal tersimpan</strong><small>{value.split("/").pop()}</small></span></a>}
+      {error && <span className="admin-field-error">{error}</span>}
+    </div>
+  );
+}
+
+
+export function ImageDropzone({
+  value,
+  onChange,
+  onUpload,
+  scope = "general",
+  alt = "",
+  label = "gambar",
+  allowClear = true,
+}) {
+  const inputRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const accept = async (file) => {
+    if (!file || uploading) return;
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    const extensionAllowed = /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!allowed.includes(file.type) && !extensionAllowed) {
+      setError("Gambar harus berformat JPG, PNG, atau WebP.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setError("Ukuran gambar maksimal 4 MB.");
+      return;
+    }
+
+    setError("");
+    setUploading(true);
+    try {
+      const inferredType = file.name.toLowerCase().endsWith(".png") ? "image/png" : file.name.toLowerCase().endsWith(".webp") ? "image/webp" : "image/jpeg";
+      const uploadFile = allowed.includes(file.type) ? file : new File([file], file.name, { type: inferredType });
+      const uploaded = await onUpload({ file: uploadFile, scope });
+      onChange(uploaded.url, uploaded);
+    } catch (uploadError) {
+      setError(uploadError.message || "Gambar gagal diunggah.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="admin-image-file-field">
+      <button
+        type="button"
+        className={`admin-image-dropzone ${value ? "has-image" : ""} ${dragging ? "is-dragging" : ""}`}
+        onClick={() => inputRef.current?.click()}
+        onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}
+        onDragOver={(event) => event.preventDefault()}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragging(false);
+          accept(event.dataTransfer.files?.[0]);
+        }}
+        disabled={uploading}
+      >
+        {value && <img src={value} alt={alt} />}
+        <span className="admin-image-dropzone-overlay" />
+        <span className="admin-image-dropzone-copy">
+          <span className="admin-file-icon">{uploading ? <span className="admin-file-spinner" /> : <ImageIcon size={19} />}</span>
+          <span>
+            <strong>{uploading ? "Mengunggah gambar..." : value ? `Ganti ${label}` : `Tarik ${label} atau pilih file`}</strong>
+            <small>JPG, PNG, atau WebP, maksimum 4 MB</small>
+          </span>
+        </span>
+      </button>
+      <input
+        ref={inputRef}
+        className="admin-visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+        onChange={(event) => accept(event.target.files?.[0])}
+      />
+      {value && <span className="admin-image-file-name"><Check size={13} /> Gambar tersimpan di media library</span>}
+      {allowClear && value && <button type="button" className="admin-image-clear" onClick={() => onChange("", null)}><X size={13} /> Hapus gambar</button>}
       {error && <span className="admin-field-error">{error}</span>}
     </div>
   );

@@ -4,7 +4,7 @@ import { achievementService } from "../services/achievement.service.js";
 import { contentService } from "../services/content.service.js";
 import { projectService } from "../services/project.service.js";
 import { teamService } from "../services/team.service.js";
-import { uploadProposal } from "../services/storage.service.js";
+import { uploadImage, uploadProposal } from "../services/storage.service.js";
 import { achievementInput, documentationInput, mediaInput, processStepInput, projectInput, siteSettingInput, teamMemberInput } from "../validators/content.js";
 
 export const adminRouter = Router();
@@ -15,6 +15,15 @@ adminRouter.post("/uploads/proposal", requireAdmin, express.raw({ type: "applica
   let fileName = header;
   try { fileName = decodeURIComponent(header); } catch { /* Keep the original header value. */ }
   const uploaded = await uploadProposal(req.body as Buffer, fileName);
+  res.status(201).json({ data: uploaded });
+});
+
+adminRouter.post("/uploads/image", requireAdmin, express.raw({ type: ["image/jpeg", "image/png", "image/webp"], limit: "4mb" }), async (req, res) => {
+  const header = req.get("x-file-name") || "image";
+  let fileName = header;
+  try { fileName = decodeURIComponent(header); } catch { /* Keep the original header value. */ }
+  const scope = typeof req.query.scope === "string" ? req.query.scope : "general";
+  const uploaded = await uploadImage(req.body as Buffer, fileName, scope);
   res.status(201).json({ data: uploaded });
 });
 

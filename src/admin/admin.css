@@ -976,3 +976,123 @@
 @media (max-width: 780px) {
   .admin-contributor-grid { grid-template-columns: minmax(0,1fr); }
 }
+
+
+/* Managed image uploads */
+.admin-image-file-field {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+.admin-image-dropzone {
+  position: relative;
+  width: 100%;
+  min-height: 150px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--admin-line-strong) !important;
+  border-radius: 4px;
+  padding: 18px;
+  background: rgba(248,245,236,.018);
+  color: var(--admin-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.admin-image-dropzone:hover,
+.admin-image-dropzone.is-dragging {
+  border-color: rgba(250,204,21,.55) !important;
+  background: rgba(250,204,21,.04);
+  color: var(--admin-text);
+}
+.admin-image-dropzone:active:not(:disabled) { transform: scale(.995); }
+.admin-image-dropzone:disabled { cursor: wait; opacity: .72; }
+.admin-image-dropzone > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.admin-image-dropzone-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7,10,8,.78);
+  opacity: 0;
+  transition: opacity 170ms ease;
+}
+.admin-image-dropzone.has-image:hover .admin-image-dropzone-overlay,
+.admin-image-dropzone.has-image:focus-visible .admin-image-dropzone-overlay { opacity: 1; }
+.admin-image-dropzone-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+.admin-image-dropzone-copy > span:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+.admin-image-dropzone-copy strong { color: var(--admin-text); font-size: 11px; font-weight: 600; }
+.admin-image-dropzone-copy small { color: var(--admin-subtle); font-size: 9px; }
+.admin-image-dropzone.has-image .admin-image-dropzone-copy {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 180ms cubic-bezier(.22,1,.36,1);
+}
+.admin-image-dropzone.has-image:hover .admin-image-dropzone-copy,
+.admin-image-dropzone.has-image:focus-visible .admin-image-dropzone-copy {
+  opacity: 1;
+  transform: translateY(0);
+}
+.admin-image-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--admin-subtle);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-image-clear {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  border: 1px solid rgba(251,113,133,.2) !important;
+  border-radius: 3px;
+  padding: 0 9px;
+  background: transparent;
+  color: #fda4af;
+  cursor: pointer;
+  font-size: 9px;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+}
+.admin-image-clear:hover {
+  border-color: rgba(251,113,133,.48) !important;
+  background: rgba(251,113,133,.08);
+  color: #fecdd3;
+}
+.admin-image-repeater-grid { grid-template-columns: minmax(0,1.3fr) minmax(0,.7fr); }
+
+@media (max-width: 780px) {
+  .admin-image-repeater-grid { grid-template-columns: minmax(0,1fr); }
+  .admin-image-dropzone { min-height: 138px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-image-dropzone,
+  .admin-image-dropzone-overlay,
+  .admin-image-dropzone-copy { transition: none; }
+}
