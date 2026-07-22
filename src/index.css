@@ -1086,6 +1086,47 @@ html.is-project-gallery body::-webkit-scrollbar {
   touch-action: none;
 }
 
+.admin-session-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  overflow: hidden;
+  background: #070A08;
+  color: #F8F5EC;
+  text-align: center;
+}
+
+.admin-session-loading img {
+  display: block;
+  width: clamp(112px, 28vw, 132px);
+  max-width: 132px;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  animation: admin-session-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.admin-session-loading span {
+  color: rgba(248, 245, 236, 0.42);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+@keyframes admin-session-pulse {
+  to { opacity: 0.48; transform: scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-session-loading img { animation: none; }
+}
+
 .team-social-links {
   position: absolute;
   left: 0.85rem;

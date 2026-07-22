@@ -13,7 +13,7 @@
   --admin-sidebar: 244px;
 }
 
-.admin-app, .admin-login-page, .admin-session-loading { min-height: 100vh; background: var(--admin-bg); color: var(--admin-text); }
+.admin-app, .admin-login-page { min-height: 100vh; background: var(--admin-bg); color: var(--admin-text); }
 .admin-app button, .admin-login-page button, .admin-app input, .admin-login-page input, .admin-app textarea, .admin-app select { font: inherit; }
 .admin-app button, .admin-login-page button { border: 0; }
 .admin-app { display: grid; grid-template-columns: var(--admin-sidebar) minmax(0, 1fr); }
@@ -221,10 +221,7 @@
 .admin-login-service-error .admin-button { width: fit-content; min-height: 34px; padding-inline: 12px; color: var(--admin-text); }
 .admin-back-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: var(--admin-muted); font-size: 10px; text-decoration: none; }
 .admin-back-link:hover { color: var(--admin-text); }
-.admin-session-loading { display: grid; place-items: center; align-content: center; gap: 16px; }
-.admin-session-loading img { width: clamp(112px, 10vw, 132px); animation: admin-pulse 1.2s ease-in-out infinite alternate; }
-.admin-session-loading span { color: var(--admin-subtle); font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
-@keyframes admin-pulse { to { opacity: .45; transform: scale(.96); } }
+
 .admin-mobile-scrim { display: none; }
 
 @media (max-width: 1050px) {
@@ -289,7 +286,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-drawer, .admin-loading-row span, .admin-session-loading img { animation: none; }
+  .admin-drawer, .admin-loading-row span { animation: none; }
   .admin-sidebar, .admin-button, .admin-stat { transition: none; }
 }
 /* Admin interaction and proportion refinements */

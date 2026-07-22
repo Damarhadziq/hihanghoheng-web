@@ -20,5 +20,5 @@ export default function Root() {
       window.removeEventListener("popstate", handleLocationChange);
     };
   }, []);
-  return admin ? <Suspense fallback={<div className="admin-session-loading"><img src="/hihang-hoeng-logo.png" alt="" /><span>Memuat workspace</span></div>}><AdminApp /></Suspense> : <App />;
+  return admin ? <Suspense fallback={<div className="admin-session-loading"><img src="/hihang-hoeng-logo.png" alt="" width="132" height="68" /><span>Memuat workspace</span></div>}><AdminApp /></Suspense> : <App />;
 }

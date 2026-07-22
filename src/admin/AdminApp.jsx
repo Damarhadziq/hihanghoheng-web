@@ -151,7 +151,7 @@ export default function AdminApp() {
     if (session.data && route === "login") setAdminLocation("overview", true);
   }, [route, session.data]);
 
-  if (session.isPending) return <div className="admin-session-loading"><img src="/hihang-hoeng-logo.png" alt="" /><span>Memuat workspace</span></div>;
+  if (session.isPending) return <div className="admin-session-loading"><img src="/hihang-hoeng-logo.png" alt="" width="132" height="68" /><span>Memuat workspace</span></div>;
   if (!session.data) return <AdminLogin />;
   return <AdminShell route={route} onRouteChange={setRoute} session={session.data} />;
 }
