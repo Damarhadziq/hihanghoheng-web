@@ -261,10 +261,10 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
               <article key={`${project.name}-${person.name}`} className="case-crew-card case-reveal">
                 <p className="label mb-3 text-gold">{person.role}</p>
                 <h3 className="font-display text-2xl font-semibold leading-tight text-[#F8F5EC]">{person.name}</h3>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <a href={person.linkedin || "#"} target="_blank" rel="noreferrer" className="case-social-pill">LinkedIn</a>
-                  <a href={person.instagram || "#"} target="_blank" rel="noreferrer" className="case-social-pill">Instagram</a>
-                </div>
+                {(person.linkedin || person.instagram) && <div className="mt-5 flex flex-wrap gap-2">
+                  {person.linkedin && <a href={person.linkedin} target="_blank" rel="noreferrer" className="case-social-pill">LinkedIn</a>}
+                  {person.instagram && <a href={person.instagram} target="_blank" rel="noreferrer" className="case-social-pill">Instagram</a>}
+                </div>}
               </article>
             ))}
           </div>

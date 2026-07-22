@@ -104,7 +104,7 @@
 .admin-empty-state h3 { margin: 16px 0 5px; color: var(--admin-text); font-size: 16px; }
 .admin-empty-state p { max-width: 390px; margin: 0 0 20px; color: var(--admin-muted); font-size: 12px; line-height: 1.7; }
 
-.admin-drawer-layer, .admin-modal-layer { position: fixed; inset: 0; z-index: 100; }
+.admin-drawer-layer, .admin-modal-layer { position: fixed; inset: 0; z-index: 300; }
 .admin-drawer-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,.7); cursor: default; backdrop-filter: blur(4px); }
 .admin-drawer { position: absolute; inset: 0 0 0 auto; width: min(760px, 94vw); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; border-left: 1px solid var(--admin-line-strong); background: #0a0e0b; box-shadow: -30px 0 90px rgba(0,0,0,.42); animation: admin-drawer-in 220ms cubic-bezier(.22,1,.36,1); }
 @keyframes admin-drawer-in { from { transform: translateX(24px); opacity: .5; } }
@@ -155,6 +155,7 @@
 
 .admin-modal-layer { display: grid; place-items: center; padding: 20px; background: rgba(0,0,0,.75); backdrop-filter: blur(5px); }
 .admin-modal { width: min(100%, 410px); border: 1px solid var(--admin-line-strong); border-radius: 6px; padding: 28px; background: var(--admin-panel-2); box-shadow: 0 30px 100px rgba(0,0,0,.5); }
+.admin-drawer:focus, .admin-modal:focus { outline: none; }
 .admin-modal-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: rgba(251,113,133,.1); color: #fda4af; }
 .admin-modal h2 { margin: 18px 0 7px; font-size: 18px; }
 .admin-modal p { margin: 0; color: var(--admin-muted); font-size: 12px; line-height: 1.7; }

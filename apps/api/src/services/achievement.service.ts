@@ -17,16 +17,18 @@ const contributorValues = (achievementId: string, contributors: AchievementInput
   achievementId,
   teamMemberId: "teamMemberId" in item ? item.teamMemberId : null,
   externalName: "externalName" in item ? item.externalName : null,
+  linkedinUrl: "externalName" in item ? item.linkedinUrl ?? null : null,
+  instagramUrl: "externalName" in item ? item.instagramUrl ?? null : null,
   role: item.role,
   sortOrder,
 }));
 
-function present<T extends { contributors: Array<{ id: string; role: string; externalName: string | null; teamMember: unknown | null }>; documentation: null | { sections: Array<{ section: string; item: string }> } }>(row: T) {
+function present<T extends { contributors: Array<{ id: string; role: string; externalName: string | null; linkedinUrl: string | null; instagramUrl: string | null; teamMember: unknown | null }>; documentation: null | { sections: Array<{ section: string; item: string }> } }>(row: T) {
   return {
     ...row,
     contributors: row.contributors.map((item) => item.teamMember
       ? { ...(item.teamMember as object), contributionRole: item.role, contributorType: "team" }
-      : { id: item.id, name: item.externalName, shortName: item.externalName, contributionRole: item.role, role: item.role, contributorType: "external", isExternal: true }),
+      : { id: item.id, name: item.externalName, shortName: item.externalName, contributionRole: item.role, role: item.role, linkedinUrl: item.linkedinUrl, instagramUrl: item.instagramUrl, contributorType: "external", isExternal: true }),
     documentation: row.documentation ? {
       ...row.documentation,
       sections: row.documentation.sections.reduce<Record<string, string[]>>((groups, item) => {

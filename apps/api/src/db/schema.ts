@@ -144,11 +144,18 @@ export const projectMockups = pgTable("project_mockups", {
 }, (table) => [index("project_mockups_project_idx").on(table.projectId)]);
 
 export const projectContributors = pgTable("project_contributors", {
+  id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-  teamMemberId: uuid("team_member_id").notNull().references(() => teamMembers.id, { onDelete: "restrict" }),
+  teamMemberId: uuid("team_member_id").references(() => teamMembers.id, { onDelete: "restrict" }),
+  externalName: text("external_name"),
+  linkedinUrl: text("linkedin_url"),
+  instagramUrl: text("instagram_url"),
   role: text("role").notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
-}, (table) => [primaryKey({ columns: [table.projectId, table.teamMemberId] })]);
+}, (table) => [
+  index("project_contributors_project_idx").on(table.projectId),
+  check("project_contributors_source_check", sql`(("team_member_id" is not null)::int + ("external_name" is not null)::int) = 1`),
+]);
 
 export const achievements = pgTable("achievements", {
   id: text("id").primaryKey(),
@@ -171,6 +178,8 @@ export const achievementContributors = pgTable("achievement_contributors", {
   achievementId: text("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
   teamMemberId: uuid("team_member_id").references(() => teamMembers.id, { onDelete: "restrict" }),
   externalName: text("external_name"),
+  linkedinUrl: text("linkedin_url"),
+  instagramUrl: text("instagram_url"),
   role: text("role").notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
 }, (table) => [

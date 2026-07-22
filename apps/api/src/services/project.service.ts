@@ -17,10 +17,22 @@ const projectWith = {
   },
 };
 
+const contributorValues = (projectId: string, contributors: ProjectInput["contributors"]) => contributors.map((item, sortOrder) => ({
+  projectId,
+  teamMemberId: "teamMemberId" in item ? item.teamMemberId : null,
+  externalName: "externalName" in item ? item.externalName : null,
+  linkedinUrl: "externalName" in item ? item.linkedinUrl ?? null : null,
+  instagramUrl: "externalName" in item ? item.instagramUrl ?? null : null,
+  role: item.role,
+  sortOrder,
+}));
+
 const present = (project: NonNullable<Awaited<ReturnType<typeof findProject>>>) => ({
   ...project,
   tags: project.tags.map((item) => item.tag),
-  contributors: project.contributors.map((item) => ({ ...item.teamMember, contributionRole: item.role })),
+  contributors: project.contributors.map((item) => item.teamMember
+    ? { ...item.teamMember, contributionRole: item.role, contributorType: "team" }
+    : { id: item.id, name: item.externalName, shortName: item.externalName, contributionRole: item.role, role: item.role, linkedinUrl: item.linkedinUrl, instagramUrl: item.instagramUrl, contributorType: "external", isExternal: true }),
 });
 
 function findProject(slug: string, publishedOnly: boolean) {
@@ -89,5 +101,5 @@ async function insertChildren(tx: Transaction, projectId: string, input: Project
   if (input.tags.length) await tx.insert(projectTags).values(input.tags.map((tag, sortOrder) => ({ projectId, tag, sortOrder })));
   if (input.timeline.length) await tx.insert(projectTimelineItems).values(input.timeline.map((item, sortOrder) => ({ projectId, ...item, sortOrder })));
   if (input.mockups.length) await tx.insert(projectMockups).values(input.mockups.map((item, sortOrder) => ({ projectId, ...item, sortOrder })));
-  if (input.contributors.length) await tx.insert(projectContributors).values(input.contributors.map((item, sortOrder) => ({ projectId, ...item, sortOrder })));
+  if (input.contributors.length) await tx.insert(projectContributors).values(contributorValues(projectId, input.contributors));
 }

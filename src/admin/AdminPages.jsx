@@ -8,6 +8,31 @@ const nullable = (value) => value?.trim() || null;
 const listFromText = (value) => value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
 const textFromList = (items = []) => items.join("\n");
 const slugify = (value) => value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+function ContributorFields({ item, update, members, roleLabel }) {
+  const type = item.type || "team";
+  const selected = type === "external" ? "__external__" : item.teamMemberId;
+  const selectContributor = (next) => update(next === "__external__"
+    ? { ...item, type: "external", teamMemberId: "", externalName: "", linkedinUrl: "", instagramUrl: "" }
+    : { ...item, type: "team", teamMemberId: next, externalName: "", linkedinUrl: "", instagramUrl: "" });
+
+  return (
+    <div className={`admin-form-grid admin-contributor-grid ${type === "external" ? "is-external" : ""}`}>
+      <Field label="Anggota">
+        <Select required value={selected} onChange={(event) => selectContributor(event.target.value)}>
+          <option value="">Pilih anggota</option>
+          {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
+          <option value="__external__" data-selected-label="Anggota eksternal">+ Tambah anggota eksternal</option>
+        </Select>
+      </Field>
+      {type === "external" && <Field label="Nama anggota eksternal"><Input required placeholder="Nama lengkap" value={item.externalName || ""} onChange={(event) => update({ ...item, externalName: event.target.value })} /></Field>}
+      <Field label={roleLabel} className={type === "external" ? "admin-grid-full" : ""}><Input required placeholder="Interaction Designer" value={item.role || ""} onChange={(event) => update({ ...item, role: event.target.value })} /></Field>
+      {type === "external" && <>
+        <Field label="LinkedIn"><Input type="url" placeholder="https://linkedin.com/in/username" value={item.linkedinUrl || ""} onChange={(event) => update({ ...item, linkedinUrl: event.target.value })} /></Field>
+        <Field label="Instagram"><Input type="url" placeholder="https://instagram.com/username" value={item.instagramUrl || ""} onChange={(event) => update({ ...item, instagramUrl: event.target.value })} /></Field>
+      </>}
+    </div>
+  );
+}
 
 const emptyProject = () => ({
   slug: "", name: "", year: new Date().getFullYear(), description: "", externalUrl: "", coverImageUrl: "", landscapeImageUrl: "",
@@ -18,7 +43,7 @@ const emptyProject = () => ({
 const projectToForm = (item) => ({
   ...emptyProject(), ...item, tagsText: (item.tags || []).join(", "),
   timeline: item.timeline || [], mockups: item.mockups || [],
-  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", role: person.contributionRole || person.role })),
+  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", linkedinUrl: person.linkedinUrl || "", instagramUrl: person.instagramUrl || "", role: person.contributionRole || person.role })),
 });
 
 const projectToPayload = (form) => ({
@@ -28,7 +53,7 @@ const projectToPayload = (form) => ({
   status: form.status, featured: Boolean(form.featured), sortOrder: Number(form.sortOrder), tags: listFromText(form.tagsText),
   timeline: form.timeline.map(({ phase, duration, title, detail }) => ({ phase, duration, title, detail })),
   mockups: form.mockups.map(({ title, imageUrl, altText }) => ({ title, imageUrl, altText })),
-  contributors: form.contributors.filter((item) => item.teamMemberId).map(({ teamMemberId, role }) => ({ teamMemberId, role })),
+  contributors: form.contributors.filter((item) => item.role && (item.type === "external" ? item.externalName : item.teamMemberId)).map((item) => item.type === "external" ? ({ type: "external", externalName: item.externalName, linkedinUrl: nullable(item.linkedinUrl), instagramUrl: nullable(item.instagramUrl), role: item.role }) : ({ type: "team", teamMemberId: item.teamMemberId, role: item.role })),
 });
 
 function ProjectForm({ value, onChange }) {
@@ -71,7 +96,7 @@ function ProjectForm({ value, onChange }) {
         <Repeater title="Mockup" addLabel="Tambah mockup" items={value.mockups} onChange={(next) => set("mockups", next)} createItem={() => ({ title: "", imageUrl: "", altText: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-form-grid-2"><Field label="Judul"><Input required placeholder="Home dashboard" value={item.title} onChange={(event) => update({ ...item, title: event.target.value })} /></Field><Field label="Alt text"><Input required placeholder="Deskripsi visual yang jelas" value={item.altText} onChange={(event) => update({ ...item, altText: event.target.value })} /></Field><Field label="Gambar mockup" className="admin-grid-full"><ImageDropzone value={item.imageUrl} alt={item.altText} label="gambar mockup" scope="project-mockups" onUpload={uploadImage.mutateAsync} onChange={(url) => update({ ...item, imageUrl: url })} /></Field></div>} />
       </Section>
       <Section title="Kontributor">
-        <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ teamMemberId: "", role: "" })} renderItem={(item, update) => <div className="admin-form-grid admin-contributor-grid"><Field label="Anggota"><Select required value={item.teamMemberId} onChange={(event) => update({ ...item, teamMemberId: event.target.value })}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}</Select></Field><Field label="Peran proyek"><Input required placeholder="Interaction Designer" value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field></div>} />
+        <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ type: "team", teamMemberId: "", externalName: "", linkedinUrl: "", instagramUrl: "", role: "" })} renderItem={(item, update) => <ContributorFields item={item} update={update} members={members} roleLabel="Peran proyek" />} />
       </Section>
     </>
   );
@@ -103,7 +128,7 @@ const emptyDocumentation = () => ({
 
 const achievementToForm = (item) => ({
   ...emptyAchievement(), ...item, occurredAt: new Date(item.occurredAt).toISOString().slice(0, 10),
-  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", role: person.contributionRole || person.role })),
+  contributors: (item.contributors || []).map((person) => ({ type: person.contributorType === "external" || person.isExternal ? "external" : "team", teamMemberId: person.isExternal ? "" : person.id, externalName: person.isExternal ? person.name : "", linkedinUrl: person.linkedinUrl || "", instagramUrl: person.instagramUrl || "", role: person.contributionRole || person.role })),
 });
 
 const documentationToForm = (doc) => doc ? ({
@@ -116,7 +141,7 @@ const documentationToForm = (doc) => doc ? ({
 const achievementToPayload = (form) => ({
   id: form.id, occurredAt: new Date(form.occurredAt).toISOString(), dateLabel: form.dateLabel, competitionName: form.competitionName,
   organizer: form.organizer, scale: form.scale, placement: form.placement, projectName: form.projectName, note: form.note, story: form.story,
-  status: form.status, sortOrder: Number(form.sortOrder), contributors: form.contributors.filter((item) => item.role && (item.type === "external" ? item.externalName : item.teamMemberId)).map((item) => item.type === "external" ? ({ type: "external", externalName: item.externalName, role: item.role }) : ({ type: "team", teamMemberId: item.teamMemberId, role: item.role })),
+  status: form.status, sortOrder: Number(form.sortOrder), contributors: form.contributors.filter((item) => item.role && (item.type === "external" ? item.externalName : item.teamMemberId)).map((item) => item.type === "external" ? ({ type: "external", externalName: item.externalName, linkedinUrl: nullable(item.linkedinUrl), instagramUrl: nullable(item.instagramUrl), role: item.role }) : ({ type: "team", teamMemberId: item.teamMemberId, role: item.role })),
 });
 
 const documentationPayload = (doc) => ({
@@ -149,17 +174,7 @@ function AchievementForm({ value, onChange, mode }) {
       <Field label="Cerita pencapaian"><Textarea required rows="5" placeholder="Ceritakan proses, tantangan, dan hasil yang dicapai." value={value.story} onChange={(event) => set("story", event.target.value)} /></Field>
     </Section>
     <Section title="Kontributor" description="Anggota dan peran yang terlibat pada kompetisi.">
-      <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ type: "team", teamMemberId: "", externalName: "", role: "" })} renderItem={(item, update) => {
-        const selected = item.type === "external" ? "__external__" : item.teamMemberId;
-        const selectContributor = (next) => update(next === "__external__"
-          ? { ...item, type: "external", teamMemberId: "", externalName: "" }
-          : { ...item, type: "team", teamMemberId: next, externalName: "" });
-        return <div className={`admin-form-grid admin-contributor-grid ${item.type === "external" ? "is-external" : ""}`}>
-          <Field label="Anggota"><Select required value={selected} onChange={(event) => selectContributor(event.target.value)}><option value="">Pilih anggota</option>{members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}<option value="__external__" data-selected-label="Anggota eksternal">+ Tambah anggota eksternal</option></Select></Field>
-          {item.type === "external" && <Field label="Nama anggota eksternal"><Input required placeholder="Nama lengkap" value={item.externalName} onChange={(event) => update({ ...item, externalName: event.target.value })} /></Field>}
-          <Field label="Peran" className={item.type === "external" ? "admin-grid-full" : ""}><Input required placeholder="UI/UX Designer" value={item.role} onChange={(event) => update({ ...item, role: event.target.value })} /></Field>
-        </div>;
-      }} />
+      <Repeater title="Kontributor" addLabel="Tambah anggota" items={value.contributors} onChange={(next) => set("contributors", next)} createItem={() => ({ type: "team", teamMemberId: "", externalName: "", linkedinUrl: "", instagramUrl: "", role: "" })} renderItem={(item, update) => <ContributorFields item={item} update={update} members={members} roleLabel="Peran" />} />
     </Section>
   </>;
 }

@@ -3,6 +3,15 @@ import { z } from "zod";
 const timelineItem = z.object({ phase: z.string().min(1), duration: z.string().min(1), title: z.string().min(1), detail: z.string().min(1) });
 const mockup = z.object({ title: z.string().min(1), imageUrl: z.string().min(1), altText: z.string().min(1) });
 
+const externalSocialLinks = {
+  linkedinUrl: z.string().trim().url().nullable().optional(),
+  instagramUrl: z.string().trim().url().nullable().optional(),
+};
+
+const contributorInput = z.union([
+  z.object({ type: z.literal("team").optional(), teamMemberId: z.uuid(), role: z.string().min(1) }),
+  z.object({ type: z.literal("external"), externalName: z.string().trim().min(1), role: z.string().min(1), ...externalSocialLinks }),
+]);
 export const projectInput = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   name: z.string().min(1), year: z.number().int().min(2000).max(2100), description: z.string().min(1),
@@ -10,7 +19,7 @@ export const projectInput = z.object({
   type: z.string().min(1), organizer: z.string().min(1), competition: z.string().min(1), problem: z.string().min(1), solution: z.string().min(1),
   status: z.enum(["draft", "published", "archived"]).default("draft"), featured: z.boolean().default(false), sortOrder: z.number().int().default(0),
   tags: z.array(z.string().min(1)).default([]), timeline: z.array(timelineItem).default([]), mockups: z.array(mockup).default([]),
-  contributors: z.array(z.object({ teamMemberId: z.uuid(), role: z.string().min(1) })).default([]),
+  contributors: z.array(contributorInput).default([]),
 });
 
 export const teamMemberInput = z.object({
@@ -20,16 +29,12 @@ export const teamMemberInput = z.object({
   images: z.array(z.object({ url: z.string().min(1), altText: z.string().min(1) })).default([]),
 });
 
-const achievementContributorInput = z.union([
-  z.object({ type: z.literal("team").optional(), teamMemberId: z.uuid(), role: z.string().min(1) }),
-  z.object({ type: z.literal("external"), externalName: z.string().trim().min(1), role: z.string().min(1) }),
-]);
 
 export const achievementInput = z.object({
   id: z.string().min(1), occurredAt: z.coerce.date(), dateLabel: z.string().min(1), competitionName: z.string().min(1), organizer: z.string().min(1),
   scale: z.string().min(1), placement: z.string().min(1), projectName: z.string().min(1), note: z.string().min(1), story: z.string().min(1),
   status: z.enum(["draft", "published", "archived"]).default("draft"), sortOrder: z.number().int().default(0),
-  contributors: z.array(achievementContributorInput).default([]),
+  contributors: z.array(contributorInput).default([]),
 });
 
 export const documentationInput = z.object({

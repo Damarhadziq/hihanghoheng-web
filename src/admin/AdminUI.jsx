@@ -326,9 +326,11 @@ export function Repeater({ title, addLabel, items, onChange, createItem, renderI
 
 export function Drawer({ open, title, eyebrow, children, footer, onClose, width = "default" }) {
   const { mounted, visible } = usePresence(open);
+  const drawerRef = useRef(null);
 
   useEffect(() => {
     if (!open) return undefined;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const escape = (event) => {
@@ -342,11 +344,17 @@ export function Drawer({ open, title, eyebrow, children, footer, onClose, width 
     };
   }, [onClose, open]);
 
+  useEffect(() => {
+    if (!open || !mounted) return undefined;
+    const focusFrame = requestAnimationFrame(() => drawerRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(focusFrame);
+  }, [mounted, open]);
+
   if (!mounted) return null;
   return (
     <div className={`admin-drawer-layer ${visible ? "is-visible" : "is-leaving"}`} role="presentation">
       <button className="admin-drawer-backdrop" aria-label="Tutup editor" onClick={onClose} />
-      <aside className={`admin-drawer admin-drawer-${width}`} role="dialog" aria-modal="true" aria-labelledby="admin-drawer-title">
+      <aside ref={drawerRef} tabIndex={-1} className={`admin-drawer admin-drawer-${width}`} role="dialog" aria-modal="true" aria-labelledby="admin-drawer-title">
         <header className="admin-drawer-head">
           <div><span>{eyebrow}</span><h2 id="admin-drawer-title">{title}</h2></div>
           <IconButton icon={X} label="Tutup editor" onClick={onClose} />
@@ -360,10 +368,19 @@ export function Drawer({ open, title, eyebrow, children, footer, onClose, width 
 
 export function ConfirmDialog({ open, title, description, pending, onCancel, onConfirm }) {
   const { mounted, visible } = usePresence(open);
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (!open || !mounted) return undefined;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    const focusFrame = requestAnimationFrame(() => modalRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(focusFrame);
+  }, [mounted, open]);
+
   if (!mounted) return null;
   return (
     <div className={`admin-modal-layer ${visible ? "is-visible" : "is-leaving"}`} role="presentation">
-      <div className="admin-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+      <div ref={modalRef} tabIndex={-1} className="admin-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-description">
         <div className="admin-modal-icon"><Trash2 size={21} /></div>
         <h2 id="confirm-title">{title}</h2>
         <p id="confirm-description">{description}</p>
