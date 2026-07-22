@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { useAchievementDocumentation } from "../hooks/useApiQueries";
+import { DocumentationSkeleton } from "./PublicSkeletons";
 
 const briefSections = [
   { id: "background", number: "01", label: "Latar Belakang Masalah" },
@@ -64,7 +65,7 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
   };
 
   if (isPending) {
-    return <main className="documentation-page documentation-empty page-shell" aria-busy="true" />;
+    return <DocumentationSkeleton />;
   }
 
   if (!document) {

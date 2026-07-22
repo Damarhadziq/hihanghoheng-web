@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { useProject, useProjects } from "../hooks/useApiQueries";
+import { ProjectDetailSkeleton } from "./PublicSkeletons";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -287,7 +288,8 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
 export default function ProjectDetails(props) {
   const { projectId } = props;
   const { data: project, isPending } = useProject(projectId);
-  const { data: projects = [] } = useProjects();
-  if (isPending || !project || !projects.length) return <main className="case-page page-shell" aria-busy="true" />;
+  const { data: projects = [], isPending: areProjectsPending } = useProjects();
+  if (isPending || areProjectsPending) return <ProjectDetailSkeleton />;
+  if (!project || !projects.length) return <main className="case-page page-shell min-h-screen px-6 pt-32 text-ink"><p className="label text-ink/48">Project</p><h1 className="mt-5 font-display text-4xl font-semibold">Project tidak ditemukan.</h1></main>;
   return <ProjectDetailsContent {...props} project={project} projects={projects} />;
 }

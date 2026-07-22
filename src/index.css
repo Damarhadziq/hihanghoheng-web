@@ -2982,3 +2982,40 @@ object {
     display: none;
   }
 }
+
+.public-skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  flex: none;
+  border-radius: 2px;
+  background: rgba(248, 245, 236, 0.075);
+  contain: paint;
+}
+
+.public-skeleton::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  transform: translateX(-110%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(248, 245, 236, 0.085),
+    transparent
+  );
+  animation: public-skeleton-shimmer 1.35s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes public-skeleton-shimmer {
+  to {
+    transform: translateX(110%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-skeleton::after {
+    animation: none;
+  }
+}

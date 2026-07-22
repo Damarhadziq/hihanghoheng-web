@@ -1,11 +1,12 @@
 
 import { useAchievementDocumentation } from "../hooks/useApiQueries";
+import { DocumentationSkeleton } from "./PublicSkeletons";
 
 export default function ProposalPreview({ achievementId, onBack, onOpenBrief }) {
   const { data: document, isPending } = useAchievementDocumentation(achievementId);
 
   if (isPending) {
-    return <main className="documentation-page documentation-empty page-shell" aria-busy="true" />;
+    return <DocumentationSkeleton proposal />;
   }
 
   if (!document) {

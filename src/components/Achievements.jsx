@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { useAchievements } from "../hooks/useApiQueries";
+import { AchievementRowsSkeleton } from "./PublicSkeletons";
 
 const getPlacementClass = (placement) => {
   if (placement.includes("1st")) return "achievement-badge achievement-badge-gold achievement-badge-static";
@@ -11,7 +12,7 @@ const getPlacementClass = (placement) => {
 };
 
 export default function Achievements({ variant = "home", onOpenDocumentation, onOpenDocument }) {
-  const { data: achievements = [] } = useAchievements();
+  const { data: achievements = [], isPending } = useAchievements();
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef, { stagger: 0.1, dependencies: [achievements.length] });
   const isPage = variant === "page";
@@ -31,7 +32,7 @@ export default function Achievements({ variant = "home", onOpenDocumentation, on
           </header>
 
           <div className="achievement-docs">
-            {achievements.map((item, index) => (
+            {isPending ? <AchievementRowsSkeleton page /> : achievements.map((item, index) => (
               <article id={item.id} key={`${item.competitionName}-${item.date}`} className="achievement-doc gsap-reveal">
                 <div className="achievement-doc-marker">
                   <span>{String(index + 1).padStart(2, "0")}</span>
@@ -122,7 +123,7 @@ export default function Achievements({ variant = "home", onOpenDocumentation, on
             <span className="label text-ink/52 md:col-span-3">Documentation</span>
           </div>
 
-          {achievements.map((item, i) => (
+          {isPending ? <AchievementRowsSkeleton /> : achievements.map((item, i) => (
             <div
               key={`${item.competitionName}-${item.date}`}
               className={`gsap-reveal grid md:grid-cols-12 gap-2 md:gap-4 py-6 md:py-5 ${
@@ -162,4 +163,3 @@ export default function Achievements({ variant = "home", onOpenDocumentation, on
     </section>
   );
 }
-

@@ -3,6 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTeam } from "../hooks/useApiQueries";
+import { TeamCardsSkeleton } from "./PublicSkeletons";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -197,7 +198,7 @@ const SocialLinks = ({ member }) => (
 );
 
 export default function Team({ variant = "home" }) {
-  const { data: team = [] } = useTeam();
+  const { data: team = [], isPending } = useTeam();
   const sectionRef = useRef(null);
   const textRef = useRef(null);
   const isPage = variant === "page";
@@ -331,7 +332,7 @@ export default function Team({ variant = "home" }) {
 
       <div className="section-wrapper">
         <div className="team-grid grid gap-6 md:grid-cols-3 md:gap-8">
-          {team.map((member, index) => (
+          {isPending ? <TeamCardsSkeleton /> : team.map((member, index) => (
             <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0" tabIndex={0}>
               <div className="team-photo-frame aspect-[4/5] overflow-hidden bg-ink/5">
                 {member.images.map((image, imageIndex) => (
@@ -358,7 +359,7 @@ export default function Team({ variant = "home" }) {
       </div>
 
       </section>
-      {isPage && <TeamMessageWall team={team} />}
+      {isPage && !isPending && <TeamMessageWall team={team} />}
     </>
   );
 }

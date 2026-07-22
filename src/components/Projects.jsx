@@ -2,9 +2,10 @@ import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { useProjects } from "../hooks/useApiQueries";
 import ProjectCard from "./ProjectCard";
+import { ProjectCardsSkeleton } from "./PublicSkeletons";
 
 export default function Projects({ onSelectProject, onViewAllProjects }) {
-  const { data: projects = [] } = useProjects();
+  const { data: projects = [], isPending } = useProjects();
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef, { stagger: 0.15, dependencies: [projects.length] });
 
@@ -28,7 +29,7 @@ export default function Projects({ onSelectProject, onViewAllProjects }) {
         </div>
 
         <div className="mb-12 grid gap-6 md:grid-cols-2 md:gap-8">
-          {projects.map((project) => (
+          {isPending ? <ProjectCardsSkeleton /> : projects.map((project) => (
             <ProjectCard key={project.slug} project={project} onSelect={() => onSelectProject?.(project.slug)} />
           ))}
         </div>
@@ -47,5 +48,3 @@ export default function Projects({ onSelectProject, onViewAllProjects }) {
     </section>
   );
 }
-
-

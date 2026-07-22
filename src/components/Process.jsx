@@ -1,9 +1,10 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import { useProcess } from "../hooks/useApiQueries";
+import { ProcessRowsSkeleton } from "./PublicSkeletons";
 
 export default function Process() {
-  const { data: process = [] } = useProcess();
+  const { data: process = [], isPending } = useProcess();
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef, { stagger: 0.18, dependencies: [process.length] });
 
@@ -24,7 +25,7 @@ export default function Process() {
 
         {/* Process steps */}
         <div className="flex flex-col">
-          {process.map((step, i) => (
+          {isPending ? <ProcessRowsSkeleton /> : process.map((step, i) => (
             <div
               key={step.label}
               className={`gsap-reveal grid md:grid-cols-12 gap-4 md:gap-8 py-8 md:py-12 ${
@@ -60,4 +61,3 @@ export default function Process() {
     </section>
   );
 }
-

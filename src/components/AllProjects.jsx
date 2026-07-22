@@ -4,6 +4,7 @@ import gsap from "gsap";
 
 import { useProjects } from "../hooks/useApiQueries";
 import Footer from "./Footer";
+import { ProjectArchiveSkeleton } from "./PublicSkeletons";
 
 const wrapIndex = (index, total) => ((index % total) + total) % total;
 
@@ -415,6 +416,7 @@ function AllProjectsContent({ projects, onSelectProject, onViewChange, onViewMod
 
 export default function AllProjects(props) {
   const { data: projects = [], isPending } = useProjects();
-  if (isPending || !projects.length) return <main className="project-index-page" aria-busy="true" />;
+  if (isPending) return <ProjectArchiveSkeleton />;
+  if (!projects.length) return <main className="project-index-page min-h-screen px-6 pt-32 text-ink"><p className="label text-ink/48">Projects</p><h1 className="mt-5 font-display text-4xl font-semibold">Belum ada project yang dipublikasikan.</h1></main>;
   return <AllProjectsContent {...props} projects={projects} />;
 }
