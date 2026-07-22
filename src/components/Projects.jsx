@@ -1,11 +1,12 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
-import { projects } from "../data/projects";
+import { useProjects } from "../hooks/useApiQueries";
 import ProjectCard from "./ProjectCard";
 
 export default function Projects({ onSelectProject, onViewAllProjects }) {
+  const { data: projects = [] } = useProjects();
   const sectionRef = useRef(null);
-  useGsapReveal(sectionRef, { stagger: 0.15 });
+  useGsapReveal(sectionRef, { stagger: 0.15, dependencies: [projects.length] });
 
   return (
     <section
@@ -27,8 +28,8 @@ export default function Projects({ onSelectProject, onViewAllProjects }) {
         </div>
 
         <div className="mb-12 grid gap-6 md:grid-cols-2 md:gap-8">
-          {projects.map((project, index) => (
-            <ProjectCard key={project.name} project={project} onSelect={() => onSelectProject?.(index + 1)} />
+          {projects.map((project) => (
+            <ProjectCard key={project.slug} project={project} onSelect={() => onSelectProject?.(project.slug)} />
           ))}
         </div>
 

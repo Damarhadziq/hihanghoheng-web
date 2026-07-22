@@ -1,8 +1,12 @@
 
-import { getCompetitionDocumentation, proposalReferenceUrl } from "../data/documentation";
+import { useAchievementDocumentation } from "../hooks/useApiQueries";
 
 export default function ProposalPreview({ achievementId, onBack, onOpenBrief }) {
-  const document = getCompetitionDocumentation(achievementId);
+  const { data: document, isPending } = useAchievementDocumentation(achievementId);
+
+  if (isPending) {
+    return <main className="documentation-page documentation-empty page-shell" aria-busy="true" />;
+  }
 
   if (!document) {
     return (
@@ -30,8 +34,8 @@ export default function ProposalPreview({ achievementId, onBack, onOpenBrief }) 
               <p>Preview a reusable UI/UX competition proposal structure before downloading the PDF reference.</p>
             </div>
             <div className="proposal-actions">
-              <a href={proposalReferenceUrl} target="_blank" rel="noreferrer">Open PDF</a>
-              <a href={proposalReferenceUrl} download>Download PDF</a>
+              <a href={document.proposalUrl} target="_blank" rel="noreferrer">Open PDF</a>
+              <a href={document.proposalUrl} download>Download PDF</a>
               <button type="button" onClick={onOpenBrief}>Read project brief</button>
             </div>
           </div>
@@ -41,8 +45,8 @@ export default function ProposalPreview({ achievementId, onBack, onOpenBrief }) 
       <section className="proposal-viewer-shell">
         <div className="section-wrapper">
           <div className="proposal-viewer">
-            <object data={proposalReferenceUrl} type="application/pdf" aria-label="UI/UX competition proposal PDF preview">
-              <p>PDF preview is not supported in this browser. <a href={proposalReferenceUrl} target="_blank" rel="noreferrer">Open the proposal PDF</a>.</p>
+            <object data={document.proposalUrl} type="application/pdf" aria-label="UI/UX competition proposal PDF preview">
+              <p>PDF preview is not supported in this browser. <a href={document.proposalUrl} target="_blank" rel="noreferrer">Open the proposal PDF</a>.</p>
             </object>
           </div>
           <p className="proposal-note">Reference only. Adapt the structure to the organizer's rules, judging rubric, and required evidence.</p>

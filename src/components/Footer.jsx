@@ -1,4 +1,5 @@
-﻿const footerNav = [
+import { useSiteSettings } from "../hooks/useApiQueries";
+const footerNav = [
   { label: "Home", view: "home" },
   { label: "About", view: "about" },
   { label: "Projects", view: "all-projects" },
@@ -7,6 +8,8 @@
 ];
 
 export default function Footer({ onViewChange }) {
+  const { data: site } = useSiteSettings();
+  const footer = site?.footer || {};
   const currentYear = new Date().getFullYear();
 
   const handleNavigate = (event, view) => {
@@ -34,8 +37,8 @@ export default function Footer({ onViewChange }) {
             <h3 className="label text-[#F8F5EC]/48 mb-4">Connect</h3>
             <ul className="flex flex-col gap-3 list-none m-0 p-0">
               {[
-                ["hello@hihanghoeng.com", "mailto:hello@hihanghoeng.com"],
-                ["Instagram", "https://www.instagram.com/"],
+                [footer.email || "hello@hihanghoeng.com", `mailto:${footer.email || "hello@hihanghoeng.com"}`],
+                ["Instagram", footer.instagramUrl || "https://www.instagram.com/"],
               ].map(([label, href]) => (
                 <li key={label}>
                   <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className="text-[#F8F5EC]/68 hover:text-[#F8F5EC] transition-colors duration-200 text-sm">
@@ -62,7 +65,7 @@ export default function Footer({ onViewChange }) {
 
         <div className="mt-12 pt-5 border-t border-[#F8F5EC]/10 flex flex-col md:flex-row justify-between gap-4">
           <p className="label text-[#F8F5EC]/48">&copy; {currentYear} HIHANG HOENG. All rights reserved.</p>
-          <p className="label text-[#F8F5EC]/48">Universitas Negeri Semarang - Built with craft &amp; intention.</p>
+          <p className="label text-[#F8F5EC]/48">{footer.organization || "Universitas Negeri Semarang"} - Built with craft &amp; intention.</p>
         </div>
       </div>
     </footer>

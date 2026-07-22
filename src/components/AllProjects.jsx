@@ -1,15 +1,9 @@
-﻿import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
-import { projects } from "../data/projects";
+import { useProjects } from "../hooks/useApiQueries";
 import Footer from "./Footer";
-
-const showcaseProjects = projects.map((project, index) => ({
-  ...project,
-  id: index + 1,
-  image: project.mockup16x9 || project.image || "/optimized/gallery/hero.webp",
-}));
 
 const wrapIndex = (index, total) => ((index % total) + total) % total;
 
@@ -60,7 +54,12 @@ function ProjectViewToggle({ viewMode, onChange }) {
   );
 }
 
-export default function AllProjects({ onSelectProject, onViewChange, onViewModeChange }) {
+function AllProjectsContent({ projects, onSelectProject, onViewChange, onViewModeChange }) {
+  const showcaseProjects = useMemo(() => projects.map((project) => ({
+    ...project,
+    id: project.slug,
+    image: project.mockup16x9 || project.image || "/optimized/gallery/hero.webp",
+  })), [projects]);
   const stageRef = useRef(null);
   const indexRef = useRef(null);
   const cardsRef = useRef([]);
@@ -140,8 +139,8 @@ export default function AllProjects({ onSelectProject, onViewChange, onViewModeC
 
     isEnteringRef.current = true;
     if (titleRef.current) titleRef.current.disabled = true;
-    onSelectProject?.(activeRef.current + 1);
-  }, [onSelectProject]);
+    onSelectProject?.(showcaseProjects[activeRef.current]?.slug);
+  }, [onSelectProject, showcaseProjects]);
 
   const goTo = useCallback(
     (direction) => {
@@ -414,3 +413,8 @@ export default function AllProjects({ onSelectProject, onViewChange, onViewModeC
   );
 }
 
+export default function AllProjects(props) {
+  const { data: projects = [], isPending } = useProjects();
+  if (isPending || !projects.length) return <main className="project-index-page" aria-busy="true" />;
+  return <AllProjectsContent {...props} projects={projects} />;
+}

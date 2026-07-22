@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
-import { achievements } from "../data/achievements";
-import { getCompetitionDocumentation } from "../data/documentation";
+import { useAchievements } from "../hooks/useApiQueries";
 
 const getPlacementClass = (placement) => {
   if (placement.includes("1st")) return "achievement-badge achievement-badge-gold achievement-badge-static";
@@ -12,8 +11,9 @@ const getPlacementClass = (placement) => {
 };
 
 export default function Achievements({ variant = "home", onOpenDocumentation, onOpenDocument }) {
+  const { data: achievements = [] } = useAchievements();
   const sectionRef = useRef(null);
-  useGsapReveal(sectionRef, { stagger: 0.1 });
+  useGsapReveal(sectionRef, { stagger: 0.1, dependencies: [achievements.length] });
   const isPage = variant === "page";
 
   const handleOpenDocumentation = (event, itemId) => {
@@ -62,7 +62,7 @@ export default function Achievements({ variant = "home", onOpenDocumentation, on
                               <button type="button" onClick={() => onOpenDocument?.("proposal", item.id)}>Proposal</button>
                             )}
                             {doc === "Prototype" && (() => {
-                              const documentation = getCompetitionDocumentation(item.id);
+                              const documentation = item.documentationDetail;
                               return documentation?.prototypeUrl ? (
                                 <a href={documentation.prototypeUrl} target="_blank" rel="noreferrer">Prototype <span aria-hidden="true">&nearr;</span></a>
                               ) : (

@@ -1,14 +1,17 @@
 import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
 import GalleryMarquee from "./GalleryMarquee";
+import { useSiteSettings } from "../hooks/useApiQueries";
 
-const stats = [
+const fallbackStats = [
   ["12+", "Competitions joined"],
   ["2", "Inter/national scales"],
   ["5", "Awards & finalist runs"],
 ];
 
 export default function About({ variant = "home" }) {
+  const { data: site } = useSiteSettings();
+  const stats = site?.about?.stats || fallbackStats;
   const sectionRef = useRef(null);
   useGsapReveal(sectionRef);
 
@@ -43,12 +46,12 @@ export default function About({ variant = "home" }) {
           <div className="mt-10 grid gap-6 md:mt-16 md:grid-cols-2">
             <article className="about-panel gsap-reveal">
               <p className="label mb-4 text-gold">Vision</p>
-              <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">To become a consistent design competition team that carries campus-born work to broader stages.</h2>
+              <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">{site?.about?.vision || "To become a consistent design competition team that carries campus-born work to broader stages."}</h2>
             </article>
             <article className="about-panel gsap-reveal">
               <p className="label mb-4 text-gold">Mission</p>
               <p className="text-sm leading-8 text-ink/68 md:text-base">
-                To enter competitions with intention, build a clear research process, document every design decision, and help each member grow through work that can stand in front of judges.
+                {site?.about?.mission || "To enter competitions with intention, build a clear research process, document every design decision, and help each member grow through work that can stand in front of judges."}
               </p>
             </article>
           </div>

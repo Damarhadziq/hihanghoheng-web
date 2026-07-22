@@ -24,6 +24,7 @@ export function useGsapReveal(containerRef, options = {}) {
     stagger = 0.12,
     duration = 0.8,
     start = "top 85%",
+    dependencies = [],
   } = options;
 
   useGSAP(
@@ -65,6 +66,6 @@ export function useGsapReveal(containerRef, options = {}) {
 
       return () => window.removeEventListener("load", refreshWhenReady);
     },
-    { scope: containerRef },
+    { scope: containerRef, dependencies },
   );
 }

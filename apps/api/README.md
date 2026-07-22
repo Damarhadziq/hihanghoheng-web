@@ -11,11 +11,7 @@ Express 5 API for the portfolio content, using Drizzle ORM, PostgreSQL, and Bett
 5. Run `npm run db:seed` to import the current frontend content.
 6. Run `npm run dev`; the API defaults to `http://localhost:4000`.
 
-Create the first account through `POST /api/auth/sign-up/email`, then promote it once in PostgreSQL:
-
-```sql
-UPDATE "user" SET role = 'admin' WHERE email = 'owner@example.com';
-```
+Open `http://localhost:5173/#admin` after the API is running. If the database has no users, the login screen automatically becomes a one-time setup form for the first administrator. Public email sign-up is disabled after setup; additional editors should be provisioned by an administrator.
 
 ## Route boundaries
 

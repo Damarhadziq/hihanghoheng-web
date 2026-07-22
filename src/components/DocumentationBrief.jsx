@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
-import { getCompetitionDocumentation, proposalReferenceUrl } from "../data/documentation";
+import { useAchievementDocumentation } from "../hooks/useApiQueries";
 
 const briefSections = [
   { id: "background", number: "01", label: "Latar Belakang Masalah" },
@@ -24,8 +24,8 @@ const BulletList = ({ items }) => (
 export default function DocumentationBrief({ achievementId, onBack, onOpenProposal }) {
   const pageRef = useRef(null);
   const [activeSection, setActiveSection] = useState(briefSections[0].id);
-  const document = getCompetitionDocumentation(achievementId);
-  useGsapReveal(pageRef, { stagger: 0.06 });
+  const { data: document, isPending } = useAchievementDocumentation(achievementId);
+  useGsapReveal(pageRef, { stagger: 0.06, dependencies: [document?.id] });
 
   useEffect(() => {
     let frameId;
@@ -62,6 +62,10 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
     setActiveSection(sectionId);
     globalThis.document.getElementById("brief-" + sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  if (isPending) {
+    return <main className="documentation-page documentation-empty page-shell" aria-busy="true" />;
+  }
 
   if (!document) {
     return (
@@ -165,7 +169,7 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
             ) : (
               <span className="documentation-pending">Figma prototype link pending</span>
             )}
-            <a href={proposalReferenceUrl} download>Download proposal PDF</a>
+            <a href={document.proposalUrl} download>Download proposal PDF</a>
           </div>
         </div>
       </section>

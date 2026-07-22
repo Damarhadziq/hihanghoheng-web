@@ -9,6 +9,7 @@ import { achievementRouter } from "./routes/achievement.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { contentRouter } from "./routes/content.routes.js";
 import { projectRouter } from "./routes/project.routes.js";
+import { setupRouter } from "./routes/setup.routes.js";
 import { teamRouter } from "./routes/team.routes.js";
 
 export const app = express();
@@ -22,6 +23,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ data: { status: "ok" } }));
+app.use("/api/setup", setupRouter);
 app.use("/api/projects", projectRouter);
 app.use("/api/achievements", achievementRouter);
 app.use("/api/team", teamRouter);

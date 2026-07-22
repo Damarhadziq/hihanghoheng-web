@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
   { label: "Home", view: "home" },
@@ -57,29 +58,34 @@ export default function Nav({ onViewChange, activeView = "home" }) {
         </ul>
 
         <button
-          className="flex flex-col gap-1.5 p-2 md:hidden"
+          className={`mobile-nav-toggle relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[4px] border border-[#F8F5EC]/12 bg-[#F8F5EC]/[0.03] text-[#F8F5EC] transition-colors duration-200 hover:border-[#F8F5EC]/24 hover:bg-[#F8F5EC]/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 md:hidden ${mobileOpen ? "is-open" : ""}`}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation-menu"
           aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
         >
-          <span className={`block h-px w-5 bg-[#F8F5EC] transition-transform duration-200 ${mobileOpen ? "translate-y-[3.5px] rotate-45" : ""}`} />
-          <span className={`block h-px w-5 bg-[#F8F5EC] transition-opacity duration-200 ${mobileOpen ? "opacity-0" : ""}`} />
-          <span className={`block h-px w-5 bg-[#F8F5EC] transition-transform duration-200 ${mobileOpen ? "-translate-y-[3.5px] -rotate-45" : ""}`} />
+          <Menu className="mobile-nav-icon mobile-nav-icon-menu" size={20} strokeWidth={1.7} aria-hidden="true" />
+          <X className="mobile-nav-icon mobile-nav-icon-close" size={20} strokeWidth={1.7} aria-hidden="true" />
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="border-b border-[#F8F5EC]/12 bg-[#0c0f0d] md:hidden">
+      <div
+        id="mobile-navigation-menu"
+        className={`mobile-nav-panel bg-[#0c0f0d] md:hidden ${mobileOpen ? "is-open" : ""}`}
+        aria-hidden={!mobileOpen}
+      >
+        <div className="mobile-nav-panel-inner">
           <ul className="section-wrapper m-0 flex list-none flex-col gap-4 p-0 px-6 py-6">
-            {navLinks.map((link) => {
+            {navLinks.map((link, index) => {
               const active = isActiveLink(link);
               return (
-                <li key={link.view}>
+                <li key={link.view} className="mobile-nav-item" style={{ "--mobile-nav-index": index }}>
                   <a
                     href={`#${link.view}`}
                     className={`interactive-nav-link label block w-fit py-1 ${active ? "is-active" : ""}`}
                     onClick={(event) => handleLinkClick(event, link)}
                     aria-current={active ? "page" : undefined}
+                    tabIndex={mobileOpen ? undefined : -1}
                   >
                     {link.label}
                   </a>
@@ -88,7 +94,7 @@ export default function Nav({ onViewChange, activeView = "home" }) {
             })}
           </ul>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

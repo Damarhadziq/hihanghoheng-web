@@ -1,8 +1,9 @@
-﻿import MarqueeModule from "react-fast-marquee";
+import MarqueeModule from "react-fast-marquee";
+import { useGallery } from "../hooks/useApiQueries";
 
 const Marquee = MarqueeModule.default || MarqueeModule;
 
-const galleryImages = [
+const fallbackGalleryImages = [
   { src: "/optimized/gallery/team-damar.webp" },
   { src: "/optimized/gallery/team-faruq.webp" },
   { src: "/optimized/gallery/team-febi.webp" },
@@ -33,9 +34,9 @@ const ratioClasses = [
 ];
 const heightClasses = ["height-xs", "height-sm", "height-md", "height-lg"];
 
-const rotateImages = (offset) => [
-  ...galleryImages.slice(offset),
-  ...galleryImages.slice(0, offset),
+const rotateImages = (images, offset) => [
+  ...images.slice(offset),
+  ...images.slice(0, offset),
 ];
 
 const getVariantClass = (rowIndex, imageIndex) => {
@@ -47,6 +48,8 @@ const getVariantClass = (rowIndex, imageIndex) => {
 };
 
 export default function GalleryMarquee({ variant = "section" }) {
+  const { data: gallery = [] } = useGallery();
+  const galleryImages = gallery.length ? gallery.map((image) => ({ src: image.url })) : fallbackGalleryImages;
   const isBackground = variant === "background";
 
   return (
@@ -74,7 +77,7 @@ export default function GalleryMarquee({ variant = "section" }) {
               pauseOnHover={false}
               speed={row.speed}
             >
-              {rotateImages(row.offset).map((image, imageIndex) => (
+              {rotateImages(galleryImages, row.offset).map((image, imageIndex) => (
                 <figure
                   key={`${rowIndex}-${image.src}-${imageIndex}`}
                   className={`gallery-marquee-photo ${getVariantClass(rowIndex, imageIndex)} tone-${(imageIndex + rowIndex) % 4}`}

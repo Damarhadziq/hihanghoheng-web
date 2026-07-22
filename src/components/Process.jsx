@@ -1,10 +1,11 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGsapReveal } from "../hooks/useGsapReveal";
-import { process } from "../data/process";
+import { useProcess } from "../hooks/useApiQueries";
 
 export default function Process() {
+  const { data: process = [] } = useProcess();
   const sectionRef = useRef(null);
-  useGsapReveal(sectionRef, { stagger: 0.18 });
+  useGsapReveal(sectionRef, { stagger: 0.18, dependencies: [process.length] });
 
   return (
     <section

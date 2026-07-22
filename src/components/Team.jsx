@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { team } from "../data/team";
+import { useTeam } from "../hooks/useApiQueries";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,9 +68,8 @@ const chatMessages = [
     tone: "cream",
   },
 ];
-const getChatMember = (sender) => team.find((member) => member.shortName === sender);
-
-const TeamMessageWall = () => {
+const TeamMessageWall = ({ team }) => {
+  const getChatMember = (sender) => team.find((member) => member.shortName === sender);
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
@@ -198,6 +197,7 @@ const SocialLinks = ({ member }) => (
 );
 
 export default function Team({ variant = "home" }) {
+  const { data: team = [] } = useTeam();
   const sectionRef = useRef(null);
   const textRef = useRef(null);
   const isPage = variant === "page";
@@ -297,7 +297,7 @@ export default function Team({ variant = "home" }) {
 
       return () => hoverCleanups.forEach((cleanup) => cleanup());
     },
-    { scope: sectionRef, dependencies: [variant] },
+    { scope: sectionRef, dependencies: [variant, team.length] },
   );
 
   return (
@@ -358,7 +358,7 @@ export default function Team({ variant = "home" }) {
       </div>
 
       </section>
-      {isPage && <TeamMessageWall />}
+      {isPage && <TeamMessageWall team={team} />}
     </>
   );
 }

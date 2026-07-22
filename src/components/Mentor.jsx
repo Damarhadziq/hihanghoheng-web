@@ -3,10 +3,12 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import mentorImage from "../assets/mentor.svg";
+import { useMentor } from "../hooks/useApiQueries";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Mentor() {
+  const { data: mentor } = useMentor();
   const sectionRef = useRef(null);
 
   useGSAP(
@@ -56,8 +58,8 @@ export default function Mentor() {
 
           <div className="mentor-reveal order-1 mx-auto flex w-full max-w-[330px] items-end justify-center md:order-2 md:max-w-[380px]">
             <img
-              src={mentorImage}
-              alt="Dosen pembimbing Hihang Hoeng"
+              src={mentor?.imageUrl?.startsWith("/src/") ? mentorImage : mentor?.imageUrl || mentorImage}
+              alt={mentor?.imageAlt || "Dosen pembimbing Hihang Hoeng"}
               className="mentor-photo h-auto w-full object-contain opacity-90 mix-blend-luminosity"
               draggable="false"
               loading="lazy"
@@ -65,10 +67,10 @@ export default function Mentor() {
           </div>
 
           <div className="mentor-reveal order-3 pb-10 text-center md:text-left">
-            <p className="font-display text-2xl font-semibold leading-tight text-ink md:text-4xl">Ajeng Rahma Sudarni, S.Pd., M.Pd.T.</p>
-            <p className="label mt-3 text-ink/56">Dosen Pembimbing</p>
+            <p className="font-display text-2xl font-semibold leading-tight text-ink md:text-4xl">{mentor?.name || "Ajeng Rahma Sudarni, S.Pd., M.Pd.T."}</p>
+            <p className="label mt-3 text-ink/56">{mentor?.role || "Dosen Pembimbing"}</p>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-ink/66 md:text-base">
-              Her guidance helps Hihang Hoeng stay honest with the problem, careful with the process, and brave enough to keep refining the work.
+              {mentor?.description || "Her guidance helps Hihang Hoeng stay honest with the problem, careful with the process, and brave enough to keep refining the work."}
             </p>
           </div>
         </div>

@@ -18,7 +18,7 @@ import GalleryMarquee from "./components/GalleryMarquee";
 import Footer from "./components/Footer";
 import DocumentationBrief from "./components/DocumentationBrief";
 import ProposalPreview from "./components/ProposalPreview";
-import { getCompetitionDocumentation } from "./data/documentation";
+import { useAchievementDocumentation } from "./hooks/useApiQueries";
 import LoadingScreen from "./components/LoadingScreen";
 import RouteSlideTransition from "./components/RouteSlideTransition";
 
@@ -62,18 +62,17 @@ const getViewFromHash = () => {
   const hash = window.location.hash.replace(/^#\/?/, "");
   if (!hash) return "home";
   if (staticRoutes.has(hash)) return hash;
-  if (/^project-\d+$/.test(hash)) return hash;
+  if (/^project-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(hash)) return hash;
   if (/^(brief|proposal)-[a-z0-9-]+$/.test(hash)) return hash;
   return "home";
 };
 
 const getRouteHash = (view) => (view === "home" ? "#home" : "#" + view);
 
-const getSeoMeta = (view) => {
+const getSeoMeta = (view, documentation) => {
   const documentationMatch = view?.match(/^(brief|proposal)-(.+)$/);
   if (documentationMatch) {
-    const [, type, achievementId] = documentationMatch;
-    const documentation = getCompetitionDocumentation(achievementId);
+    const [, type] = documentationMatch;
     if (documentation) {
       const isBrief = type === "brief";
       return {
@@ -114,6 +113,9 @@ const PageShell = ({ children }) => (
 
 export default function App() {
   const [currentView, setCurrentView] = useState(getViewFromHash);
+  const routeDocumentationMatch = currentView.match(/^(brief|proposal)-(.+)$/);
+  const routeAchievementId = routeDocumentationMatch?.[2];
+  const { data: routeDocumentation } = useAchievementDocumentation(routeAchievementId);
   const [isBootLoading, setIsBootLoading] = useState(currentView === "home");
   const [projectViewMode, setProjectViewMode] = useState("showcase");
   const pendingRouteViewRef = useRef(null);
@@ -363,7 +365,7 @@ export default function App() {
   }, [currentView, routeTransition]);
 
   useEffect(() => {
-    const seo = getSeoMeta(currentView);
+    const seo = getSeoMeta(currentView, routeDocumentation);
     const canonicalUrl = "https://hihanghoeng.com/" + (currentView === "home" ? "" : "#" + currentView);
     const setMeta = (selector, attribute, key, content) => {
       let element = document.head.querySelector(selector);
@@ -408,7 +410,7 @@ export default function App() {
       author: { "@type": "Organization", name: "HIHANG HOENG" },
       publisher: { "@type": "Organization", name: "HIHANG HOENG", logo: { "@type": "ImageObject", url: "https://hihanghoeng.com/hihang-hoeng-logo.png" } },
     });
-  }, [currentView]);
+  }, [currentView, routeDocumentation]);
   const openProjectDetail = (projectId) => {
     startRouteTransition(`project-${projectId}`, { label: "Opening competition archive", title: "Project Details" });
   };
@@ -447,7 +449,7 @@ export default function App() {
     const achievementId = currentView.replace(/^proposal-/, "");
     pageContent = <><ProposalPreview achievementId={achievementId} onBack={() => startRouteTransition("achievements", { direction: "down", label: "Back to achievements", title: "Achievement" })} onOpenBrief={() => handleAchievementDocument("brief", achievementId)} /><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView.startsWith("project-")) {
-    const projectId = currentView.split("-")[1];
+    const projectId = currentView.replace(/^project-/, "");
     pageContent = <><ProjectDetails projectId={projectId} onBack={() => startRouteTransition("all-projects", { direction: "down", label: "Back to projects", title: "Projects" })} onSelectProject={openProjectDetail} /><Footer onViewChange={handleViewChange} /></>;
   }
 
