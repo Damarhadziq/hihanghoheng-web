@@ -457,6 +457,7 @@ export default function App() {
         hideDefaultCursor={true}
         parallaxOn={true}
         targetSelector=".cursor-target, a, button, .gsap-pill, .gsap-clickable-card, [role='button']"
+        activeView={currentView}
       />
       <Nav onViewChange={handleViewChange} activeView={currentView} />
       <div ref={viewShellRef} className="route-view-shell" aria-hidden={isBootLoading ? "true" : undefined}>

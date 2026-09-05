@@ -52,7 +52,7 @@ export default function Mentor() {
           <div className="mentor-reveal order-2 pb-10 text-center md:order-1 md:text-right">
             <span className="label mb-3 inline-flex text-gold md:justify-end">Pendamping</span>
             <h2 className="font-display text-2xl font-semibold leading-tight text-ink md:text-4xl">
-              A mentor who keeps our process grounded.
+              A Mentor Who Keeps Our Process Grounded.
             </h2>
           </div>
 

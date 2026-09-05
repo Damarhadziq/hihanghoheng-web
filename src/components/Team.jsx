@@ -4,8 +4,47 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTeam } from "../hooks/useApiQueries";
 import { TeamCardsSkeleton } from "./PublicSkeletons";
+import ProfileCard from "./ProfileCard";
+import uiUxPattern from "../assets/patterns/ui-ux-pattern.svg";
+import businessAnalysisPattern from "../assets/patterns/business-analysis-pattern.svg";
+import userAnalysisPattern from "../assets/patterns/user-analysis-pattern.svg";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const getRoleConfig = (role = "") => {
+  const normalized = role.toLowerCase();
+  if (normalized.includes("business") || normalized.includes("biz")) {
+    return {
+      pattern: businessAnalysisPattern,
+      innerGradient:
+        "linear-gradient(145deg, rgba(20, 60, 130, 0.45) 0%, rgba(70, 50, 120, 0.3) 50%, rgba(80, 180, 240, 0.25) 100%)",
+      behindGlowColor: "rgba(90, 160, 255, 0.65)",
+    };
+  }
+  if (normalized.includes("user") || normalized.includes("research")) {
+    return {
+      pattern: userAnalysisPattern,
+      innerGradient:
+        "linear-gradient(145deg, rgba(25, 95, 85, 0.45) 0%, rgba(80, 60, 105, 0.3) 50%, rgba(100, 220, 190, 0.25) 100%)",
+      behindGlowColor: "rgba(95, 220, 185, 0.65)",
+    };
+  }
+  return {
+    pattern: uiUxPattern,
+    innerGradient:
+      "linear-gradient(145deg, rgba(96, 73, 110, 0.5) 0%, rgba(162, 137, 73, 0.35) 50%, rgba(113, 196, 255, 0.25) 100%)",
+    behindGlowColor: "rgba(212, 175, 55, 0.65)",
+  };
+};
+
+const getMemberHandle = (member) => {
+  const handles = {
+    Damar: "damarhadziq",
+    Faruq: "faruqosama",
+    Febi: "febiindra",
+  };
+  return handles[member.shortName] || member.shortName?.toLowerCase() || "maker";
+};
 
 const chatMessages = [
   {
@@ -157,7 +196,7 @@ const TeamMessageWall = ({ team }) => {
       <div className="section-wrapper">
         <div className="team-message-heading">
           <span className="label text-ink/48">Team Notes</span>
-          <h2 id="team-message-title" className="headline-md">The group chat before submission.</h2>
+          <h2 id="team-message-title" className="headline-md">The Group Chat Before Submission.</h2>
           <p className="text-sm leading-7 text-ink/64 md:text-base">
             Scroll through a horizontal stack of short pre-submission messages from the team.
           </p>
@@ -209,12 +248,16 @@ export default function Team({ variant = "home" }) {
       if (!section) return undefined;
 
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const cards = gsap.utils.toArray(section.querySelectorAll(".team-card"));
+      const cards = gsap.utils.toArray(
+        isPage
+          ? section.querySelectorAll(".team-profile-card-col")
+          : section.querySelectorAll(".team-card")
+      );
       const photoFrames = gsap.utils.toArray(section.querySelectorAll(".team-photo-frame"));
       const hoverCleanups = [];
 
       if (prefersReduced) {
-        gsap.set([textRef.current, ...cards].filter(Boolean), { opacity: 1, xPercent: 0 });
+        gsap.set([textRef.current, ...cards].filter(Boolean), { opacity: 1, xPercent: 0, y: 0 });
         photoFrames.forEach((frame) => {
           const images = gsap.utils.toArray(frame.querySelectorAll("img"));
           gsap.set(images, { opacity: 0, scale: 1 });
@@ -298,7 +341,7 @@ export default function Team({ variant = "home" }) {
 
       return () => hoverCleanups.forEach((cleanup) => cleanup());
     },
-    { scope: sectionRef, dependencies: [variant, team.length] },
+    { scope: sectionRef, dependencies: [variant, team.length, isPage] },
   );
 
   return (
@@ -308,7 +351,7 @@ export default function Team({ variant = "home" }) {
         <div className="section-wrapper mb-12 md:mb-16">
           <span className="label mb-5 inline-flex text-ink/48">Team</span>
           <div className="grid gap-5 md:grid-cols-12 md:items-end">
-            <h1 className="headline-lg md:col-span-7">Meet the makers.</h1>
+            <h1 className="headline-lg md:col-span-7">Meet The Makers.</h1>
             <p className="text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
               Three core roles moving from research and strategy to design and competition presentation.
             </p>
@@ -331,30 +374,68 @@ export default function Team({ variant = "home" }) {
       )}
 
       <div className="section-wrapper">
-        <div className="team-grid grid gap-6 md:grid-cols-3 md:gap-8">
-          {isPending ? <TeamCardsSkeleton /> : team.map((member, index) => (
-            <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0" tabIndex={0}>
-              <div className="team-photo-frame aspect-[4/5] overflow-hidden bg-ink/5">
-                {member.images.map((image, imageIndex) => (
-                  <img
-                    key={`${member.name}-${image}`}
-                    src={image}
-                    alt={imageIndex === 0 ? member.name : `${member.name} alternate ${imageIndex}`}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover mix-blend-luminosity"
-                    draggable="false"
+        <div className={`team-grid grid gap-6 md:grid-cols-3 md:gap-8 ${isPage ? "items-stretch" : ""}`}>
+          {isPending ? (
+            <TeamCardsSkeleton isPage={isPage} />
+          ) : isPage ? (
+            team.map((member, index) => {
+              const config = getRoleConfig(member.role);
+              const avatar = member.images?.[0] || "";
+              const handle = getMemberHandle(member);
+
+              return (
+                <div
+                  key={`${member.name}-${index}`}
+                  className="team-profile-card-col flex justify-center opacity-0"
+                >
+                  <ProfileCard
+                    name={member.name}
+                    title={member.role}
+                    handle={handle}
+                    status="Online"
+                    contactText="LinkedIn"
+                    avatarUrl={avatar}
+                    miniAvatarUrl={avatar}
+                    iconUrl={config.pattern}
+                    innerGradient={config.innerGradient}
+                    behindGlowColor={config.behindGlowColor}
+                    behindGlowEnabled={true}
+                    enableTilt={true}
+                    enableMobileTilt={false}
+                    onContactClick={() => {
+                      if (member.social?.linkedin) {
+                        window.open(member.social.linkedin, "_blank", "noopener,noreferrer");
+                      }
+                    }}
                   />
-                ))}
-                <SocialLinks member={member} />
-              </div>
-              <div className="pt-5">
-                <p className="label mb-2 text-gold">Member {index + 1}</p>
-                <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
-              </div>
-            </article>
-          ))}
+                </div>
+              );
+            })
+          ) : (
+            team.map((member, index) => (
+              <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0" tabIndex={0}>
+                <div className="team-photo-frame aspect-[4/5] overflow-hidden bg-ink/5">
+                  {member.images.map((image, imageIndex) => (
+                    <img
+                      key={`${member.name}-${image}`}
+                      src={image}
+                      alt={imageIndex === 0 ? member.name : `${member.name} alternate ${imageIndex}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover mix-blend-luminosity"
+                      draggable="false"
+                    />
+                  ))}
+                  <SocialLinks member={member} />
+                </div>
+                <div className="pt-5">
+                  <p className="label mb-2 text-gold">Member {index + 1}</p>
+                  <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </div>
 

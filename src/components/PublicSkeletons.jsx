@@ -85,7 +85,41 @@ export function AchievementRowsSkeleton({ count = 4, page = false }) {
   );
 }
 
-export function TeamCardsSkeleton({ count = 3 }) {
+export function TeamCardsSkeleton({ count = 3, isPage = false }) {
+  if (isPage) {
+    return (
+      <Fragment>
+        <LoadingLabel>Memuat profil anggota team</LoadingLabel>
+        {createItems(count).map((item) => (
+          <div key={item} className="flex justify-center w-full">
+            <article
+              className="relative aspect-[0.718] w-full max-w-[388px] rounded-[30px] border border-ink/10 bg-ink/[0.04] p-5 shadow-2xl overflow-hidden flex flex-col justify-between"
+              style={{ height: "80svh", maxHeight: "540px" }}
+            >
+              <div className="pt-6 flex flex-col items-center gap-2.5">
+                <Skeleton className="h-6 w-3/4 rounded-full" />
+                <Skeleton className="h-4 w-1/3 rounded-full" />
+              </div>
+              <div className="flex justify-center items-center py-6">
+                <Skeleton className="w-24 h-24 rounded-full opacity-30" />
+              </div>
+              <div className="rounded-[20px] border border-ink/10 bg-ink/[0.04] p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3.5 w-20 rounded" />
+                    <Skeleton className="h-2.5 w-12 rounded" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-16 rounded-lg" />
+              </div>
+            </article>
+          </div>
+        ))}
+      </Fragment>
+    );
+  }
+
   return (
     <Fragment>
       <LoadingLabel>Memuat anggota team</LoadingLabel>
@@ -126,23 +160,36 @@ export function ProcessRowsSkeleton({ count = 4 }) {
 
 export function ProjectArchiveSkeleton() {
   return (
-    <main className="min-h-screen bg-[#070a08] px-5 pb-16 pt-28 text-[#f8f5ec] md:px-10 md:pt-32" aria-busy="true">
-      <LoadingLabel>Memuat arsip proyek</LoadingLabel>
-      <div className="mx-auto max-w-[1440px]">
-        <div className="flex items-center justify-between gap-6">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-10 w-36" />
-        </div>
-        <Skeleton className="mx-auto mt-12 aspect-video w-[min(90vw,960px)]" />
-        <div className="mx-auto mt-7 flex w-[min(90vw,960px)] items-end justify-between gap-8">
-          <div className="w-full max-w-xl space-y-3">
-            <Skeleton className="h-8 w-3/5" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-4/5" />
+    <main className="min-h-screen bg-[#070A08] pt-24 pb-16 md:pt-28 md:pb-20 text-[#F8F5EC] flex flex-col justify-center" aria-busy="true">
+      <LoadingLabel>Memuat galeri proyek</LoadingLabel>
+      <section className="section-wrapper w-full">
+        {/* Title area skeleton */}
+        <div className="mb-8 md:mb-12 max-w-5xl space-y-3">
+          <Skeleton className="h-4 w-44 rounded-sm" />
+          <div className="space-y-2 pt-1">
+            <Skeleton className="h-10 md:h-14 w-3/4 max-w-lg rounded-sm" />
+            <Skeleton className="h-10 md:h-14 w-1/2 max-w-sm rounded-sm" />
           </div>
-          <Skeleton className="h-12 w-12 shrink-0" />
         </div>
-      </div>
+
+        {/* Accordion Gallery skeleton (5 vertical panels) */}
+        <div className="flex h-[420px] md:h-[550px] w-full gap-3 md:gap-[14px]">
+          {/* Expanded panel */}
+          <div className="relative flex-[5] overflow-hidden rounded-[16px] border border-ink/10 bg-ink/[0.03]">
+            <Skeleton className="h-full w-full rounded-[16px]" />
+            <div className="absolute bottom-6 left-6 space-y-2">
+              <Skeleton className="h-3 w-32 rounded-sm" />
+              <Skeleton className="h-6 w-48 rounded-sm" />
+            </div>
+          </div>
+          {/* Collapsed panels */}
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex-[1] overflow-hidden rounded-[16px] border border-ink/10 bg-ink/[0.03]">
+              <Skeleton className="h-full w-full rounded-[16px]" />
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

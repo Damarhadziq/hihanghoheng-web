@@ -2255,6 +2255,8 @@ html.is-project-gallery body::-webkit-scrollbar {
   place-items: center;
   overflow: hidden;
   isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .about-marquee-hero .gallery-marquee-background {
@@ -2267,7 +2269,8 @@ html.is-project-gallery body::-webkit-scrollbar {
 .about-marquee-hero .gallery-marquee-field {
   min-height: 100%;
   opacity: 0.64;
-  transform: scale(1.06);
+  transform: scale(1.06) translateZ(0);
+  backface-visibility: hidden;
 }
 
 .about-marquee-overlay {
@@ -2446,7 +2449,7 @@ html.is-project-gallery body::-webkit-scrollbar {
 
 /* Achievement page hero hierarchy */
 .achievement-page-title {
-  max-width: 13ch;
+  max-width: 24ch;
   color: var(--color-ink);
   font-family: var(--font-display);
   font-size: clamp(3.4rem, 6vw, 6rem);
@@ -2456,7 +2459,7 @@ html.is-project-gallery body::-webkit-scrollbar {
 
 @media (max-width: 767px) {
   .achievement-page-title {
-    max-width: 12ch;
+    max-width: 100%;
     font-size: clamp(2.8rem, 14vw, 4rem);
     line-height: 1;
   }

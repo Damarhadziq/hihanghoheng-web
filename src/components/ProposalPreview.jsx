@@ -14,7 +14,7 @@ export default function ProposalPreview({ achievementId, onBack, onOpenBrief }) 
       <main className="documentation-page documentation-empty page-shell">
         <div className="section-wrapper">
           <p className="label text-ink/48">Documentation</p>
-          <h1 className="headline-md mt-5">Proposal reference not found.</h1>
+          <h1 className="headline-md mt-5">Proposal Reference Not Found.</h1>
           <button type="button" className="documentation-command mt-8" onClick={onBack}>Back to achievements</button>
         </div>
       </main>

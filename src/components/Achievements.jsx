@@ -28,7 +28,9 @@ export default function Achievements({ variant = "home", onOpenDocumentation, on
         <div className="section-wrapper">
           <header className="mb-14 md:mb-20">
             <span className="label mb-5 inline-flex text-ink/48 gsap-reveal">Competition Docs</span>
-            <h1 className="achievement-page-title gsap-reveal">Competition journeys, documented.</h1>
+            <h1 className="achievement-page-title gsap-reveal">
+              Competition Journeys,<br />Documented.
+            </h1>
           </header>
 
           <div className="achievement-docs">

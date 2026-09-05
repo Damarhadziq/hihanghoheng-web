@@ -18,14 +18,14 @@ export default function About({ variant = "home" }) {
   if (variant === "page") {
     return (
       <section id="about" ref={sectionRef} className="about-page border-hairline-t">
-        <div className="about-marquee-hero gsap-reveal">
+        <div className="about-marquee-hero">
           <GalleryMarquee variant="background" />
           <div className="about-marquee-overlay" />
-          <header className="about-marquee-copy">
+          <header className="about-marquee-copy gsap-reveal">
             <span className="label mb-5 inline-flex text-[#F8F5EC]/68">About</span>
             <h1 className="about-page-headline mb-6">
-              <span>Built from briefs and research.</span>
-              <span>Ready for the final pitch.</span>
+              <span>Built From Briefs And Research.</span>
+              <span>Ready For The Final Pitch.</span>
             </h1>
             <p className="mx-auto max-w-4xl text-sm leading-7 text-[#F8F5EC]/72 md:text-base">
               HIHANG HOENG is a UI/UX competition team from Universitas Negeri Semarang. We turn briefs and research into prototypes, pitch decks, and clear documentation.
@@ -46,7 +46,7 @@ export default function About({ variant = "home" }) {
           <div className="mt-10 grid gap-6 md:mt-16 md:grid-cols-2">
             <article className="about-panel gsap-reveal">
               <p className="label mb-4 text-gold">Vision</p>
-              <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">{site?.about?.vision || "To become a consistent design competition team that carries campus-born work to broader stages."}</h2>
+              <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">{site?.about?.vision || "To Become A Consistent Design Competition Team That Carries Campus-Born Work To Broader Stages."}</h2>
             </article>
             <article className="about-panel gsap-reveal">
               <p className="label mb-4 text-gold">Mission</p>
@@ -86,8 +86,8 @@ export default function About({ variant = "home" }) {
 
           <div className="md:col-span-9 lg:col-span-7">
             <h2 className="headline-md mb-6 gsap-reveal">
-              We're a team of designers and developers from a university most
-              people haven't heard of - and that's exactly what drives us.
+              We're A Team Of Designers And Developers From A University Most
+              People Haven't Heard Of &mdash; And That's Exactly What Drives Us.
             </h2>
             <div className="space-y-4 gsap-reveal">
               <p className="text-ink/70 text-base md:text-lg leading-relaxed">

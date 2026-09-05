@@ -82,7 +82,13 @@ export default function GalleryMarquee({ variant = "section" }) {
                   key={`${rowIndex}-${image.src}-${imageIndex}`}
                   className={`gallery-marquee-photo ${getVariantClass(rowIndex, imageIndex)} tone-${(imageIndex + rowIndex) % 4}`}
                 >
-                  <img src={image.src} alt="" draggable="false" loading="lazy" decoding="async" />
+                  <img
+                    src={image.src}
+                    alt=""
+                    draggable="false"
+                    loading={isBackground ? "eager" : "lazy"}
+                    decoding={isBackground ? "sync" : "async"}
+                  />
                 </figure>
               ))}
             </Marquee>

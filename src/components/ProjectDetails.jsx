@@ -177,7 +177,7 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
         >
           <div className="case-section-heading case-reveal">
             <p className="label text-[#F8F5EC]/48">1 / Competition timeline</p>
-            <h2 id="timeline-title" className="headline-md text-[#F8F5EC]">From brief to submission</h2>
+            <h2 id="timeline-title" className="headline-md text-[#F8F5EC]">From Brief To Submission</h2>
           </div>
 
           <div className="case-timeline mt-8 md:mt-10">
@@ -205,13 +205,13 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
         >
           <article className="case-story-panel case-reveal">
             <p className="label mb-5 text-[#F8F5EC]/48">2 / Competition context</p>
-            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The problem brought into competition</h2>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The Problem Brought Into Competition</h2>
             <p className="mt-6 text-sm leading-8 text-[#F8F5EC]/68 md:text-base">{project.problem}</p>
           </article>
 
           <article className="case-story-panel case-story-panel-accent case-reveal">
             <p className="label mb-5 text-[#F8F5EC]/48">3 / Submission direction</p>
-            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The direction prepared for judging</h2>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-[#F8F5EC] md:text-4xl">The Direction Prepared For Judging</h2>
             <p className="mt-6 text-sm leading-8 text-[#F8F5EC]/68 md:text-base">{project.solution}</p>
           </article>
         </section>
@@ -224,7 +224,7 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
         >
           <div className="case-section-heading case-reveal md:max-w-3xl">
             <p className="label text-[#F8F5EC]/48">4 / Preview interface</p>
-            <h2 id="mockup-title" className="headline-md text-[#F8F5EC]">Interface preview</h2>
+            <h2 id="mockup-title" className="headline-md text-[#F8F5EC]">Interface Preview</h2>
             <p className="mt-5 text-sm leading-7 text-[#F8F5EC]/62 md:text-base">
               A visual preview of the prototype and mockups used for submission and competition presentation.
             </p>
@@ -251,7 +251,7 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
         >
           <div className="case-section-heading case-reveal md:max-w-3xl">
             <p className="label text-[#F8F5EC]/48">5 / Competition crew</p>
-            <h2 id="competition-team-title" className="headline-md text-[#F8F5EC]">Who worked on this project</h2>
+            <h2 id="competition-team-title" className="headline-md text-[#F8F5EC]">Who Worked On This Project</h2>
             <p className="mt-5 text-sm leading-7 text-[#F8F5EC]/62 md:text-base">
               Every HIHANG HOENG project comes from a competition. These are the members who worked on the submission, along with their roles and social links.
             </p>
@@ -290,6 +290,6 @@ export default function ProjectDetails(props) {
   const { data: project, isPending } = useProject(projectId);
   const { data: projects = [], isPending: areProjectsPending } = useProjects();
   if (isPending || areProjectsPending) return <ProjectDetailSkeleton />;
-  if (!project || !projects.length) return <main className="case-page page-shell min-h-screen px-6 pt-32 text-ink"><p className="label text-ink/48">Project</p><h1 className="mt-5 font-display text-4xl font-semibold">Project tidak ditemukan.</h1></main>;
+  if (!project || !projects.length) return <main className="case-page page-shell min-h-screen px-6 pt-32 text-ink"><p className="label text-ink/48">Project</p><h1 className="mt-5 font-display text-4xl font-semibold">Project Tidak Ditemukan.</h1></main>;
   return <ProjectDetailsContent {...props} project={project} projects={projects} />;
 }

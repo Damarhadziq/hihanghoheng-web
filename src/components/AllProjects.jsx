@@ -39,11 +39,13 @@ function AllProjectsContent({ projects, onSelectProject }) {
     <main className="min-h-screen bg-[#070A08] pt-24 pb-16 md:pt-28 md:pb-20 text-[#F8F5EC] flex flex-col justify-center">
       <section className="section-wrapper w-full">
         {/* Judul */}
-        <div className="mb-8 md:mb-12 max-w-2xl">
+        <div className="mb-8 md:mb-12 max-w-5xl">
           <span className="label mb-3 inline-flex items-center gap-2 text-ink/48">
             Competition Portfolio &bull; {projects.length} Projects
           </span>
-          <h1 className="headline-lg">Competition journeys, documented.</h1>
+          <h1 className="headline-lg">
+            Competition Case Studies,<br />Crafted For The Stage.
+          </h1>
         </div>
 
         {/* Konten Accordion Gallery */}
@@ -77,7 +79,7 @@ export default function AllProjects(props) {
     return (
       <main className="project-index-page min-h-screen px-6 pt-32 text-ink">
         <p className="label text-ink/48">Projects</p>
-        <h1 className="mt-5 font-display text-4xl font-semibold">Belum ada project yang dipublikasikan.</h1>
+        <h1 className="mt-5 font-display text-4xl font-semibold">Belum Ada Project Yang Dipublikasikan.</h1>
       </main>
     );
   }

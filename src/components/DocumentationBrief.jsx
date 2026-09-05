@@ -73,7 +73,7 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
       <main className="documentation-page documentation-empty page-shell">
         <div className="section-wrapper">
           <p className="label text-ink/48">Documentation</p>
-          <h1 className="headline-md mt-5">Project brief not found.</h1>
+          <h1 className="headline-md mt-5">Project Brief Not Found.</h1>
           <button type="button" className="documentation-command mt-8" onClick={onBack}>Back to achievements</button>
         </div>
       </main>
@@ -119,31 +119,31 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
         <article className="documentation-content">
           <section id="brief-background" className="brief-section gsap-reveal">
             <p className="brief-section-number">01</p>
-            <div><p className="label text-gold">Latar Belakang Masalah</p><h2>Why this problem matters.</h2><p>{document.background}</p></div>
+            <div><p className="label text-gold">Latar Belakang Masalah</p><h2>Why This Problem Matters.</h2><p>{document.background}</p></div>
           </section>
           <section id="brief-objectives" className="brief-section gsap-reveal">
             <p className="brief-section-number">02</p>
-            <div><p className="label text-gold">Tujuan Aplikasi</p><h2>What the experience must achieve.</h2><BulletList items={document.objectives} /></div>
+            <div><p className="label text-gold">Tujuan Aplikasi</p><h2>What The Experience Must Achieve.</h2><BulletList items={document.objectives} /></div>
           </section>
           <section id="brief-users" className="brief-section gsap-reveal">
             <p className="brief-section-number">03</p>
-            <div><p className="label text-gold">Target Pengguna</p><h2>People at the center of the system.</h2><BulletList items={document.users} /></div>
+            <div><p className="label text-gold">Target Pengguna</p><h2>People At The Center Of The System.</h2><BulletList items={document.users} /></div>
           </section>
           <section id="brief-solution" className="brief-section gsap-reveal">
             <p className="brief-section-number">04</p>
-            <div><p className="label text-gold">Solusi yang Ditawarkan</p><h2>The proposed product direction.</h2><p>{document.solution}</p></div>
+            <div><p className="label text-gold">Solusi yang Ditawarkan</p><h2>The Proposed Product Direction.</h2><p>{document.solution}</p></div>
           </section>
           <section id="brief-innovations" className="brief-section gsap-reveal">
             <p className="brief-section-number">05</p>
-            <div><p className="label text-gold">Nilai Inovasi UI/UX</p><h2>How the design creates value.</h2><BulletList items={document.innovations} /></div>
+            <div><p className="label text-gold">Nilai Inovasi UI/UX</p><h2>How The Design Creates Value.</h2><BulletList items={document.innovations} /></div>
           </section>
           <section id="brief-features" className="brief-section gsap-reveal">
             <p className="brief-section-number">06</p>
-            <div><p className="label text-gold">Fitur Inti</p><h2>The minimum meaningful experience.</h2><BulletList items={document.features} /></div>
+            <div><p className="label text-gold">Fitur Inti</p><h2>The Minimum Meaningful Experience.</h2><BulletList items={document.features} /></div>
           </section>
           <section id="brief-limitations" className="brief-section gsap-reveal">
             <p className="brief-section-number">07</p>
-            <div><p className="label text-gold">Batasan Fitur</p><h2>What stays outside the scope.</h2><BulletList items={document.limitations} /></div>
+            <div><p className="label text-gold">Batasan Fitur</p><h2>What Stays Outside The Scope.</h2><BulletList items={document.limitations} /></div>
           </section>
           <section id="brief-positioning" className="brief-section brief-positioning gsap-reveal">
             <p className="brief-section-number">08</p>
@@ -153,7 +153,7 @@ export default function DocumentationBrief({ achievementId, onBack, onOpenPropos
             <p className="brief-section-number">09</p>
             <div>
               <p className="label text-gold">User Flow</p>
-              <h2>Primary low-fidelity journey.</h2>
+              <h2>Primary Low-Fidelity Journey.</h2>
               <ol className="brief-flow-list">{document.userFlow.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, "0")}</span><p>{step}</p></li>)}</ol>
             </div>
           </section>
