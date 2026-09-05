@@ -118,7 +118,6 @@ export default function App() {
   const routeAchievementId = routeDocumentationMatch?.[2];
   const { data: routeDocumentation } = useAchievementDocumentation(routeAchievementId);
   const [isBootLoading, setIsBootLoading] = useState(currentView === "home");
-  const [projectViewMode, setProjectViewMode] = useState("showcase");
   const pendingRouteViewRef = useRef(null);
   const [routeTransition, setRouteTransition] = useState(null);
   const viewShellRef = useRef(null);
@@ -199,18 +198,15 @@ export default function App() {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const isTransitioning = isBootLoading || Boolean(routeTransition);
-    const isProjectGallery = currentView === "all-projects" && projectViewMode === "showcase";
 
     root.classList.toggle("is-transitioning", isTransitioning);
     root.classList.toggle("is-boot-loading", isBootLoading);
-    root.classList.toggle("is-project-gallery", isProjectGallery);
 
     return () => {
       root.classList.remove("is-transitioning");
       root.classList.remove("is-boot-loading");
-      root.classList.remove("is-project-gallery");
     };
-  }, [currentView, isBootLoading, projectViewMode, routeTransition]);
+  }, [isBootLoading, routeTransition]);
   useEffect(() => {
     const shouldLockScroll = isBootLoading || Boolean(routeTransition);
     if (!shouldLockScroll) return undefined;
@@ -287,7 +283,7 @@ export default function App() {
   }, [currentView, isBootLoading, routeTransition]);
 
   useEffect(() => {
-    if (isBootLoading || currentView === "all-projects" || routeTransition) return undefined;
+    if (isBootLoading || routeTransition) return undefined;
 
     const lenis = new Lenis();
     lenis.on("scroll", ScrollTrigger.update);
@@ -442,7 +438,7 @@ export default function App() {
   } else if (currentView === "team") {
     pageContent = <><PageShell><Team variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "all-projects") {
-    pageContent = <AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} onViewModeChange={setProjectViewMode} />;
+    pageContent = <AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} />;
   } else if (currentView.startsWith("brief-")) {
     const achievementId = currentView.replace(/^brief-/, "");
     pageContent = <><DocumentationBrief achievementId={achievementId} onBack={() => startRouteTransition("achievements", { direction: "down", label: "Back to achievements", title: "Achievement" })} onOpenProposal={() => handleAchievementDocument("proposal", achievementId)} /><Footer onViewChange={handleViewChange} /></>;

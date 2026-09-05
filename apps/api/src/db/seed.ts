@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { asc, eq } from "drizzle-orm";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -16,8 +17,13 @@ type FrontendDocumentation = { category: string; prototypeUrl: string | null; su
 const slugify = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 async function loadFrontendData() {
-  const frontendRoot = resolve(process.cwd(), "../..");
-  const load = (file: string) => import(pathToFileURL(resolve(frontendRoot, "src/data", file)).href);
+  const candidates = [
+    resolve(process.cwd(), "src/data"),
+    resolve(process.cwd(), "../src/data"),
+    resolve(process.cwd(), "../../src/data"),
+  ];
+  const dataDir = candidates.find((dir) => existsSync(dir)) || candidates[1];
+  const load = (file: string) => import(pathToFileURL(resolve(dataDir, file)).href);
   const [teamModule, projectModule, processModule, achievementModule, documentationModule] = await Promise.all([load("team.js"), load("projects.js"), load("process.js"), load("achievements.js"), load("documentation.js")]);
   return {
     team: teamModule.team as FrontendTeamMember[], projects: projectModule.projects as FrontendProject[],
@@ -29,23 +35,29 @@ async function loadFrontendData() {
 }
 
 async function seed() {
+  console.log("Loading frontend data...");
   const source = await loadFrontendData();
+  console.log(`Loaded ${source.projects.length} projects from frontend data.`);
+
   for (const [sortOrder, member] of source.team.entries()) {
     const input = { slug: slugify(member.shortName), name: member.name, shortName: member.shortName, role: member.role, linkedinUrl: member.social.linkedin ?? null, instagramUrl: member.social.instagram ?? null, sortOrder, isActive: true, images: member.images.map((url, index) => ({ url, altText: `${member.name} portrait ${index + 1}` })) };
     const existing = await db.query.teamMembers.findFirst({ where: eq(teamMembers.slug, input.slug) });
     if (existing) await teamService.update(existing.id, input); else await teamService.create(input);
   }
+  console.log("Team members synced.");
 
   const members = await db.query.teamMembers.findMany();
   const memberIdByName = new Map(members.map((member) => [member.name, member.id]));
   const contributors = (people: Array<{ name: string; role: string }>) => people.map((person) => ({ teamMemberId: memberIdByName.get(person.name), role: person.role })).filter((person): person is { teamMemberId: string; role: string } => Boolean(person.teamMemberId));
 
   for (const [sortOrder, project] of source.projects.entries()) {
+    console.log(`Syncing project ${project.name}...`);
     const slug = slugify(project.name);
     const input = { slug, name: project.name, year: Number(project.year), description: project.description, externalUrl: project.link === "#" ? null : project.link ?? null, coverImageUrl: project.image, landscapeImageUrl: project.mockup16x9 ?? null, type: project.type, organizer: project.organizer, competition: project.competition, problem: project.problem, solution: project.solution, status: "published" as const, featured: sortOrder < 3, sortOrder, tags: project.tags, timeline: project.timeline, mockups: project.mockups.map((mockup) => ({ title: mockup.title, imageUrl: mockup.image, altText: `${project.name} - ${mockup.title}` })), contributors: contributors(project.team) };
     const existing = await db.query.projects.findFirst({ where: eq(projects.slug, slug) });
     if (existing) await projectService.update(existing.id, input); else await projectService.create(input);
   }
+  console.log("Projects synced.");
 
   for (const [sortOrder, achievement] of source.achievements.entries()) {
     const input = { id: achievement.id, occurredAt: new Date(achievement.date), dateLabel: achievement.date, competitionName: achievement.competitionName, organizer: achievement.organizer, scale: achievement.scale, placement: achievement.placement, projectName: achievement.projectName, note: achievement.note, story: achievement.story, status: "published" as const, sortOrder, contributors: contributors(achievement.contributors) };

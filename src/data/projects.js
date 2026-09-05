@@ -137,4 +137,24 @@ export const projects = [
       "Jejak Karbon turns tracking into habit logs, weekly insight cards, and lightweight challenges so behavior change feels concrete and measurable.",
     mockups: defaultMockups,
   },
+  {
+    name: "EduBridge",
+    year: "2023",
+    tags: ["ICT Business Plan", "Web Platform", "Education"],
+    description:
+      "An education opportunity platform that helps students discover mentoring, learning programs, and relevant support through one focused journey.",
+    link: "#",
+    image: landingMockup,
+    mockup16x9,
+    type: "Business Plan Competition",
+    organizer: "ICT BPC Committee",
+    competition: "ICT Business Plan Competition",
+    team: competitionCrew,
+    timeline: defaultTimeline,
+    problem:
+      "Students can miss learning support and development opportunities because information is scattered, difficult to compare, and rarely connected to their current goals.",
+    solution:
+      "EduBridge organizes opportunities, mentor profiles, and learning support around a student's goal. The journey highlights fit, requirements, deadlines, and application progress.",
+    mockups: defaultMockups,
+  },
 ];

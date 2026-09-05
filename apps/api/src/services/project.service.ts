@@ -78,12 +78,10 @@ export const projectService = {
         updatedAt: new Date(),
       }).where(eq(projects.id, id)).returning({ id: projects.id });
       if (!updated) throw new AppError(404, "Project not found");
-      await Promise.all([
-        tx.delete(projectTags).where(eq(projectTags.projectId, id)),
-        tx.delete(projectTimelineItems).where(eq(projectTimelineItems.projectId, id)),
-        tx.delete(projectMockups).where(eq(projectMockups.projectId, id)),
-        tx.delete(projectContributors).where(eq(projectContributors.projectId, id)),
-      ]);
+      await tx.delete(projectTags).where(eq(projectTags.projectId, id));
+      await tx.delete(projectTimelineItems).where(eq(projectTimelineItems.projectId, id));
+      await tx.delete(projectMockups).where(eq(projectMockups.projectId, id));
+      await tx.delete(projectContributors).where(eq(projectContributors.projectId, id));
       await insertChildren(tx, id, input);
     });
     return this.getBySlug(input.slug, false);
