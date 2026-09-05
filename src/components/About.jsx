@@ -34,7 +34,7 @@ export default function About({ variant = "home" }) {
         </div>
 
         <div className="about-page-content section-wrapper">
-          <div className="grid gap-3 border-y border-hairline py-5 sm:grid-cols-3">
+          <div className="grid gap-3 py-5 sm:grid-cols-3">
             {stats.map(([value, label]) => (
               <div key={label} className="about-stat gsap-reveal">
                 <strong>{value}</strong>
