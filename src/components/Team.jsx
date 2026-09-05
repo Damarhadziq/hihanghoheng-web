@@ -348,14 +348,8 @@ export default function Team({ variant = "home" }) {
     <>
       <section id="team" ref={sectionRef} className={`overflow-hidden border-hairline-t py-20 md:py-32 ${isPage ? "team-page" : ""}`}>
       {isPage ? (
-        <div className="section-wrapper mb-12 md:mb-16">
-          <span className="label mb-5 inline-flex text-ink/48">Team</span>
-          <div className="grid gap-5 md:grid-cols-12 md:items-end">
-            <h1 className="headline-lg md:col-span-7">Meet The Makers.</h1>
-            <p className="text-sm leading-7 text-ink/64 md:col-span-4 md:col-start-9 md:text-base">
-              Three core roles moving from research and strategy to design and competition presentation.
-            </p>
-          </div>
+        <div className="section-wrapper mb-12 text-center md:mb-16">
+          <h1 className="headline-lg mx-auto">Meet The Makers.</h1>
         </div>
       ) : (
         <>
@@ -380,7 +374,7 @@ export default function Team({ variant = "home" }) {
           ) : isPage ? (
             team.map((member, index) => {
               const config = getRoleConfig(member.role);
-              const avatar = member.images?.[0] || "";
+              const avatar = "/assets/demo/person.webp";
               const handle = getMemberHandle(member);
 
               return (
@@ -392,10 +386,10 @@ export default function Team({ variant = "home" }) {
                     name={member.name}
                     title={member.role}
                     handle={handle}
-                    status="Online"
                     contactText="LinkedIn"
                     avatarUrl={avatar}
                     miniAvatarUrl={avatar}
+                    grainUrl="/assets/demo/grain.webp"
                     iconUrl={config.pattern}
                     innerGradient={config.innerGradient}
                     behindGlowColor={config.behindGlowColor}

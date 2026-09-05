@@ -25,12 +25,7 @@ const fallbackProject = {
   mockups: [],
 };
 
-function ProjectDetailsContent({ project = fallbackProject, projects, projectId, onBack, onSelectProject }) {
-  const currentIndex = Math.max(0, projects.findIndex((item) => item.slug === projectId));
-  const previousIndex = (currentIndex - 1 + projects.length) % projects.length;
-  const nextIndex = (currentIndex + 1) % projects.length;
-  const previousProject = projects[previousIndex];
-  const nextProject = projects[nextIndex];
+function ProjectDetailsContent({ project = fallbackProject, projectId, onBack }) {
 
   const featuredImage = project.mockup16x9 || project.image;
   const mockups = project.mockups?.length
@@ -270,16 +265,22 @@ function ProjectDetailsContent({ project = fallbackProject, projects, projectId,
             ))}
           </div>
         </section>
-        <nav className="case-project-nav" aria-label="Browse competition projects">
-          <button type="button" onClick={() => onSelectProject?.(previousProject.slug)}>
-            <span className="label text-[#F8F5EC]/42">Previous project</span>
-            <strong><span aria-hidden="true">&larr;</span> {previousProject.name}</strong>
+        <div className="case-back-to-top-wrapper">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="case-back-to-top-btn cursor-target"
+            aria-label="Back to top"
+          >
+            <span className="case-back-to-top-icon" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            </span>
+            <span className="case-back-to-top-text">Back to Top</span>
           </button>
-          <button type="button" onClick={() => onSelectProject?.(nextProject.slug)}>
-            <span className="label text-[#F8F5EC]/42">Next project</span>
-            <strong>{nextProject.name} <span aria-hidden="true">&rarr;</span></strong>
-          </button>
-        </nav>
+        </div>
       </article>
     </div>
   );

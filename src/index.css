@@ -1400,7 +1400,7 @@ html.is-project-gallery body::-webkit-scrollbar {
   letter-spacing: 0.08em;
   line-height: 1.4;
   text-transform: uppercase;
-  transition: color 220ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 220ms ease, opacity 220ms ease;
 }
 
 .documentation-link:hover,
@@ -1408,7 +1408,7 @@ html.is-project-gallery body::-webkit-scrollbar {
 .doc-link-list a:hover,
 .doc-link-list a:focus-visible {
   color: #F8F5EC;
-  transform: translateX(3px);
+  opacity: 1;
 }
 
 .doc-link-list li::marker {
@@ -2149,6 +2149,68 @@ html.is-project-gallery body::-webkit-scrollbar {
   text-transform: uppercase;
 }
 
+.case-back-to-top-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(4rem, 8vw, 7rem);
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  border-top: 1px solid rgba(248, 245, 236, 0.12);
+}
+
+.case-back-to-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.6rem 0.75rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 245, 236, 0.22);
+  background: rgba(248, 245, 236, 0.035);
+  color: #F8F5EC;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.case-back-to-top-btn:hover,
+.case-back-to-top-btn:focus-visible {
+  background: #F8F5EC;
+  color: #070A08;
+  border-color: #F8F5EC;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(248, 245, 236, 0.12);
+}
+
+.case-back-to-top-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(248, 245, 236, 0.08);
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), background 260ms ease, color 260ms ease;
+}
+
+.case-back-to-top-icon svg {
+  transition: transform 220ms ease;
+}
+
+.case-back-to-top-btn:hover .case-back-to-top-icon,
+.case-back-to-top-btn:focus-visible .case-back-to-top-icon {
+  background: #070A08;
+  color: #F8F5EC;
+}
+
+.case-back-to-top-btn:hover .case-back-to-top-icon svg,
+.case-back-to-top-btn:focus-visible .case-back-to-top-icon svg {
+  transform: translateY(-2px);
+}
+
 .case-project-nav {
   display: grid;
   margin-top: clamp(3rem, 8vw, 7rem);
@@ -2302,9 +2364,15 @@ html.is-project-gallery body::-webkit-scrollbar {
   padding-block: clamp(3.5rem, 7vw, 6rem);
 }
 
-.achievement-page .headline-lg,
-.team-page .headline-lg {
+.achievement-page .headline-lg {
   max-width: 14ch;
+  font-size: clamp(2.5rem, 4.5vw, 4.4rem);
+  line-height: 1.04;
+}
+
+.team-page .headline-lg {
+  max-width: none;
+  text-align: center;
   font-size: clamp(2.5rem, 4.5vw, 4.4rem);
   line-height: 1.04;
 }
@@ -2796,13 +2864,13 @@ html.is-project-gallery body::-webkit-scrollbar {
   letter-spacing: 0.08em;
   line-height: 1.4;
   text-transform: uppercase;
-  transition: color 220ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 220ms ease, opacity 220ms ease;
 }
 
 .doc-link-list button:hover,
 .doc-link-list button:focus-visible {
   color: #f8f5ec;
-  transform: translateX(3px);
+  opacity: 1;
 }
 
 .proposal-heading {

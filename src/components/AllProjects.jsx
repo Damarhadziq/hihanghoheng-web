@@ -44,7 +44,7 @@ function AllProjectsContent({ projects, onSelectProject }) {
             Competition Portfolio &bull; {projects.length} Projects
           </span>
           <h1 className="headline-lg">
-            Competition Case Studies,<br />Crafted For The Stage.
+            Case Studies.
           </h1>
         </div>
 

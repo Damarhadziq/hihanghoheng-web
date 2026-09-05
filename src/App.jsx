@@ -456,7 +456,7 @@ export default function App() {
         spinDuration={2}
         hideDefaultCursor={true}
         parallaxOn={true}
-        targetSelector=".cursor-target, a, button, .gsap-pill, .gsap-clickable-card, [role='button']"
+        targetSelector=".cursor-target, a:not(.no-cursor-target), button:not(.no-cursor-target), .gsap-pill, .gsap-clickable-card, [role='button']"
         activeView={currentView}
       />
       <Nav onViewChange={handleViewChange} activeView={currentView} />

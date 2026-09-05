@@ -161,11 +161,11 @@ const TargetCursor = ({
 
       const corners = Array.from(cornersRef.current);
       corners.forEach((corner, i) => {
-        const currentX = gsap.getProperty(corner, 'x');
-        const currentY = gsap.getProperty(corner, 'y');
-
         const targetX = targetCorners[i].x - cursorX;
         const targetY = targetCorners[i].y - cursorY;
+
+        const currentX = gsap.getProperty(corner, 'x');
+        const currentY = gsap.getProperty(corner, 'y');
 
         const finalX = currentX + (targetX - currentX) * strength;
         const finalY = currentY + (targetY - currentY) * strength;
@@ -239,6 +239,9 @@ const TargetCursor = ({
       const allTargets = [];
       let current = directTarget;
       while (current && current !== document.body) {
+        if (current.matches && (current.matches('.no-cursor-target') || current.closest?.('.no-cursor-target'))) {
+          return;
+        }
         if (current.matches && current.matches(targetSelector)) {
           allTargets.push(current);
         }
@@ -262,7 +265,9 @@ const TargetCursor = ({
 
       gsap.killTweensOf(cursorRef.current, 'rotation');
       spinTl.current?.pause();
-      gsap.set(cursorRef.current, { rotation: 0 });
+      const currentRot = gsap.getProperty(cursorRef.current, 'rotation') || 0;
+      const targetRot = Math.round(currentRot / 360) * 360;
+      gsap.to(cursorRef.current, { rotation: targetRot, duration: 0.35, ease: 'power3.out' });
 
       if (cursorColorOnTarget) {
         gsap.to(corners, {
@@ -282,8 +287,6 @@ const TargetCursor = ({
       const rect = target.getBoundingClientRect();
       const { borderWidth, cornerSize } = constants;
       const { x: offsetX, y: offsetY } = getOffset();
-      const cursorX = gsap.getProperty(cursorRef.current, 'x');
-      const cursorY = gsap.getProperty(cursorRef.current, 'y');
 
       targetCornerPositionsRef.current = [
         { x: rect.left - borderWidth - offsetX, y: rect.top - borderWidth - offsetY },
@@ -301,14 +304,8 @@ const TargetCursor = ({
         ease: 'power2.out'
       });
 
-      corners.forEach((corner, i) => {
-        gsap.to(corner, {
-          x: targetCornerPositionsRef.current[i].x - cursorX,
-          y: targetCornerPositionsRef.current[i].y - cursorY,
-          duration: 0.2,
-          ease: 'power2.out'
-        });
-      });
+      // Corner positioning is handled entirely by the ticker via strength ramp-up.
+      // No separate tween here — avoids the conflict that caused the "jump"."
 
       const leaveHandler = () => {
         gsap.ticker.remove(tickerFnRef.current);
