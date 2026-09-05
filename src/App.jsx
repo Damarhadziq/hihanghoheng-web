@@ -21,6 +21,7 @@ import ProposalPreview from "./components/ProposalPreview";
 import { useAchievementDocumentation } from "./hooks/useApiQueries";
 import LoadingScreen from "./components/LoadingScreen";
 import RouteSlideTransition from "./components/RouteSlideTransition";
+import TargetCursor from "./components/TargetCursor";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -455,6 +456,12 @@ export default function App() {
 
   return (
     <>
+      <TargetCursor
+        spinDuration={2}
+        hideDefaultCursor={true}
+        parallaxOn={true}
+        targetSelector=".cursor-target, a, button, .gsap-pill, .gsap-clickable-card, [role='button']"
+      />
       <Nav onViewChange={handleViewChange} activeView={currentView} />
       <div ref={viewShellRef} className="route-view-shell" aria-hidden={isBootLoading ? "true" : undefined}>
         {pageContent}

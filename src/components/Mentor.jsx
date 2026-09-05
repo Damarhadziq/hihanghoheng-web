@@ -46,7 +46,7 @@ export default function Mentor() {
   );
 
   return (
-    <section id="mentor" ref={sectionRef} className="relative overflow-hidden border-hairline-t pt-8 md:pt-10">
+    <section id="mentor" ref={sectionRef} className="relative overflow-hidden pt-8 md:pt-10">
       <div className="section-wrapper relative z-20">
         <div className="grid gap-8 md:grid-cols-[1fr_minmax(280px,380px)_1fr] md:items-end md:gap-10">
           <div className="mentor-reveal order-2 pb-10 text-center md:order-1 md:text-right">

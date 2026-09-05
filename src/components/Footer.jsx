@@ -63,7 +63,7 @@ export default function Footer({ onViewChange }) {
           </div>
         </div>
 
-        <div className="mt-12 pt-5 border-t border-[#F8F5EC]/10 flex flex-col md:flex-row justify-between gap-4">
+        <div className="mt-12 pt-5 flex flex-col md:flex-row justify-between gap-4">
           <p className="label text-[#F8F5EC]/48">&copy; {currentYear} HIHANG HOENG. All rights reserved.</p>
           <p className="label text-[#F8F5EC]/48">{footer.organization || "Universitas Negeri Semarang"} - Built with craft &amp; intention.</p>
         </div>
