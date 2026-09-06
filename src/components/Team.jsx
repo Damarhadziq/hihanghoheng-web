@@ -3,6 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTeam } from "../hooks/useApiQueries";
+import { team as fallbackTeam } from "../data/team";
 import { TeamCardsSkeleton } from "./PublicSkeletons";
 import ProfileCard from "./ProfileCard";
 import TextLoop from "./TextLoop";
@@ -81,7 +82,8 @@ const SocialLinks = ({ member }) => (
 );
 
 export default function Team({ variant = "home" }) {
-  const { data: team = [], isPending } = useTeam();
+  const { data: teamData, isPending } = useTeam();
+  const team = teamData && teamData.length > 0 ? teamData : fallbackTeam;
   const sectionRef = useRef(null);
   const textRef = useRef(null);
   const isPage = variant === "page";
@@ -135,8 +137,8 @@ export default function Team({ variant = "home" }) {
           ease: "power3.out",
           scrollTrigger: {
             trigger: section.querySelector(".team-grid"),
-            start: "top 78%",
-            toggleActions: "play none none reverse",
+            start: isPage ? "top 90%" : "top 78%",
+            toggleActions: isPage ? "play none none none" : "play none none reverse",
             invalidateOnRefresh: true,
           },
         },
@@ -213,7 +215,7 @@ export default function Team({ variant = "home" }) {
 
       <div className="section-wrapper">
         <div className={`team-grid grid gap-6 md:grid-cols-3 md:gap-8 ${isPage ? "items-stretch" : ""}`}>
-          {isPending ? (
+          {isPending && team.length === 0 ? (
             <TeamCardsSkeleton isPage={isPage} />
           ) : isPage ? (
             team.map((member, index) => {
@@ -240,6 +242,8 @@ export default function Team({ variant = "home" }) {
                     behindGlowEnabled={true}
                     enableTilt={true}
                     enableMobileTilt={false}
+                    showShine={false}
+                    showGlare={false}
                     onContactClick={() => {
                       if (member.social?.linkedin) {
                         window.open(member.social.linkedin, "_blank", "noopener,noreferrer");

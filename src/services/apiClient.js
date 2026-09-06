@@ -1,5 +1,9 @@
 import { API_URL, apiRequest } from "./httpClient";
 import { projects as fallbackProjects } from "../data/projects";
+import { team as fallbackTeam } from "../data/team";
+import { achievements as fallbackAchievements } from "../data/achievements";
+import { process as fallbackProcess } from "../data/process";
+import { competitionDocumentation as fallbackDocumentationData } from "../data/documentation";
 
 const mapMember = (member) => ({
   ...member,
@@ -56,16 +60,16 @@ export const publicApi = {
     const found = fallbackProjects.find((p) => p.slug === slug || p.id === slug || p.name.toLowerCase().replace(/\s+/g, "-") === slug);
     return found ? mapProject(found) : null;
   }),
-  achievements: () => apiRequest("/api/achievements").then((items) => items.map(mapAchievement)),
-  achievement: (id) => apiRequest(`/api/achievements/${encodeURIComponent(id)}`).then(mapAchievement),
+  achievements: () => apiRequest("/api/achievements").then((items) => items.map(mapAchievement)).catch(() => fallbackAchievements),
+  achievement: (id) => apiRequest(`/api/achievements/${encodeURIComponent(id)}`).then(mapAchievement).catch(() => fallbackAchievements.find((a) => a.id === id) || null),
   documentation: (id) => Promise.all([
     apiRequest(`/api/achievements/${encodeURIComponent(id)}`),
     apiRequest(`/api/achievements/${encodeURIComponent(id)}/documentation`),
-  ]).then(([achievement, documentation]) => mapDocumentation(documentation, achievement)),
-  team: () => apiRequest("/api/team").then((items) => items.map(mapMember)),
-  process: () => apiRequest("/api/process"),
-  mentor: () => apiRequest("/api/mentor"),
-  gallery: () => apiRequest("/api/media/gallery"),
+  ]).then(([achievement, documentation]) => mapDocumentation(documentation, achievement)).catch(() => fallbackDocumentationData[id] || null),
+  team: () => apiRequest("/api/team").then((items) => items.map(mapMember)).catch(() => fallbackTeam),
+  process: () => apiRequest("/api/process").catch(() => fallbackProcess),
+  mentor: () => apiRequest("/api/mentor").catch(() => null),
+  gallery: () => apiRequest("/api/media/gallery").catch(() => []),
 };
 
 const createResourceClient = (resource) => ({

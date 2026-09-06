@@ -33,6 +33,8 @@ const ProfileCardComponent = ({
   handle = 'javicodes',
   contactText = 'LinkedIn',
   showUserInfo = true,
+  showShine = false,
+  showGlare = false,
   onContactClick
 }) => {
   const wrapRef = useRef(null);
@@ -309,8 +311,8 @@ const ProfileCardComponent = ({
       <div ref={shellRef} className="pc-card-shell">
         <section className="pc-card">
           <div className="pc-inside">
-            <div className="pc-shine" />
-            <div className="pc-glare" />
+            {showShine && <div className="pc-shine" />}
+            {showGlare && <div className="pc-glare" />}
             <div className="pc-content pc-avatar-content">
               <img
                 className="avatar"
