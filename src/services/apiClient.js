@@ -1,4 +1,5 @@
 import { API_URL, apiRequest } from "./httpClient";
+import { projects as fallbackProjects } from "../data/projects";
 
 const mapMember = (member) => ({
   ...member,
@@ -49,9 +50,12 @@ export const publicApi = {
   site: () => apiRequest("/api/site").then((site) => ({
     ...site,
     about: site.about ? { ...site.about, stats: site.about.stats?.map((stat) => [stat.value, stat.label]) || [] } : undefined,
-  })),
-  projects: () => apiRequest("/api/projects").then((items) => items.map(mapProject)),
-  project: (slug) => apiRequest(`/api/projects/${encodeURIComponent(slug)}`).then(mapProject),
+  })).catch(() => ({})),
+  projects: () => apiRequest("/api/projects").then((items) => items.map(mapProject)).catch(() => fallbackProjects.map(mapProject)),
+  project: (slug) => apiRequest(`/api/projects/${encodeURIComponent(slug)}`).then(mapProject).catch(() => {
+    const found = fallbackProjects.find((p) => p.slug === slug || p.id === slug || p.name.toLowerCase().replace(/\s+/g, "-") === slug);
+    return found ? mapProject(found) : null;
+  }),
   achievements: () => apiRequest("/api/achievements").then((items) => items.map(mapAchievement)),
   achievement: (id) => apiRequest(`/api/achievements/${encodeURIComponent(id)}`).then(mapAchievement),
   documentation: (id) => Promise.all([

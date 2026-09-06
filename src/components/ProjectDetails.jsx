@@ -112,7 +112,7 @@ function ProjectDetailsContent({ project = fallbackProject, projectId, onBack })
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(180deg,rgba(5,6,5,0.96),rgba(5,6,5,1))]" />
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.045] bg-[linear-gradient(90deg,rgba(248,245,236,0.2)_1px,transparent_1px),linear-gradient(0deg,rgba(248,245,236,0.16)_1px,transparent_1px)] bg-[size:72px_72px]" />
 
-      <article className="section-wrapper relative z-10 py-10 md:py-20 lg:py-24">
+      <article className="section-wrapper relative z-10 pt-10 pb-4 md:pt-16 md:pb-6 lg:pt-20 lg:pb-8">
         <button onClick={onBack} className="gsap-pill label mb-8 inline-flex items-center px-5 py-3 md:mb-12 md:px-6">
           Back to gallery
         </button>
@@ -132,7 +132,7 @@ function ProjectDetailsContent({ project = fallbackProject, projectId, onBack })
             </p>
           </div>
 
-          <div className="case-detail-featured group overflow-hidden border border-[#F8F5EC]/12 bg-[#F8F5EC]/5">
+          <div className="cursor-target case-detail-featured group overflow-hidden border border-[#F8F5EC]/12 bg-[#F8F5EC]/5">
             {featuredImage && (
               <img
                 src={featuredImage}
@@ -227,7 +227,7 @@ function ProjectDetailsContent({ project = fallbackProject, projectId, onBack })
 
           <div className="case-mockup-grid mt-10">
             {mockups.map((mockup, index) => (
-              <figure key={`${mockup.title}-${index}`} className="case-mockup-card case-reveal">
+              <figure key={`${mockup.title}-${index}`} className="cursor-target case-mockup-card case-reveal">
                 <img src={mockup.image} alt={`${project.name} ${mockup.title}`} loading="lazy" decoding="async" />
                 <figcaption>
                   <span className="label text-[#F8F5EC]/48">Mockup {index + 1}</span>

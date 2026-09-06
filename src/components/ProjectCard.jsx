@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -36,14 +36,21 @@ export default function ProjectCard({ project, onSelect }) {
   );
 
   return (
-    <button
+    <div
       ref={cardRef}
-      type="button"
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
-      className="gsap-reveal gsap-clickable-card project-card group flex flex-col border border-ink/12 text-left transition-colors duration-300"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect?.();
+        }
+      }}
+      className="gsap-reveal project-card group flex flex-col border border-ink/12 text-left transition-colors duration-300 cursor-pointer"
       aria-label={`Open ${name} competition details`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-ink/5">
+      <div className="cursor-target relative aspect-[4/3] overflow-hidden bg-ink/5">
         {image ? (
           <img
             ref={imageRef}
@@ -83,12 +90,12 @@ export default function ProjectCard({ project, onSelect }) {
           {description}
         </p>
 
-        <span className="label mt-2 inline-flex items-center gap-2 text-ink/58 transition-colors duration-200 group-hover:text-ink">
+        <span className="cursor-target label mt-2 inline-flex items-center gap-2 text-ink/58 transition-colors duration-200 group-hover:text-ink">
           View Competition
           <span aria-hidden="true">-&gt;</span>
         </span>
       </div>
-    </button>
+    </div>
   );
 }
 

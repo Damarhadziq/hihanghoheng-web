@@ -159,25 +159,24 @@ const TargetCursor = ({
       ];
       targetCornerPositionsRef.current = targetCorners;
 
+      const defaultPositions = [
+        { x: -cornerSize * 1.5, y: -cornerSize * 1.5 },
+        { x: cornerSize * 0.5, y: -cornerSize * 1.5 },
+        { x: cornerSize * 0.5, y: cornerSize * 0.5 },
+        { x: -cornerSize * 1.5, y: cornerSize * 0.5 }
+      ];
+
       const corners = Array.from(cornersRef.current);
       corners.forEach((corner, i) => {
         const targetX = targetCorners[i].x - cursorX;
         const targetY = targetCorners[i].y - cursorY;
 
-        const currentX = gsap.getProperty(corner, 'x');
-        const currentY = gsap.getProperty(corner, 'y');
+        const currentTargetX = defaultPositions[i].x + (targetX - defaultPositions[i].x) * strength;
+        const currentTargetY = defaultPositions[i].y + (targetY - defaultPositions[i].y) * strength;
 
-        const finalX = currentX + (targetX - currentX) * strength;
-        const finalY = currentY + (targetY - currentY) * strength;
-
-        const duration = strength >= 0.99 ? (parallaxOn ? 0.12 : 0) : 0.05;
-
-        gsap.to(corner, {
-          x: finalX,
-          y: finalY,
-          duration: duration,
-          ease: duration === 0 ? 'none' : 'power1.out',
-          overwrite: 'auto'
+        gsap.set(corner, {
+          x: currentTargetX,
+          y: currentTargetY
         });
       });
     };
@@ -265,9 +264,7 @@ const TargetCursor = ({
 
       gsap.killTweensOf(cursorRef.current, 'rotation');
       spinTl.current?.pause();
-      const currentRot = gsap.getProperty(cursorRef.current, 'rotation') || 0;
-      const targetRot = Math.round(currentRot / 360) * 360;
-      gsap.to(cursorRef.current, { rotation: targetRot, duration: 0.35, ease: 'power3.out' });
+      gsap.set(cursorRef.current, { rotation: 0 });
 
       if (cursorColorOnTarget) {
         gsap.to(corners, {

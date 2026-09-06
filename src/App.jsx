@@ -438,7 +438,7 @@ export default function App() {
   } else if (currentView === "team") {
     pageContent = <><PageShell><Team variant="page" /></PageShell><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView === "all-projects") {
-    pageContent = <AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} />;
+    pageContent = <><AllProjects onSelectProject={openProjectDetail} onViewChange={handleViewChange} /><Footer onViewChange={handleViewChange} /></>;
   } else if (currentView.startsWith("brief-")) {
     const achievementId = currentView.replace(/^brief-/, "");
     pageContent = <><DocumentationBrief achievementId={achievementId} onBack={() => startRouteTransition("achievements", { direction: "down", label: "Back to achievements", title: "Achievement" })} onOpenProposal={() => handleAchievementDocument("proposal", achievementId)} /><Footer onViewChange={handleViewChange} /></>;
@@ -456,7 +456,7 @@ export default function App() {
         spinDuration={2}
         hideDefaultCursor={true}
         parallaxOn={true}
-        targetSelector=".cursor-target, a:not(.no-cursor-target), button:not(.no-cursor-target), .gsap-pill, .gsap-clickable-card, [role='button']"
+        targetSelector=".cursor-target, a:not(.no-cursor-target), button:not(.no-cursor-target):not(.project-card), .gsap-pill, [role='button']:not(.project-card)"
         activeView={currentView}
       />
       <Nav onViewChange={handleViewChange} activeView={currentView} />

@@ -58,6 +58,7 @@ const defaultMockups = [
 
 export const projects = [
   {
+    slug: "pasar-nusantara",
     name: "Pasar Nusantara",
     year: "2025",
     tags: ["UI/UX Competition", "Mobile App", "Cultural Heritage"],
@@ -78,6 +79,7 @@ export const projects = [
     mockups: defaultMockups,
   },
   {
+    slug: "kampusku",
     name: "KampusKu",
     year: "2025",
     tags: ["UI/UX Competition", "Web App", "Education"],
@@ -98,6 +100,7 @@ export const projects = [
     mockups: defaultMockups,
   },
   {
+    slug: "warungcepat",
     name: "WarungCepat",
     year: "2024",
     tags: ["UX Challenge", "Mobile App", "F&B"],
@@ -118,6 +121,7 @@ export const projects = [
     mockups: defaultMockups,
   },
   {
+    slug: "jejak-karbon",
     name: "Jejak Karbon",
     year: "2024",
     tags: ["Digital Innovation", "Web App", "Sustainability"],
@@ -138,6 +142,7 @@ export const projects = [
     mockups: defaultMockups,
   },
   {
+    slug: "edubridge",
     name: "EduBridge",
     year: "2023",
     tags: ["ICT Business Plan", "Web Platform", "Education"],
