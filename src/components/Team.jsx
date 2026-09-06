@@ -64,7 +64,7 @@ const TeamSigningOff = () => {
           uppercase
           color="#070A08"
           ribbon={true}
-          ribbonColor="#F59E0B"
+          ribbonColor="#FFFFFF"
           ribbonWidth={88}
           pauseOnHover={true}
         />
