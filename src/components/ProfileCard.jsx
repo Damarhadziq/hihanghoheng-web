@@ -33,8 +33,8 @@ const ProfileCardComponent = ({
   handle = 'javicodes',
   contactText = 'LinkedIn',
   showUserInfo = true,
-  showShine = false,
-  showGlare = false,
+  showShine = true,
+  showGlare = true,
   onContactClick
 }) => {
   const wrapRef = useRef(null);

@@ -235,15 +235,13 @@ export default function Team({ variant = "home" }) {
                     contactText="LinkedIn"
                     avatarUrl={avatar}
                     miniAvatarUrl={avatar}
-                    grainUrl="/assets/demo/grain.webp"
-                    iconUrl={config.pattern}
                     innerGradient={config.innerGradient}
                     behindGlowColor={config.behindGlowColor}
                     behindGlowEnabled={true}
                     enableTilt={true}
                     enableMobileTilt={false}
-                    showShine={false}
-                    showGlare={false}
+                    showShine={true}
+                    showGlare={true}
                     onContactClick={() => {
                       if (member.social?.linkedin) {
                         window.open(member.social.linkedin, "_blank", "noopener,noreferrer");
