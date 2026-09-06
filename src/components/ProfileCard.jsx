@@ -35,6 +35,8 @@ const ProfileCardComponent = ({
   showUserInfo = true,
   showShine = true,
   showGlare = true,
+  avatarTop,
+  avatarHeight,
   onContactClick
 }) => {
   const wrapRef = useRef(null);
@@ -296,9 +298,11 @@ const ProfileCardComponent = ({
       '--grain': grainUrl ? `url(${grainUrl})` : 'none',
       '--inner-gradient': innerGradient ?? DEFAULT_INNER_GRADIENT,
       '--behind-glow-color': behindGlowColor ?? 'rgba(125, 190, 255, 0.67)',
-      '--behind-glow-size': behindGlowSize ?? '50%'
+      '--behind-glow-size': behindGlowSize ?? '50%',
+      '--avatar-top': avatarTop ?? '80px',
+      '--avatar-height': avatarHeight ?? '520px'
     }),
-    [iconUrl, grainUrl, innerGradient, behindGlowColor, behindGlowSize]
+    [iconUrl, grainUrl, innerGradient, behindGlowColor, behindGlowSize, avatarTop, avatarHeight]
   );
 
   const handleContactClick = useCallback(() => {

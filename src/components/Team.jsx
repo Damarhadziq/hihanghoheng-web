@@ -48,6 +48,28 @@ const getMemberHandle = (member) => {
   return handles[member.shortName] || member.shortName?.toLowerCase() || "maker";
 };
 
+const getMemberPhoto = (member) => {
+  const name = (member.shortName || member.name || "").toLowerCase();
+  if (name.includes("damar")) return "/assets/DAMAR%20FOTO.svg";
+  if (name.includes("faruq")) return "/assets/FARUQ%20FOTO.svg";
+  if (name.includes("febi")) return "/assets/FEBI%20FOTO.svg";
+  return "/assets/DAMAR%20FOTO.svg";
+};
+
+const getMemberAvatarConfig = (member) => {
+  const name = (member.shortName || member.name || "").toLowerCase();
+  if (name.includes("damar")) {
+    return { avatarTop: "84px", avatarHeight: "520px" };
+  }
+  if (name.includes("faruq")) {
+    return { avatarTop: "75px", avatarHeight: "520px" };
+  }
+  if (name.includes("febi")) {
+    return { avatarTop: "80px", avatarHeight: "520px" };
+  }
+  return { avatarTop: "80px", avatarHeight: "520px" };
+};
+
 const TeamSigningOff = () => {
   return (
     <section className="team-signing-off-section overflow-hidden py-8 md:py-12 bg-[#070A08] text-[#F8F5EC] relative" aria-label="Hihang Hoeng Signing Off">
@@ -105,9 +127,8 @@ export default function Team({ variant = "home" }) {
       if (prefersReduced) {
         gsap.set([textRef.current, ...cards].filter(Boolean), { opacity: 1, xPercent: 0, y: 0 });
         photoFrames.forEach((frame) => {
-          const images = gsap.utils.toArray(frame.querySelectorAll("img"));
-          gsap.set(images, { opacity: 0, scale: 1 });
-          gsap.set(images[0], { opacity: 0.78 });
+          const image = frame.querySelector("img");
+          if (image) gsap.set(image, { opacity: 0.92, scale: 1 });
         });
         return undefined;
       }
@@ -146,28 +167,16 @@ export default function Team({ variant = "home" }) {
 
       photoFrames.forEach((frame) => {
         const card = frame.closest(".team-card");
-        const images = gsap.utils.toArray(frame.querySelectorAll("img"));
-        if (!card || !images.length) return;
+        const image = frame.querySelector("img");
+        if (!card || !image) return;
 
-        gsap.set(images, { opacity: 0, scale: 1 });
-        gsap.set(images[0], { opacity: 0.78 });
-
-        const cycle = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.12 });
-        images.forEach((image, index) => {
-          cycle.to(images, { opacity: 0, duration: 0.3, ease: "power2.inOut" }, index * 0.82);
-          cycle.to(image, { opacity: 0.82, duration: 0.3, ease: "power2.inOut" }, index * 0.82);
-        });
-        cycle.to(images, { opacity: 0, duration: 0.34, ease: "power2.inOut" }, images.length * 0.82);
-        cycle.to(images[0], { opacity: 0.78, duration: 0.34, ease: "power2.inOut" }, images.length * 0.82);
+        gsap.set(image, { opacity: 0.92, scale: 1 });
 
         const enter = () => {
-          gsap.to(images, { scale: 1.025, duration: 1.05, ease: "power3.out", overwrite: "auto" });
-          cycle.restart(true);
+          gsap.to(image, { scale: 1.04, opacity: 1, duration: 0.5, ease: "power2.out", overwrite: "auto" });
         };
         const leave = () => {
-          cycle.pause(0);
-          gsap.to(images, { opacity: 0, scale: 1, duration: 0.72, ease: "power2.out", overwrite: "auto" });
-          gsap.to(images[0], { opacity: 0.78, duration: 0.72, ease: "power2.out", overwrite: "auto" });
+          gsap.to(image, { scale: 1, opacity: 0.92, duration: 0.5, ease: "power2.out", overwrite: "auto" });
         };
 
         card.addEventListener("pointerenter", enter);
@@ -176,8 +185,7 @@ export default function Team({ variant = "home" }) {
         card.addEventListener("focusout", leave);
 
         hoverCleanups.push(() => {
-          cycle.kill();
-          gsap.killTweensOf(images);
+          gsap.killTweensOf(image);
           card.removeEventListener("pointerenter", enter);
           card.removeEventListener("pointerleave", leave);
           card.removeEventListener("focusin", enter);
@@ -220,8 +228,9 @@ export default function Team({ variant = "home" }) {
           ) : isPage ? (
             team.map((member, index) => {
               const config = getRoleConfig(member.role);
-              const avatar = "/assets/demo/person.webp";
+              const avatar = getMemberPhoto(member);
               const handle = getMemberHandle(member);
+              const avatarConfig = getMemberAvatarConfig(member);
 
               return (
                 <div
@@ -235,6 +244,8 @@ export default function Team({ variant = "home" }) {
                     contactText="LinkedIn"
                     avatarUrl={avatar}
                     miniAvatarUrl={avatar}
+                    avatarTop={avatarConfig.avatarTop}
+                    avatarHeight={avatarConfig.avatarHeight}
                     innerGradient={config.innerGradient}
                     behindGlowColor={config.behindGlowColor}
                     behindGlowEnabled={true}
@@ -252,29 +263,37 @@ export default function Team({ variant = "home" }) {
               );
             })
           ) : (
-            team.map((member, index) => (
-              <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0" tabIndex={0}>
-                <div className="team-photo-frame aspect-[4/5] overflow-hidden bg-ink/5">
-                  {member.images.map((image, imageIndex) => (
+            team.map((member, index) => {
+              const config = getRoleConfig(member.role);
+              const avatar = getMemberPhoto(member);
+
+              return (
+                <article key={`${member.name}-${index}`} className="team-card gsap-clickable-card group border border-hairline bg-ink/[0.018] p-3 opacity-0" tabIndex={0}>
+                  <div
+                    className="team-photo-frame aspect-[4/5] overflow-hidden relative rounded-xl"
+                    style={{
+                      backgroundImage: config.innerGradient,
+                      backgroundColor: "rgba(0, 0, 0, 0.9)",
+                    }}
+                  >
                     <img
-                      key={`${member.name}-${image}`}
-                      src={image}
-                      alt={imageIndex === 0 ? member.name : `${member.name} alternate ${imageIndex}`}
+                      src={avatar}
+                      alt={member.name}
                       loading="lazy"
                       decoding="async"
-                      className="h-full w-full object-cover mix-blend-luminosity"
+                      className="h-full w-full object-cover mix-blend-luminosity will-change-transform"
                       draggable="false"
                     />
-                  ))}
-                  <SocialLinks member={member} />
-                </div>
-                <div className="pt-5">
-                  <p className="label mb-2 text-gold">Member {index + 1}</p>
-                  <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
-                </div>
-              </article>
-            ))
+                    <SocialLinks member={member} />
+                  </div>
+                  <div className="pt-5">
+                    <p className="label mb-2 text-gold">Member {index + 1}</p>
+                    <h3 className="font-display text-xl font-semibold leading-tight text-ink md:text-2xl">{member.name}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-ink/64">{member.role}</p>
+                  </div>
+                </article>
+              );
+            })
           )}
         </div>
       </div>
